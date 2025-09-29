@@ -1,0 +1,4512 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Biblioteca CTH — Colegio Theodoro Hertzl</title>
+<style>
+  :root{
+    --bg:#f6f9fc;
+    --card:#ffffff;
+    --ink:#0f172a;
+    --muted:#475569;
+    --accent:#0ea5e9; /* celeste */
+    --pill:#eef2ff;
+    --ok:#16a34a;
+    --ring: rgba(14,165,233,.35);
+    --shadow: 0 10px 30px rgba(2,8,23,.08);
+    --radius:16px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font:500 16px system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,"Noto Sans",sans-serif}
+  a{color:var(--accent);text-decoration:none}
+  .wrap{max-width:1200px;margin:0 auto;padding:28px 20px 64px}
+  header{text-align:center;margin-top:10px}
+  /* Logo grande */
+  header img{width:160px;height:auto;display:block;margin:0 auto 6px;cursor:pointer}
+  h1{font-size:clamp(28px,3.6vw,44px);letter-spacing:.3px;margin:.1rem 0 .35rem}
+  .sub{color:var(--muted);font-weight:500;margin-bottom:22px}
+  /* Toolbar en una línea */
+  .toolbar{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:nowrap;overflow:auto;padding:0 6px;margin:14px auto 18px}
+  .input,select{background:var(--card);border:1px solid #e5e7eb;padding:12px 14px;border-radius:12px;outline:none;box-shadow:var(--shadow);white-space:nowrap}
+  .input{min-width:320px}
+  #cat,#aut{min-width:220px}
+  #per{min-width:170px}
+  .input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--ring)}
+  .counters{display:flex;gap:16px;justify-content:center;margin:8px 0 0;color:#334155}
+  /* Grid + tarjetas UNIFORMES (sin portada) */
+  .grid{display:grid;grid-template-columns:repeat(1,minmax(0,1fr));gap:16px;margin-top:12px}
+  @media(min-width:680px){.grid{grid-template-columns:repeat(2,1fr)}}
+  @media(min-width:980px){.grid{grid-template-columns:repeat(4,1fr)}}
+  .card{
+    background:var(--card);border:1px solid #e5e7eb;border-radius:var(--radius);
+    box-shadow:var(--shadow);cursor:pointer;overflow:hidden;display:flex;flex-direction:column;height:180px;
+    transition:transform .12s ease, box-shadow .12s ease;padding:16px; position:relative;
+  }
+  .card:hover{transform:translateY(-2px);box-shadow:0 14px 38px rgba(2,8,23,.12)}
+  .title{
+    font-size:18px;font-weight:800;line-height:1.2;margin:.1rem 0;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .author{
+    color:var(--muted);font-weight:600;margin:0;
+    display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .badges{margin-top:auto;display:flex;gap:8px;flex-wrap:wrap}
+  .badge{display:inline-flex;gap:6px;align-items:center;background:var(--pill);border:1px solid #e5e7eb;color:#334155;border-radius:999px;padding:6px 10px;font-size:12px}
+  .badge.ok{background:#ecfdf5;color:#065f46;border-color:#a7f3d0}
+  .badge.bad{background:#fef2f2;color:#991b1b;border-color:#fecaca}
+  .btn{border:1px solid #e5e7eb;background:var(--card);padding:10px 14px;border-radius:12px;box-shadow:var(--shadow);cursor:pointer}
+  .btn:hover{border-color:#cbd5e1}
+  .pagination{display:flex;align-items:center;gap:10px;justify-content:center;margin:20px 0 6px}
+  .muted{color:var(--muted)}
+  /* Tooltip simple */
+  .tooltip{
+    position:fixed; pointer-events:none; z-index:1000;
+    max-width:360px; background:#111827; color:#f8fafc; padding:10px 12px;
+    border-radius:10px; font-size:13px; line-height:1.35; box-shadow:0 10px 30px rgba(2,8,23,.22);
+    transform:translate(-50%,-120%); display:none;
+  }
+  /* Modal con portada a la izquierda, centrada verticalmente */
+  dialog{border:none;border-radius:18px;padding:0;box-shadow:0 40px 80px rgba(2,8,23,.30);width:min(980px,96vw)}
+  .modal{background:var(--card);border-radius:18px;padding:18px;max-height:90vh;overflow:auto}
+  .modal header{display:flex;align-items:flex-start;justify-content:space-between;margin:0 0 8px;width:100%}
+  .detail{display:grid;grid-template-columns:220px 1fr;gap:20px;align-items:center}
+  @media(max-width:820px){.detail{grid-template-columns:1fr;align-items:start}}
+  .cover-wrap{display:flex;justify-content:center;align-items:center}
+  .cover{width:180px;height:260px;object-fit:cover;border-radius:10px;border:1px solid #e5e7eb;background:#f1f5f9}
+  .modal h2{margin:6px 0 2px;font-size:28px;text-align:left;color:var(--ink);font-weight:800;width:100%}
+  .modal .byline{color:#64748b;font-weight:600;margin:2px 0 10px;text-align:left;width:100%}
+  .right{min-width:100px;display:flex;justify-content:flex-end}
+  .close-btn{border:1px solid #e5e7eb;background:#fff;border-radius:12px;height:40px;padding:0 14px;font-weight:700;cursor:pointer}
+  .fields{display:grid;grid-template-columns:1fr;gap:10px;margin-top:6px}
+  @media(min-width:860px){.fields{grid-template-columns:1fr 1fr}}
+  .kv{background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;padding:12px 14px}
+  .kv b{color:#0b1220}
+  .kv .value{color:#0f172a}
+  .kv.full{grid-column:1/-1}
+  footer{margin-top:14px;text-align:center;color:#64748b}
+
+/* ---- Date dialog polish (scoped) ---- */
+.dpdlg::backdrop{background:rgba(15,23,42,.55)}
+.dp.modal.dp{max-width: 560px;border-radius: 16px;padding: 18px 18px 10px}
+.dp-head{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:8px}
+.dp-titles{flex:1;text-align:center}
+.dp-titles h2{font-size:22px;line-height:1.25;margin:0;color:#111827}
+.dp-sub{margin:4px 0 0;color:#6b7280;font-size:14px}
+.btn{border:1px solid #e5e7eb;background:#fff;border-radius:12px;padding:8px 14px;font-weight:600;cursor:pointer}
+.btn.ghost{background:transparent}
+.btn.primary{background:#0ea5e9;border-color:#0ea5e9;color:#fff}
+.btn:active{transform:translateY(1px)}
+.dp-body{padding:10px 4px 6px}
+.dp-field{display:flex;flex-direction:column;align-items:center;gap:8px;margin:12px 0}
+.dp-label{font-weight:700;color:#111827;text-align:center}
+.dp-inputwrap{display:flex;align-items:center;gap:24px;flex-wrap:nowrap}
+.dp-inline-actions{display:flex;gap:20px;align-items:center;margin-left:28px;padding:8px 6px;position:relative}
+.dp-inline-actions::before{content:'';position:absolute;left:-10px;right:-10px;bottom:-8px;height:44px;background:radial-gradient(120px 34px at 35% 60%, rgba(14,165,233,.18), transparent 70%);filter:blur(10px);pointer-events:none}
+.dp-pretty{font-size:16px;color:#6b7280;margin-left:6px}
+.dp-input{font-size:18px;padding:14px 16px;border:1px solid #e5e7eb;border-radius:16px;width:min(520px,55vw)}
+.dp-pretty{font-size:14px;color:#6b7280}
+.dp-actions{display:flex;justify-content:center;margin-top:12px;gap:10px}
+@media (max-width:640px){.dp.modal.dp{max-width:92vw}.dp-inputwrap{flex-wrap:wrap;justify-content:center}.dp-inline-actions{margin-left:0;justify-content:center}.dp-inline-actions::before{display:none}.dp-input{width:min(320px,90vw)}}
+
+
+/* ---- Date dialog "big" look ---- */
+.dp-big .dp.modal.dp{max-width:1200px;border-radius:28px;padding:28px 30px 22px}
+.dp-big .dp-titles h2{font-size:32px;font-weight:800;color:#0f172a}
+.dp-big .dp-sub{font-size:16px;color:#64748b;margin-top:6px}
+.dp-big .dp-input{transform:scale(1.35); transform-origin:left top; min-width:340px}
+.dp-big .dp-inputwrap{margin-top:8px}
+.dp-big .btn{border-radius:14px;padding:12px 18px;font-size:16px}
+.dp-big .btn.primary{background:#12b0e8;border-color:#12b0e8;box-shadow:0 10px 30px rgba(18,176,232,.25)}
+.dp-big .btn.ghost{background:#fff;border-color:#e5e7eb;color:#111827;box-shadow:0 10px 25px rgba(2,6,23,.06)}
+.dp-big .dp-actions{gap:14px;margin-top:18px}
+
+
+/* Inline picker styles (scoped to confirm dialog) */
+.rv-list{ display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-top:14px; }
+.rv-chip{
+  border-radius: 9999px;
+  padding:10px 16px;
+  border:none;
+  background:#12b0e8;
+  color:#fff;
+  cursor:pointer;
+  font-weight:700;
+  box-shadow: 0 1px 1px rgba(0,0,0,.05), 0 10px 30px rgba(18,176,232,.25);
+  transition: transform .05s ease, background .15s ease, box-shadow .15s ease;
+}
+.rv-chip:hover{ background:#0ea5e9; box-shadow: 0 2px 2px rgba(0,0,0,.06), 0 14px 32px rgba(18,176,232,.30); }
+.rv-chip:active{ transform: translateY(1px); }
+.rv-chip:focus-visible{ outline:3px solid rgba(14,165,233,.35); outline-offset:2px; }
+
+  /* Estados de color para las píldoras */
+  .pill-ok{ background:#ecfdf5 !important; border-color:#a7f3d0 !important; color:#065f46 !important; }
+  .pill-bad{ background:#fef2f2 !important; border-color:#fecaca !important; color:#991b1b !important; }
+  .pill-warn{ background:#fffbeb !important; border-color:#fde68a !important; color:#92400e !important; }
+
+
+/* Botoneras bajo la portada
+
+  @media(min-width:821px){
+    .detail{ grid-template-columns:220px 1fr; gap:20px; align-items:flex-start; }
+    .cover-wrap{ display:flex; flex-direction:column; align-items:center; }
+    .cover-wrap .cover{ margin-bottom:14px; }
+    .cover-wrap .kv-btn{
+      width:200px;
+      min-height:38px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      border-radius:12px;
+      padding:8px 12px;
+      background:#fff;
+      border:1px solid #e5e7eb;
+      box-shadow:0 6px 20px rgba(2,8,23,.08);
+      font-size:14px;
+      cursor:default;
+      margin:6px 0;
+      text-align:center;
+    }
+    .cover-wrap .kv-btn b{ font-weight:800; color:#0f172a; }
+  }
+  @media(max-width:820px){
+    .cover-wrap{ flex-direction:column; align-items:stretch; }
+    .cover-wrap .kv-btn{ width:100%; margin:4px 0; box-shadow:none; font-size:inherit; }
+  }
+
+  @media(min-width:821px){
+    .fields .kv:nth-child(6),
+    .fields .kv:nth-child(9),
+    .fields .kv:nth-child(8){ display:none !important; }
+    .cover-wrap{ display:flex; flex-direction:column; align-items:center; }
+    .cover{ margin-bottom:12px; }
+    .kv-btn{
+      width:180px;
+      height:38px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      border-radius:12px;
+      padding:0 10px;
+      background:#fff;
+      border:1px solid #e5e7eb;
+      box-shadow:0 6px 20px rgba(2,8,23,.08);
+      font-size:13px;
+      margin:6px 0;
+      text-align:center;
+    }
+    .kv-btn b{ font-weight:800; color:#0f172a; }
+  }
+  @media(max-width:820px){
+    .kv-btn{ display:none !important; }
+    .fields .kv:nth-child(6),
+    .fields .kv:nth-child(9),
+    .fields .kv:nth-child(8){ display:block !important; }
+  }
+
+
+  
+  /* === Botones apilados bajo la portada (alineados a la izquierda) === */
+  @media(min-width:821px){
+    .detail{ align-items:flex-start; }
+    .cover-wrap{ display:flex; flex-direction:column; align-items:flex-start; }
+    .cover{ margin-bottom:12px; }
+    .kv.kv-btn{
+      width:190px;
+      min-height:38px;
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+      gap:6px;
+      border-radius:12px;
+      padding:6px 12px;
+      background:#fff;
+      border:1px solid #e5e7eb;
+      box-shadow:0 6px 20px rgba(2,8,23,.08);
+      font-size:13px;
+      margin:6px 0;
+      text-align:left;
+      white-space:nowrap;
+    }
+    .kv.kv-btn b{ font-weight:800; color:#0f172a; margin-right:4px; }
+    .kv.kv-btn.hide-label b{ display:none; }
+  }
+
+  }
+
+
+  @media(min-width:821px){
+    .fields .kv:nth-child(6),
+    .fields .kv:nth-child(9),
+    .fields .kv:nth-child(8){ display:none !important; }
+  }
+
+
+  @media(min-width:821px){
+    .cover{ width:220px; } /* portada con ancho fijo */
+    .kv.kv-btn{ width:220px; } /* botones igual ancho que portada */
+  }
+
+
+  @media(min-width:821px){
+    .cover-wrap{ 
+      display:flex; 
+      flex-direction:column; 
+      align-items:flex-start; 
+      border:1px solid #e5e7eb;
+      border-radius:16px;
+      overflow:hidden;
+      box-shadow:0 6px 20px rgba(2,8,23,.08);
+      background:#fff;
+      width:220px;
+    }
+    .cover-wrap .cover{
+      width:100%;
+      height:auto;
+      border:none;
+      border-radius:0;
+      box-shadow:none;
+      margin:0;
+    }
+    .kv.kv-btn{
+      width:100%;
+      border:none;
+      border-radius:0;
+      box-shadow:none;
+      margin:0;
+      justify-content:center;
+      padding:10px;
+      border-top:1px solid #e5e7eb;
+    }
+    .kv.kv-btn:first-of-type{ border-top:none; }
+  }
+
+
+  @media(min-width:821px){
+    .cover-wrap{
+      transition:transform .15s ease, box-shadow .15s ease;
+      cursor:pointer;
+    }
+    .cover-wrap:hover{
+      transform:translateY(-2px);
+      box-shadow:0 10px 28px rgba(2,8,23,.15);
+    }
+  }
+
+
+  /* === Alineación vertical centrada entre columna izquierda (portada+botones) y derecha (campos) === */
+  @media(min-width:821px){
+    .detail{
+      display:flex !important;
+      align-items:center !important; /* centra verticalmente ambos lados según el más alto */
+      gap:24px;
+    }
+    .detail .cover-wrap{ flex:0 0 220px; }
+    .detail .fields{ 
+      flex:1 1 auto; 
+      align-self:center; /* si es más baja que la izquierda, queda centrada; si es más alta, domina y queda natural */
+    }
+  }
+  @media(max-width:820px){
+    .detail{ display:grid !important; grid-template-columns:1fr; align-items:start; }
+  }
+
+
+  /* Estado visual del botón de candado */
+  .btn.unlocked{background:#10b981;border-color:#10b981;color:#fff}
+  .btn.unlocked:hover{filter:brightness(.95)}
+
+
+/* === Forzar siempre tema claro en dashboard === */
+#logsDlg .modal{ background:#ffffff !important; color:#0f172a !important; border:1px solid #e5e7eb !important; }
+#logsDlg header h2{ color:#0f172a !important; }
+#logsDlg #logsStats > div{ background:#f8fafc !important; border:1px solid #e5e7eb !important; color:#0f172a !important; }
+#logsDlg #logsControls{ background:#f8fafc !important; border:1px solid #e5e7eb !important; }
+#logsDlg #logsControls input[type="search"],
+#logsDlg #logsControls select{ background:#ffffff !important; border:1px solid #cbd5e1 !important; color:#0f172a !important; }
+#logsDlg #logsWrap{ background:#ffffff !important; border:1px solid #e5e7eb !important; }
+#logsDlg #logsTable thead tr th{ background:#f1f5f9 !important; border-bottom:1px solid #e5e7eb !important; color:#0f172a !important; }
+#logsDlg #logsTable tbody tr:nth-child(even){ background:#f8fafc !important; }
+#logsDlg #logsTable tbody tr:hover{ background:#f1f5f9 !important; }
+#logsDlg #logsTable tbody td{ color:#0f172a !important; border-bottom:1px solid #e5e7eb !important; }
+#logsDlg #logsCount{ background:#e2e8f0 !important; border:1px solid #cbd5e1 !important; color:#0f172a !important; padding:2px 8px; border-radius:8px; }
+
+
+/* ---- Paleta por bloque en el header de Registros (3+2) ---- */
+#logsDlg #logsStats .stats-top > div:nth-child(1){ background:#ecfeff !important; border-color:#a5f3fc !important; } /* Registros */
+#logsDlg #logsStats .stats-top > div:nth-child(2){ background:#fee2e2 !important; border-color:#fecaca !important; } /* En préstamo rojo suave */
+#logsDlg #logsStats .stats-top > div:nth-child(3){ background:#dcfce7 !important; border-color:#bbf7d0 !important; } /* Devueltos verde suave */
+#logsDlg #logsStats .stats-bottom > div:nth-child(1){ background:#f5f3ff !important; border-color:#ddd6fe !important; }
+#logsDlg #logsStats .stats-bottom > div:nth-child(2){ background:#fff7ed !important; border-color:#fed7aa !important; }
+/* Textos dentro de las tarjetas */
+#logsDlg #logsStats .stats-top > div > div:first-child,
+#logsDlg #logsStats .stats-bottom > div > div:first-child{ color:#475569 !important; }
+#logsDlg #logsStats .stats-top > div > div:nth-child(2),
+#logsDlg #logsStats .stats-bottom > div > ol{ color:#0f172a !important; }
+
+</style>
+
+<style id="kill-tooltips-style">#tooltip{display:none!important;visibility:hidden!important;opacity:0!important}
+/* === Forzar siempre tema claro en dashboard === */
+#logsDlg .modal{ background:#ffffff !important; color:#0f172a !important; border:1px solid #e5e7eb !important; }
+#logsDlg header h2{ color:#0f172a !important; }
+#logsDlg #logsStats > div{ background:#f8fafc !important; border:1px solid #e5e7eb !important; color:#0f172a !important; }
+#logsDlg #logsControls{ background:#f8fafc !important; border:1px solid #e5e7eb !important; }
+#logsDlg #logsControls input[type="search"],
+#logsDlg #logsControls select{ background:#ffffff !important; border:1px solid #cbd5e1 !important; color:#0f172a !important; }
+#logsDlg #logsWrap{ background:#ffffff !important; border:1px solid #e5e7eb !important; }
+#logsDlg #logsTable thead tr th{ background:#f1f5f9 !important; border-bottom:1px solid #e5e7eb !important; color:#0f172a !important; }
+#logsDlg #logsTable tbody tr:nth-child(even){ background:#f8fafc !important; }
+#logsDlg #logsTable tbody tr:hover{ background:#f1f5f9 !important; }
+#logsDlg #logsTable tbody td{ color:#0f172a !important; border-bottom:1px solid #e5e7eb !important; }
+#logsDlg #logsTable tbody td:nth-child(8){ color:#475569 !important; }
+#logsDlg #logsCount{ background:#e2e8f0 !important; border:1px solid #cbd5e1 !important; color:#0f172a !important; padding:2px 8px; border-radius:8px; }
+
+</style>
+<style>#logsBtn{display:none;}
+/* === Forzar siempre tema claro en dashboard === */
+#logsDlg .modal{ background:#ffffff !important; color:#0f172a !important; border:1px solid #e5e7eb !important; }
+#logsDlg header h2{ color:#0f172a !important; }
+#logsDlg #logsStats > div{ background:#f8fafc !important; border:1px solid #e5e7eb !important; color:#0f172a !important; }
+#logsDlg #logsControls{ background:#f8fafc !important; border:1px solid #e5e7eb !important; }
+#logsDlg #logsControls input[type="search"],
+#logsDlg #logsControls select{ background:#ffffff !important; border:1px solid #cbd5e1 !important; color:#0f172a !important; }
+#logsDlg #logsWrap{ background:#ffffff !important; border:1px solid #e5e7eb !important; }
+#logsDlg #logsTable thead tr th{ background:#f1f5f9 !important; border-bottom:1px solid #e5e7eb !important; color:#0f172a !important; }
+#logsDlg #logsTable tbody tr:nth-child(even){ background:#f8fafc !important; }
+#logsDlg #logsTable tbody tr:hover{ background:#f1f5f9 !important; }
+#logsDlg #logsTable tbody td{ color:#0f172a !important; border-bottom:1px solid #e5e7eb !important; }
+#logsDlg #logsTable tbody td:nth-child(8){ color:#475569 !important; }
+#logsDlg #logsCount{ background:#e2e8f0 !important; border:1px solid #cbd5e1 !important; color:#0f172a !important; padding:2px 8px; border-radius:8px; }
+
+</style>
+
+<style id="logsStatsTightenLeft">
+  #logsDlg #logsStats .stats-bottom ol{ padding-left:0 !important; margin-left:0 !important; }
+  #logsDlg #logsStats .stats-bottom li{ gap:8px !important; }
+</style>
+
+<style id="logsCountFix">
+  #logsControls{ display:flex; align-items:center; gap:10px; }
+  #logsControls #logsCount{ margin-left:auto; background:#e2e8f0; color:#0f172a; padding:6px 10px; border-radius:9999px; font-weight:700; }
+</style>
+
+<style id="modalScrollLockStyle">
+  html.modal-lock, body.modal-lock { overflow: hidden !important; }
+</style>
+
+<style id="iosOverscrollStyle">
+  /* Evita scroll chaining/bounce del fondo cuando el modal está abierto */
+  #logsDlg .modal, #logsDlg #logsWrap { overscroll-behavior: contain; }
+  #logsDlg #logsWrap { -webkit-overflow-scrolling: touch; }
+</style>
+
+<style id="sticky-toolbar-css">
+/* === Barra de controles "sticky" con blur suave === */
+.toolbar{
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: saturate(180%) blur(8px);
+  -webkit-backdrop-filter: saturate(180%) blur(8px);
+  background: rgba(246,249,252,.85);
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(2,8,23,.06);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  width: 100%;
+  padding: 12px 14px;            /* más respiración para que no corte las esquinas */
+  overflow: visible;              /* evita que se "corten" los bordes internos */
+  box-sizing: border-box;
+  gap: 12px;                      /* espacio consistente entre controles */
+}
+
+/* Contenedor para el input de búsqueda con botón "limpiar" */
+.search-wrap{ position: relative; display: flex; align-items: center; flex: 1 1 auto; min-width: 18rem; }
+.search-wrap > .input{ padding-right: 42px; width: 100%; flex: 1 1 auto; }
+
+/* Botón "✖" para limpiar el buscador */
+.clear-btn{
+  box-shadow: none !important;
+  border: 0 !important;
+  background: transparent !important;
+  height: 22px;
+  width: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  font-size: 16px;
+  line-height: 1;
+  padding: 4px 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  opacity: .0;
+  pointer-events: none;
+  transition: opacity .12s ease, background .12s ease, color .12s ease;
+}
+.clear-btn:hover{ background: #f1f5f9; color: #0f172a; }
+.clear-btn.show{ opacity: .9; pointer-events: auto; }
+</style>
+
+
+<style id="aut-width-tweak">
+/* Autor más corto en desktop; responsive en pantallas pequeñas */
+.toolbar #aut{
+  width: 26rem;      /* ~416px, ajustable */
+  max-width: 100%;
+  flex: 0 0 26rem;
+}
+@media (max-width: 1024px){
+  .toolbar #aut{ width: 20rem; flex-basis: 20rem; }
+}
+@media (max-width: 768px){
+  .toolbar #aut{ width: auto; flex: 1 1 auto; }
+}
+</style>
+
+
+<style id="sticky-toolbar-edgefix">
+/* Evita que los controles toquen el borde redondeado de la toolbar */
+.toolbar > *{ margin: 0; }
+.toolbar .btn, .toolbar .input, .toolbar select{ border-radius: 12px; }
+</style>
+
+
+<style id="sticky-toolbar-childfix">
+.toolbar > * { margin: 0; }
+.toolbar .btn, .toolbar .input, .toolbar select { border-radius: 12px; }
+</style>
+
+<style id="toolbar-one-line">
+/* Mantener barra en una sola línea en desktop y ajustar anchos */
+@media (min-width: 1200px){
+  .toolbar{ flex-wrap: nowrap; }
+  .toolbar .search-wrap{ flex: 1 1 auto; min-width: 18rem; }
+  .toolbar #cat{ width: 14rem; flex: 0 0 14rem; }
+  .toolbar #aut{ width: 18rem; flex: 0 0 18rem; }
+  .toolbar #per{ width: 13rem; flex: 0 0 13rem; } /* si no lo usas, ignora este */
+}
+@media (max-width: 1199px){
+  .toolbar{ flex-wrap: wrap; }
+}
+</style>
+
+
+<style id="toolbar-align-logs-right">
+/* Empujar el botón "Registros" al extremo derecho de la toolbar */
+.toolbar #logsBtn{ margin-left: auto; }
+</style>
+
+
+<style id="author-clear-css">
+.select-wrap{ position: relative; display: inline-flex; align-items: center; }
+.select-wrap > select{ padding-right: 40px; } /* que no choque visualmente con la ✖ */
+#clearAut{
+  position: absolute;
+  right: 10px;               /* dejamos espacio para la flecha nativa del select */
+  top: 50%;
+  transform: translateY(-50%);
+}
+</style>
+
+
+<style id="clear-unified-css">
+/* Contenedores */
+.search-wrap{ position: relative; display: inline-flex; align-items: center; width: 100%; }
+.select-wrap{ position: relative; display: inline-flex; align-items: center; }
+/* Espacio para la ✖ dentro del input/select */
+.search-wrap > .input{ padding-right: 42px; width: 100%; }
+.select-wrap > select{ padding-right: 40px; }
+/* Botón "limpiar" reutilizable */
+.clear-btn{
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0; background: transparent; color: #64748b;
+  font-size: 16px; line-height: 1; padding: 4px 6px; border-radius: 8px;
+  cursor: pointer; opacity: 0; pointer-events: none;
+  transition: opacity .12s ease, background .12s ease, color .12s ease;
+}
+.clear-btn:hover{ background: #f1f5f9; color: #0f172a; }
+.clear-btn.show{ opacity: .9; pointer-events: auto; }
+</style>
+
+
+<style id="logs-final-hide-v20">
+  /* Oculta SOLO lo pedido dentro del modal de Registros */
+  
+  #logsDlg #logsStats .stats-bottom{ display:none !important; visibility:hidden !important; }
+  
+  
+</style>
+
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+<a id="top"></a>
+<div class="wrap">
+  <header>
+    <img id="logo" src="CTH.png" alt="Colegio Theodoro Hertzl" title="Ir al inicio">
+    <h1>Biblioteca CTH</h1>
+    <div class="sub">Explora nuestro catálogo público</div>
+  </header>
+
+  <div class="toolbar">
+    <div class="search-wrap"><input id="q" class="input" placeholder="Escribe para buscar… (título / autor / categoría)"><button id="clearQ" class="clear-btn" type="button" aria-label="Limpiar búsqueda" title="Limpiar">✖</button></div>
+    <div class="select-wrap"><select id="cat"></select><button id="clearCat" class="clear-btn" type="button" aria-label="Limpiar categoría" title="Limpiar">✖</button></div>
+    <div class="select-wrap aut-wrap-added"><select id="aut"></select><button id="clearAut" class="clear-btn" type="button" aria-label="Limpiar autor" title="Limpiar">✖</button></div>
+    <select id="per">
+      <option value="12">12 por página</option>
+      <option value="24">24 por página</option>
+      <option value="48">48 por página</option>
+    </select>
+
+    <button id="unlock" class="btn" title="Solo bibliotecología">🔒 Desbloquear</button>
+<div id="googleBtn" style="display:none"></div>
+    <button id="logsBtn" class="btn" title="Ver últimos préstamos y devoluciones">📒 Registros</button>
+  </div>
+
+  <div class="counters">
+    <div>Total de libros: <b id="tCount">0</b></div>
+    <div>Disponibles: <b id="dCount">0</b></div>
+  </div>
+
+  <div id="grid" class="grid"></div>
+
+  <div class="pagination">
+    <button id="prev" class="btn">Anterior</button>
+    <div class="muted" id="pageLabel">1 de 1</div>
+    <button id="next" class="btn">Siguiente</button>
+  </div>
+
+  <footer class="muted">Catálogo conectado a Google Sheets. Cualquier cambio en la hoja se refleja al recargar.</footer>
+</div>
+
+<div id="tooltip" class="tooltip"></div>
+
+<dialog id="dlg">
+  <div class="modal">
+    <header>
+      <div style="flex:1;width:100%">
+        <h2 id="mTitle">Título</h2>
+        <div class="byline" id="mByline">Autor · Editorial</div>
+      </div>
+      <div class="right">
+                <button id="returnBtn" class="close-btn" disabled>Devolución</button>
+        <button id="reserveBtn" class="close-btn" disabled>Reservar</button>
+        <button id="close" class="close-btn">Cerrar</button>
+      </div>
+    </header>
+
+    <div class="detail">
+      <div class="cover-wrap">
+        <img id="mCover" class="cover" src="default_cover.png" alt="Portada">
+      </div>
+      <div class="fields">
+        <div class="kv"><b>Título: </b><span class="value" id="fTitulo"></span></div>
+        <div class="kv"><b>Autor: </b><span class="value" id="fAutor"></span></div>
+        <div class="kv"><b>Editorial: </b><span class="value" id="fEditorial"></span></div>
+        <div class="kv"><b>Clasificación: </b><span class="value" id="fClas"></span></div>
+        <div class="kv full"><b>Sinopsis: </b><span class="value" id="fSinopsis"></span></div>
+        <div class="kv"><b>Ejemplares: </b><span class="value" id="fEjem"></span></div>
+        <div class="kv"><b>Categoría: </b><span class="value" id="fCat"></span></div>
+        <div class="kv"><b>Disponibilidad: </b><span class="value" id="fDisp"></span></div>
+        <div class="kv"><b>En préstamo: </b><span class="value" id="fPrestamo"></span></div>
+        <div class="kv full"><b>Observaciones: </b><span class="value" id="fObs"></span></div>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<script>
+// Considera un préstamo "activo" si NO está devuelto y NO tiene fecha_devolucion
+function isActiveLoan(it){
+  const estado = String(it.estado || it.Estado || '').trim().toLowerCase();
+  const dev    = String(
+    it.fecha_devolucion || it['fecha devolucion'] || it['Fecha devolución'] || it.devolucion || ''
+  ).trim();
+  return !(estado === 'devuelto' || dev);
+}
+
+const SHEET_ID = "13SOXwd_TSub0vivKLerD_81VoJiuHnNTXZ6f6DK9xtE";
+const SHEET_NAME = "Libros"; // solo esta pestaña
+
+const state = {
+  all: [], rows: [], page: 1, per: 12,
+  q: "", cat: "Categoría", aut: "Autor",
+};
+
+
+// --- Accent-insensitive normalization helper ---
+const __norm = (s)=> (s??'').toString().toLowerCase()
+  .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+const $ = (s)=>document.querySelector(s);
+const grid=$("#grid"), tCount=$("#tCount"), dCount=$("#dCount"), pageLabel=$("#pageLabel");
+const tooltip = $("#tooltip");
+
+$("#logo").addEventListener("click", ()=>{ location.hash="#top"; window.scrollTo({top:0,behavior:"smooth"}) });
+$("#q").addEventListener("input", e=>{ state.q = __norm(e.target.value); state.page=1; render() });
+$("#cat").addEventListener("change", e=>{ state.cat = e.target.value; state.page=1; render() });
+$("#aut").addEventListener("change", e=>{ state.aut = e.target.value; state.page=1; render() });
+$("#per").addEventListener("change", e=>{ state.per = +e.target.value; state.page=1; render() });
+$("#prev").addEventListener("click", ()=>{ if(state.page>1){ state.page--; render() }});
+$("#next").addEventListener("click", ()=>{ const max = Math.max(1, Math.ceil(state.rows.length/state.per)); if(state.page<max){ state.page++; render() }});
+$("#close").addEventListener("click", ()=>$("#dlg").close());
+
+function normalize(v){ if(v==null) return ""; if(typeof v==="string") return v.trim(); return String(v).trim(); }
+function toInt(v){ const n=parseInt(v,10); return Number.isFinite(n)? n : 0; }
+
+function parseGViz(text){
+  const start = text.indexOf("{"); const end = text.lastIndexOf("}");
+  const json = JSON.parse(text.slice(start, end+1));
+  const cols = json.table.cols.map(c=>normalize(c.label));
+  const rows = json.table.rows.map(r=> (r.c||[]).map(c=> c? (c.v??""): ""));
+  return {cols, rows};
+}
+
+function asBook(cols, row){
+  const get = (name)=>{ const idx = cols.findIndex(c=> c.toLowerCase() === name.toLowerCase()); return idx>=0 ? row[idx] : ""; };
+  const titulo   = normalize(get("Título"));
+  const autor    = normalize(get("Autor"));
+  const sinopsis = normalize(get("Sinopsis"));
+  const editorial= normalize(get("Editorial"));
+  const categoria= normalize(get("Categoría"));
+  const clasif   = normalize(get("Clasificación"));
+  const ejemplar = toInt(get("Ejemplares"));
+  const prestamo = toInt(get("En prestamo"));
+  const dispo    = normalize(get("Disponible")) || (ejemplar - prestamo > 0 ? "Disponible" : "No disponible");
+  const obs      = normalize(get("Observaciones"));
+  const portada  = normalize(get("Portada"));
+  return { titulo, autor, sinopsis, editorial, categoria, clasif, ejemplares:ejemplar, prestamo, disponible:dispo, obs, portada };
+}
+
+function computeCounters(list){
+  tCount.textContent = list.length;
+  const disp = list.filter(b=> (b.disponible||"").toLowerCase().includes("dispon")).length;
+  dCount.textContent = disp;
+}
+
+function renderFilters(list){
+  const cats = ["Categoría", ...Array.from(new Set(list.map(b=>b.categoria).filter(Boolean))).sort((a,b)=>a.localeCompare(b))];
+  const auts = ["Autor", ...Array.from(new Set(list.map(b=>b.autor).filter(Boolean))).sort((a,b)=>a.localeCompare(b))];
+  $("#cat").innerHTML = cats.map(v=>`<option>${v}</option>`).join("");
+  $("#aut").innerHTML = auts.map(v=>`<option>${v}</option>`).join("");
+  // fijar selección según el estado actual
+  $("#cat").value = state.cat;
+  $("#aut").value = state.aut;
+}
+
+function applyFilters(){
+  const q = __norm(state.q);
+  let rows = state.all.filter(b=> b.titulo && b.titulo !== "-" );
+  if(state.cat!=="Categoría") rows = rows.filter(b=> b.categoria === state.cat);
+  if(state.aut!=="Autor") rows = rows.filter(b=> b.autor === state.aut);
+  if(q){
+    rows = rows.filter(b=>
+      __norm(b.titulo||"").includes(q) ||
+      __norm(b.autor||"").includes(q) ||
+      __norm(b.categoria||"").includes(q) ||
+      (b.editorial||"").toLowerCase().includes(q)
+    );
+  }
+  // Orden por título A→Z (oculto)
+  rows.sort((a,b)=> (a.titulo||"").localeCompare(b.titulo||""));
+  state.rows = rows;
+}
+
+function validCover(url){
+  if(!url) return false;
+  if(/drive\.google\.com/.test(url)){
+    const m = url.match(/\/file\/d\/([^\/]+)\//);
+    if(m && m[1]){ return `https://drive.google.com/uc?export=view&id=${m[1]}`; }
+    return url;
+  }
+  return url;
+}
+
+function openModal(b){
+  try{ document.getElementById('loanList')?.remove(); }catch(_){}
+  const src = validCover(b.portada) || "default_cover.png";
+  document.getElementById("mCover").src = src;
+
+  document.getElementById("mTitle").textContent = b.titulo || "—";
+  document.getElementById("mByline").textContent = [b.autor, b.editorial].filter(Boolean).join(" · ");
+  document.getElementById("fTitulo").textContent = b.titulo || "—";
+  document.getElementById("fAutor").textContent = b.autor || "—";
+  document.getElementById("fEditorial").textContent = b.editorial || "—";
+  document.getElementById("fClas").textContent = b.clasif || "—";
+  document.getElementById("fSinopsis").textContent = b.sinopsis || "—";
+  document.getElementById("fEjem").textContent = b.ejemplares;
+  document.getElementById("fCat").textContent = b.categoria || "—";
+  document.getElementById("fDisp").textContent = b.disponible || "—";
+  document.getElementById("fPrestamo").textContent = b.prestamo;
+  document.getElementById("fObs").textContent = b.obs || "—";
+  
+  
+  // Colorear las píldoras según estado
+  try{
+    const elE = document.getElementById("fEjem")?.closest(".kv");
+    const elD = document.getElementById("fDisp")?.closest(".kv");
+    const elP = document.getElementById("fPrestamo")?.closest(".kv");
+
+    const setPill = (el, cls) => {
+      if(!el) return;
+      el.classList.remove("pill-ok","pill-bad","pill-warn");
+      if(cls) el.classList.add(cls);
+    };
+
+    // Disponibilidad: verde si disponible, rojo si no
+    const dispTxt = (b.disponible||"").toLowerCase();
+    if(dispTxt.includes("no dispon") || dispTxt.includes("0")){
+      setPill(elD,"pill-bad");
+    }else if(dispTxt.includes("dispon") || dispTxt.includes("sí") || dispTxt.includes("si")){
+      setPill(elD,"pill-ok");
+    }else{
+      setPill(elD,null);
+    }
+
+    // En préstamo: amarillo si hay préstamos activos (>0)
+    const prest = parseInt(String(b.prestamo||"0").replace(/[^0-9-]/g,'')) || 0;
+    setPill(elP, prest>0 ? "pill-warn" : null);
+
+    // Ejemplares: neutro; si 0 marcar en rojo
+    const ej = parseInt(String(b.ejemplares||"0").replace(/[^0-9-]/g,'')) || 0;
+    setPill(elE, ej>0 ? null : "pill-bad");
+  // Ubicar tres botones debajo de la portada (usar elementos originales, sin duplicados)
+  try{
+    const coverWrap = document.querySelector('#dlg .cover-wrap');
+    const fields = document.querySelector('#dlg .fields');
+    const elE = document.getElementById("fEjem")?.closest(".kv");
+    const elP = document.getElementById("fPrestamo")?.closest(".kv");
+    const elD = document.getElementById("fDisp")?.closest(".kv");
+
+    // limpiar clones de intentos previos
+    coverWrap?.querySelectorAll('.kv-btn').forEach(n=>n.remove());
+
+    // función auxiliar para mover (no clonar)
+    const moveBtn = (el, opts={})=>{
+      if(!el || !coverWrap) return;
+      el.classList.add('kv-btn');
+      if(opts.hideLabel){ el.classList.add('hide-label'); }
+      coverWrap.appendChild(el);
+    };
+
+    // Mover en este orden: Ejemplares, En préstamo, Disponibilidad
+    moveBtn(elE);
+    moveBtn(elP);
+
+    // Para disponibilidad: mostramos solo el valor ("Disponible" o "No disponible")
+    if(elD){
+      const valueEl = elD.querySelector('#fDisp');
+      let text = (valueEl?.textContent || '').trim();
+      // Normalizar mayúsculas inicial
+      if(text){ text = text[0].toUpperCase() + text.slice(1); }
+      // Reemplazar el contenido del contenedor por solo el texto
+      if(valueEl){
+        elD.innerHTML = '<span id="fDisp">'+text+'</span>';
+      }
+      moveBtn(elD, {hideLabel:true});
+    }
+  }catch(_){}
+
+  // Clonar y ubicar botones bajo la portada (desktop)
+  try{
+    const coverWrap = document.querySelector('#dlg .cover-wrap');
+    const elE = document.getElementById("fEjem")?.closest(".kv");
+    const elP = document.getElementById("fPrestamo")?.closest(".kv");
+    const elD = document.getElementById("fDisp")?.closest(".kv");
+    const ordered = [elE, elP, elD];
+    if(coverWrap){
+      coverWrap.querySelectorAll('.kv-btn').forEach(n=>n.remove());
+      ordered.forEach(src=>{
+        if(!src) return;
+        const clone = src.cloneNode(true);
+        clone.classList.add('kv-btn');
+        ['pill-ok','pill-bad','pill-warn'].forEach(c=>{ if(src.classList.contains(c)) clone.classList.add(c); });
+        coverWrap.appendChild(clone);
+      });
+    }
+  }catch(_){}
+
+  try{
+    const coverWrap = document.querySelector('#dlg .cover-wrap');
+    const elE = document.getElementById("fEjem")?.closest(".kv");
+    const elP = document.getElementById("fPrestamo")?.closest(".kv");
+    const elD = document.getElementById("fDisp")?.closest(".kv");
+    [elE, elP, elD].forEach(el=>{
+      if(el && coverWrap){
+        el.classList.add("kv-btn");
+        coverWrap.appendChild(el);
+      }
+    });
+  }catch(_){}
+
+  // Mover botones al contenedor de portada
+  try{
+    const coverWrap = document.querySelector('#dlg .cover-wrap');
+    const elE = document.getElementById("fEjem")?.closest(".kv");
+    const elP = document.getElementById("fPrestamo")?.closest(".kv");
+    const elD = document.getElementById("fDisp")?.closest(".kv");
+    [elE, elP, elD].forEach(el=>{
+      if(el && coverWrap && !el.classList.contains("kv-btn")){
+        el.classList.add("kv-btn");
+        coverWrap.appendChild(el);
+      }
+    });
+  }catch(_){}
+
+    [elE, elP, elD].forEach(el=>{ try{ if(el){ el.setAttribute('role','button'); el.setAttribute('tabindex','0'); } }catch(_){}});
+    
+  }catch(_){}
+// Mostrar préstamos activos (rápido, con caché y carga inmediata)
+  (function(){
+    // PRIVACY: do not show active borrowers unless unlocked
+    if (typeof isUnlocked !== 'undefined' && !isUnlocked) { try{ document.getElementById('loanList')?.remove(); }catch(_){} return; }
+
+    try{
+      const tituloX = b.titulo || document.getElementById('fTitulo')?.textContent?.trim() || '';
+      const cont = document.querySelector('.fields');
+      if(!tituloX || !cont) return;
+
+      // prepara contenedor al instante
+      const old = document.getElementById('loanList');
+      if(old) old.remove();
+      const box = document.createElement('div');
+      box.id = 'loanList';
+      box.className = 'kv full';
+      box.style.background = '#eff6ff';
+      box.style.border = '1px solid #dbeafe';
+      box.style.borderRadius = '12px';
+      box.style.padding = '10px 12px';
+      box.innerHTML = `<b>Préstamos activos:</b> <div id="loanBtns" style="margin-top:8px; display:flex; flex-wrap:wrap; gap:8px;"></div>`;
+      cont.appendChild(box);
+      const btns = document.getElementById('loanBtns');
+
+      function renderLoans(items){
+        btns.innerHTML = '';
+        if(!items || !items.length){
+          box.remove();
+          return;
+        }
+        try{
+          const activos = items.filter(isActiveLoan).length;
+          const fPrest = document.getElementById('fPrestamo'); if(fPrest) fPrest.textContent = activos;
+          const fDisp  = document.getElementById('fDisponibilidad');
+          const ejem   = Number(b.ejemplares||0);
+          const disponible = (ejem - activos) > 0;
+          if(fDisp){ fDisp.textContent = disponible ? 'Disponible' : 'No disponible'; fDisp.classList?.toggle('ok', disponible); fDisp.classList?.toggle('bad', !disponible); }
+          setBookLoansInState(tituloX, activos);
+          updateCardStatus(tituloX);
+        }catch(_){}
+        items.forEach(it=>{
+          const btn = document.createElement('button');
+          btn.className = 'btn';
+          const rol = it.rol || it.role || it.Rol || '';
+          const grado = it.grado || it.grade || it.Grado || '';
+          const extra = rol ? ` (${rol}${/^estud/i.test(rol) && grado ? `, grado: ${grado}` : ''})` : '';
+          btn.textContent = (it.borrower || '(sin nombre)') + extra;
+          btn.style.padding = '6px 10px';
+          btn.onclick = () => devolverConNombre(it.borrower||'');
+          btns.appendChild(btn);
+        });
+      }
+
+      if(typeof loansCache !== 'undefined' && loansCache.has(tituloX)){
+        renderLoans(loansCache.get(tituloX));
+      }else{
+        btns.innerHTML = '<span style="opacity:.7">cargando…</span>';
+        (async () => {
+          try{
+            const q = `${LOOKUP_URL}?action=loans-by-title&title=${encodeURIComponent(tituloX)}`;
+            const res = await fetch(q, {cache:'no-store'});
+            const data = await res.json();
+            const items = (data && Array.isArray(data.items)) ? data.items : [];
+            if(typeof loansCache !== 'undefined'){ loansCache.set(tituloX, items); }
+            renderLoans(items);
+          }catch(e){ btns.innerHTML = '<span style="opacity:.7">sin datos</span>'; }
+        })();
+      }
+    }catch(_){}
+  })();
+document.getElementById("dlg").showModal();
+}
+
+function esc(str){ return String(str||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function short(s, n=160){
+  const t = (s||"").trim();
+  if(!t) return "";
+  return t.length>n ? t.slice(0,n-1)+"…" : t;
+}
+
+function cardHTML(b){
+  const tip = short(b.sinopsis, 160);
+  const tipAttr = tip ? ` data-tip="${esc(tip)}"` : "";
+  const txt = String(b.disponible || '').trim().toLowerCase();
+  const avail = ((+b.ejemplares || 0) - (+b.prestamo || 0) > 0)
+               ? true
+               : (txt === 'disponible');
+  const statusText = avail ? 'Disponible' : 'No disponible';
+  const statusIcon = avail ? '✅' : '❌';
+  const statusClass = avail ? 'ok' : 'bad';
+  return `
+    <article class="card" data-title="${esc(b.titulo)||''}" ${tipAttr} role="button" aria-label="${esc(b.titulo||'')}">
+      <h3 class="title">${esc(b.titulo)||"—"}</h3>
+      <p class="author">${esc(b.autor)||"—"}</p>
+      <div class="badges">
+        <span class="badge">📚 ${esc(b.categoria||"General")}</span>
+        <span class="badge status ${statusClass}">${statusIcon} ${statusText}</span>
+      </div>
+    </article>
+  `;
+}
+
+function attachTooltips(){
+  const cards = document.querySelectorAll(".card[data-tip]");
+  cards.forEach(el=>{
+    el.addEventListener("mousemove", (e)=>{
+      tooltip.textContent = el.getAttribute("data-tip")||"";
+      tooltip.style.display = "block";
+      const x = e.clientX, y = e.clientY;
+      tooltip.style.left = x + "px";
+      tooltip.style.top  = (y - 16) + "px";
+    });
+    el.addEventListener("mouseleave", ()=>{ tooltip.style.display = "none"; tooltip.textContent=""; });
+  });
+}
+
+function render(){
+  applyFilters();
+  computeCounters(state.rows);
+  const start = (state.page-1)*state.per;
+  const slice = state.rows.slice(start, start+state.per);
+  grid.innerHTML = slice.map(cardHTML).join("");
+  [...grid.children].forEach((el,i)=>{ el.addEventListener("click", ()=> openModal(slice[i]) ); });
+  attachTooltips();
+  const max = Math.max(1, Math.ceil(state.rows.length/state.per));
+  pageLabel.textContent = `${state.page} de ${max}`;
+  updateVisibleCardsAvailability();
+  document.getElementById("prev").disabled = state.page<=1;
+  document.getElementById("next").disabled = state.page>=max;
+}
+
+async function boot(){
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}&t=${Date.now()}`;
+  const res = await fetch(url, { cache: 'no-store' });
+  const txt = await res.text();
+  const {cols, rows} = parseGViz(txt);
+  const items = rows.map(r=> asBook(cols, r))
+                   .filter(b=> b.titulo && b.titulo!=="-" && !(b.titulo.length<=2 && !b.autor));
+  state.all = items;
+  renderFilters(items);
+  render();
+}
+
+
+
+// === Toggle visual para botón de desbloqueo (no invasivo) ===
+function updateLockUI(){
+  try{
+    var btn = document.getElementById('unlock');
+    if(!btn) return;
+    if(isUnlocked){
+      btn.innerHTML = '🔓 Desbloqueado';
+      btn.classList.add('unlocked');
+      btn.setAttribute('aria-pressed','true');
+      btn.title = 'Haga clic para bloquear';
+    }else{
+      btn.innerHTML = '🔒 Desbloquear';
+      btn.classList.remove('unlocked');
+      btn.setAttribute('aria-pressed','false');
+      btn.title = 'Haga clic para desbloquear';
+    }
+  }catch(_){}
+}
+// Reflejar estado en el DOM (ya existe __applyPrivacyLock__, ampliamos su efecto sin romperla)
+(function(){
+  var __origPrivacy = typeof __applyPrivacyLock__ === 'function' ? __applyPrivacyLock__ : null;
+  window.__applyPrivacyLock__ = function(){
+    try{ if(__origPrivacy) __origPrivacy(); }catch(_){}
+    try{
+      document.body.toggleAttribute('data-locked', !isUnlocked);
+      if(document.getElementById('dlg')?.open){
+        var rBtn = document.getElementById('reserveBtn');
+        var dBtn = document.getElementById('returnBtn');
+        if(rBtn) rBtn.disabled = !isUnlocked || rBtn.getAttribute('data-disabled') === 'true';
+        if(dBtn) dBtn.disabled = !isUnlocked || dBtn.getAttribute('data-disabled') === 'true';
+      }
+    }catch(_){}
+    try{ updateLockUI(); }catch(_){}
+  };
+})();
+
+
+// === Calendario (UI) ===
+function isoToDMY(iso){ if(!iso) return ''; const [y,m,d]=iso.split('-'); return `${d}/${m}/${y}`; }
+function prettyDateFromISO(iso){
+  if (!iso) return '';
+  const d = new Date(iso + 'T00:00:00');
+  return new Intl.DateTimeFormat('es-CO',{ day:'numeric', month:'long', year:'numeric' }).format(d);
+}
+function todayISO(){
+  const d=new Date(), y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), da=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${da}`;
+}
+function pickDate({title='Selecciona una fecha', sub='Haz clic en el día del calendario', initialISO=todayISO()} = {}){
+  return new Promise((resolve, reject)=>{
+    const dlg = document.getElementById('dateDlg');
+    const inpt = document.getElementById('dateDlgInput');
+    const pretty = document.getElementById('dateDlgPretty');
+    document.getElementById('dateDlgTitle').textContent = title;
+    document.getElementById('dateDlgSub').textContent   = sub;
+    inpt.value = initialISO;
+    pretty.textContent = prettyDateFromISO(inpt.value);
+
+    const onChange = ()=> pretty.textContent = prettyDateFromISO(inpt.value);
+    const onCancel = ()=> { cleanup(); dlg.close(); reject(new Error('cancel')); };
+    const onOk     = ()=> { const iso=inpt.value; cleanup(); dlg.close(); resolve(isoToDMY(iso)); };
+    const onKey = (e)=>{ if(e.key==='Enter'){ e.preventDefault(); onOk(); } if(e.key==='Escape'){ e.preventDefault(); onCancel(); } };
+
+    inpt.addEventListener('change', onChange);
+    inpt.addEventListener('keydown', onKey);
+    document.getElementById('dateDlgCancel').addEventListener('click', onCancel, {once:true});
+    document.getElementById('dateDlgOk').addEventListener('click', onOk, {once:true});
+
+    function cleanup(){
+      inpt.removeEventListener('change', onChange);
+      inpt.removeEventListener('keydown', onKey);
+    }
+    dlg.showModal();
+  });
+}
+
+/***** === RESERVAS / DEVOLUCIONES (Apps Script) === *****/
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbys0nC2pKbfkwhYvm67h6q3AQQdgBZaauYu4190VOykcsxBxRQ4MsRzGXUhKMHiX8sc/exec";
+const LOOKUP_URL = "https://script.google.com/macros/s/AKfycbys0nC2pKbfkwhYvm67h6q3AQQdgBZaauYu4190VOykcsxBxRQ4MsRzGXUhKMHiX8sc/exec";
+const loansCache = new Map();
+// Warm up Apps Script to avoid cold-start delay
+try{ fetch(LOOKUP_URL + '?ping=1', {method:'GET', cache:'no-store'}).catch(()=>{}); }catch(_){}
+
+
+let isUnlocked = false;
+// Reflect lock state on <body> and ensure borrower lists are hidden when locked
+function __applyPrivacyLock__(){
+  try{
+    document.body.toggleAttribute('data-locked', !isUnlocked);
+    if(!isUnlocked){ document.getElementById('loanList')?.remove(); }
+  }catch(_){}
+}
+__applyPrivacyLock__();
+
+let TOKEN_CACHE = null;
+const UNLOCK_PIN = 'cth-2025-123456';
+let currentBook = null;
+
+// Desbloquear/Bloquear con PIN (toggle sin romper nada)
+document.getElementById('unlock')?.addEventListener('click', ()=>{
+  if(isUnlocked){
+    isUnlocked = false;
+    TOKEN_CACHE = null;
+    __applyPrivacyLock__();
+    uiAlert && uiAlert('Modo bloqueado', 'Vista pública activada.');
+    return;
+  }
+  const pin = prompt('PIN de bibliotecología:');
+  if(!pin) return;
+  const p = pin.trim();
+  if(p !== UNLOCK_PIN){ uiAlert && uiAlert('PIN incorrecto', 'La contraseña ingresada no es válida.', 'error'); return; }
+  TOKEN_CACHE = p; isUnlocked = true; __applyPrivacyLock__();
+  uiAlert && uiAlert('Listo', 'Ya puedes reservar o registrar devoluciones.');
+});
+
+// Hook: recordamos el libro actual y habilitamos botones según disponibilidad
+const __openModal = openModal;
+openModal = function(b){
+  currentBook = b;
+  __openModal(b);
+
+  const rBtn = document.getElementById('reserveBtn');
+  const dBtn = document.getElementById('returnBtn');
+
+  // Estimación rápida con los datos del catálogo (pueden venir desactualizados)
+  const ejemplares = Number(b.ejemplares||b.Ejemplares||0);
+  const prestadosHeader = Number(b.prestamo||b['En prestamo']||0);
+  if(rBtn) rBtn.disabled = !(isUnlocked && (ejemplares - prestadosHeader) > 0);
+  if(dBtn) dBtn.disabled = !(isUnlocked && prestadosHeader > 0);
+
+  // Ajuste con el dato REAL desde la hoja de préstamos (por título)
+  (async () => {
+    try{
+      const tituloX = b.titulo || document.getElementById('fTitulo')?.textContent?.trim() || '';
+      if(!tituloX) return;
+      const q = `${LOOKUP_URL}?action=loans-by-title&title=${encodeURIComponent(tituloX)}`;
+      const res = await fetch(q, { cache:'no-store' });
+      const data = await res.json();
+      const items = (data && Array.isArray(data.items)) ? data.items : [];
+      const activos = items.filter(isActiveLoan).length;
+
+      // Refresca el contador "En préstamo" mostrado en el modal
+      const lab = document.getElementById('fPrestamo');
+      if(lab) lab.textContent = activos;
+
+      // Habilita/inhabilita correctamente según lo que exista realmente en la hoja
+      if(dBtn) dBtn.disabled = !isUnlocked || activos === 0;
+      if(rBtn) rBtn.disabled = !isUnlocked || (ejemplares - activos) <= 0;
+    }catch(_){ /* silencioso */ }
+  })();
+};
+
+// POST simple (text/plain) para evitar preflight CORS
+async function postToWebApp(payload){
+  const res = await fetch(WEBAPP_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  });
+  return res.json();
+}
+
+async function reservarLibro(){
+  try { __showModalSpinner__('Registrando préstamo…','No cierres esta ventana');
+
+  try { __CTH_SHOW__('Registrando préstamo…','Por favor no cierres esta ventana');
+
+  if(!isUnlocked) return uiAlert('Necesita PIN', 'Primero desbloquea con el PIN.');
+  if(!currentBook) return;
+  const estudiante = prompt('Usuario:');
+  if(!estudiante) return;
+  const grado = prompt('Grado (opcional):') || '';
+  const rol = prompt('Rol (Estudiante/Docente/Administrativo/Oficios varios/Particular, opcional):') || '';
+  // Fecha de préstamo = hoy (servidor). No se solicita en UI.
+const fechaEntrega = await pickDate({title:'Fecha de devolución estimada', sub:'Selecciona la fecha estimada de devolución'});
+  const payload = {
+    action: 'reserve',
+    token: TOKEN_CACHE,
+    titulo: currentBook.titulo || currentBook.Titulo || document.getElementById('fTitulo')?.textContent?.trim() || '',
+    estudiante, grado, rol, fechaEntrega
+  };
+  try{
+    const data = await postToWebApp(payload);
+    if(data.ok){
+      __CTH_HIDE__ && __CTH_HIDE__(); __hideModalSpinner__ && __hideModalSpinner__(); const __roleText = (/^Estudiante$/i.test(rol) && (grado||'').trim()) ? `Estudiante (Grado: ${(grado||'').trim()})` : (rol||'');
+await uiAlert('Reserva registrada ✅', `Título: ${payload.titulo}
+Reservado por: ${estudiante}
+Rol: ${__roleText}`);
+
+    await refreshAvailabilityUI(currentBook.titulo, Number(currentBook.ejemplares||0));
+try{ if(typeof loansCache!=='undefined' && currentBook?.titulo){ loansCache.delete(currentBook.titulo); } }catch(_){}
+      await boot();
+
+// === Clear rápido para filtro Autor ===
+(function(){
+  const autEl = document.getElementById('aut');
+  const clear = document.getElementById('clearAut');
+  function toggleAutClear(){
+    if(!clear) return;
+    clear.classList.toggle('show', !!(state.aut && state.aut !== 'Autor'));
+  }
+  if(autEl && !autEl.__autBound){
+    // Soportar tanto <select> como un posible <input> en el futuro
+    autEl.addEventListener('change', e=>{
+      state.aut = e.target.value || 'Autor';
+      state.page = 1;
+      render();
+      toggleAutClear();
+    });
+    autEl.addEventListener('input', e=>{
+      state.aut = e.target.value || 'Autor';
+      state.page = 1;
+      render();
+      toggleAutClear();
+    });
+    autEl.__autBound = true;
+  }
+  if(clear && !clear.__bound){
+    clear.addEventListener('click', ()=>{
+      state.aut = 'Autor';
+      const el = document.getElementById('aut');
+      if(el){
+        if(el.tagName === 'SELECT'){ el.selectedIndex = 0; }
+        else { el.value = ''; }
+        el.focus();
+      }
+      state.page = 1;
+      render();
+      toggleAutClear();
+    });
+    clear.__bound = true;
+  }
+  toggleAutClear();
+})();
+
+
+// === Botón "Limpiar" del buscador ===
+function __toggleClearBtn(){ try{ var el=document.getElementById('clearQ'); var q=document.getElementById('q'); if(!el||!q) return; el.classList.toggle('show', !!q.value.trim()); }catch(_){} }
+(function(){
+  var clear = document.getElementById('clearQ');
+  if(clear && !clear.__bound){
+    clear.addEventListener('click', function(){
+      try{
+        var q = document.getElementById('q');
+        if(!q) return;
+        q.value = '';
+        state.q = '';
+        state.page = 1;
+        render();
+        __toggleClearBtn();
+        q.focus();
+      }catch(_){}
+    });
+    clear.__bound = true;
+  }
+  // Llamada inicial (por si hay query pre-cargada)
+  __toggleClearBtn();
+})(); 
+
+      document.getElementById('dlg')?.close();
+    }else{
+      uiAlert('No se pudo reservar', 'No se pudo reservar: ' + (data.error || data.message || ''));
+    }
+  }catch(err){
+    uiAlert('Error de red', 'Error de red: ' + err.message);
+  }
+
+  } finally { __CTH_HIDE__(); }
+
+  } finally { __hideModalSpinner__(); }
+}
+
+async function registrarDevolucion(){
+  try { __showModalSpinner__('Registrando devolución…','No cierres esta ventana');
+
+  try { __CTH_SHOW__('Registrando devolución…','Por favor no cierres esta ventana');
+
+  if(!isUnlocked) return uiAlert('Necesita PIN', 'Primero desbloquea con el PIN.');
+  if(!currentBook) return;
+
+  const titulo = currentBook.titulo || currentBook.Titulo || document.getElementById('fTitulo')?.textContent?.trim() || '';
+  if(!titulo) return uiAlert('Ups', 'No se pudo determinar el título.');
+
+  try{
+    // 1) consultar prestamos activos sin pedir nombre
+    const q = `${LOOKUP_URL}?action=loans-by-title&title=${encodeURIComponent(titulo)}`;
+    const res = await fetch(q, { cache: 'no-store' });
+    const data = await res.json();
+
+    if(!data.items || data.items.length === 0){
+      uiAlert('Sin préstamos activos', 'No hay préstamos activos para este título.');
+      return;
+    }
+
+    const devolverConNombre = async (nombre) => {
+      const payload = {
+        action: 'return',
+        token: TOKEN_CACHE,
+        titulo,
+        estudiante: nombre
+      };
+      __showModalSpinner__('Registrando devolución…','No cierres esta ventana');
+__CTH_SHOW__('Registrando devolución…','Por favor no cierres esta ventana');
+let r;
+try {
+        r = await postToWebApp(payload);
+} finally {
+        __CTH_HIDE__();
+        __hideModalSpinner__();
+}
+if(r.ok){
+        const __loan = (data && Array.isArray(data.items) ? data.items : []).find(it => (
+  (it.estudiante||it.nombre||'').toString().trim().toLowerCase() === (nombre||'').toString().trim().toLowerCase()
+)) || {};
+const __rol   = __loan.rol || __loan.Rol || '';
+const __grado = __loan.grado || __loan.Grado || '';
+const __roleText = (/^Estudiante$/i.test(__rol) && (__grado||'').trim()) ? `Estudiante (Grado: ${(__grado||'').trim()})` : (__rol||'');
+await uiAlert('Devolución registrada ✅', `Título: ${titulo}
+Devuelto por: ${nombre}${__roleText?`
+Rol: ${__roleText}`:''}`, null, { hideOk:true, autoCloseMs:3000, onClose:function(){ try{ document.getElementById('dlg').close(); }catch(_){} } });
+        
+    await refreshAvailabilityUI(currentBook.titulo, Number(currentBook.ejemplares||0));
+try{ if(typeof loansCache!=='undefined' && titulo){ loansCache.delete(titulo); } }catch(_){}
+        await boot();
+
+// === Clear rápido para filtro Autor ===
+(function(){
+  const autEl = document.getElementById('aut');
+  const clear = document.getElementById('clearAut');
+  function toggleAutClear(){
+    if(!clear) return;
+    clear.classList.toggle('show', !!(state.aut && state.aut !== 'Autor'));
+  }
+  if(autEl && !autEl.__autBound){
+    // Soportar tanto <select> como un posible <input> en el futuro
+    autEl.addEventListener('change', e=>{
+      state.aut = e.target.value || 'Autor';
+      state.page = 1;
+      render();
+      toggleAutClear();
+    });
+    autEl.addEventListener('input', e=>{
+      state.aut = e.target.value || 'Autor';
+      state.page = 1;
+      render();
+      toggleAutClear();
+    });
+    autEl.__autBound = true;
+  }
+  if(clear && !clear.__bound){
+    clear.addEventListener('click', ()=>{
+      state.aut = 'Autor';
+      const el = document.getElementById('aut');
+      if(el){
+        if(el.tagName === 'SELECT'){ el.selectedIndex = 0; }
+        else { el.value = ''; }
+        el.focus();
+      }
+      state.page = 1;
+      render();
+      toggleAutClear();
+    });
+    clear.__bound = true;
+  }
+  toggleAutClear();
+})();
+
+
+// === Botón "Limpiar" del buscador ===
+function __toggleClearBtn(){ try{ var el=document.getElementById('clearQ'); var q=document.getElementById('q'); if(!el||!q) return; el.classList.toggle('show', !!q.value.trim()); }catch(_){} }
+(function(){
+  var clear = document.getElementById('clearQ');
+  if(clear && !clear.__bound){
+    clear.addEventListener('click', function(){
+      try{
+        var q = document.getElementById('q');
+        if(!q) return;
+        q.value = '';
+        state.q = '';
+        state.page = 1;
+        render();
+        __toggleClearBtn();
+        q.focus();
+      }catch(_){}
+    });
+    clear.__bound = true;
+  }
+  // Llamada inicial (por si hay query pre-cargada)
+  __toggleClearBtn();
+})(); 
+
+        document.getElementById('dlg')?.close();
+      }else{
+        uiAlert('No se pudo registrar la devolución', 'No se pudo registrar la devolución: ' + (r.error || r.message || ''));
+      }
+    };
+
+    // Caso único
+    if(data.items.length === 1){
+      const n = data.items[0].borrower || '(sin nombre)';
+      if(await uiConfirm('¿Confirmar devolución?', `Título: ${titulo}\nLo tiene: ${n}`, '', 'Confirmar devolución')){
+        await devolverConNombre(n);
+      }
+      return;
+    }
+
+    // Varios: pinta lista clicable en el modal, sin romper estructura
+    const cont = document.querySelector('.fields');
+    const old = document.getElementById('loanList');
+    if(old) old.remove();
+
+    const box = document.createElement('div');
+    box.id = 'loanList';
+    box.className = 'kv full';
+    box.innerHTML = `<b>Préstamos activos:</b> <div id="loanBtns" style="margin-top:8px; display:flex; flex-wrap:wrap; gap:8px;"></div>`;
+    cont.appendChild(box);
+
+    const btns = document.getElementById('loanBtns');
+    data.items.forEach(it=>{
+      const btn = document.createElement('button');
+      btn.className = 'btn';
+      btn.textContent = it.borrower || '(sin nombre)';
+      btn.style.padding = '6px 10px';
+      btn.onclick = () => devolverConNombre(it.borrower||'');
+      btns.appendChild(btn);
+    });
+
+    const choice = await window.uiPickBorrower('Selecciona un nombre', 'Haz clic en la persona que devuelve:', (data.items||[]).map(it => it.borrower || '(sin nombre)'));
+      if(choice){ await devolverConNombre(choice); }
+  }catch(err){
+    uiAlert('Error', 'Error consultando préstamos: ' + err.message);
+  }
+
+  } finally { __CTH_HIDE__(); }
+
+  } finally { __hideModalSpinner__(); }
+}
+
+document.getElementById('reserveBtn')?.addEventListener('click', reservarLibro);
+document.getElementById('returnBtn')?.addEventListener('click', registrarDevolucion);
+/***** === FIN RESERVAS / DEVOLUCIONES === *****/
+boot();
+
+// === Clear rápido para filtro Autor ===
+(function(){
+  const autEl = document.getElementById('aut');
+  const clear = document.getElementById('clearAut');
+  function toggleAutClear(){
+    if(!clear) return;
+    clear.classList.toggle('show', !!(state.aut && state.aut !== 'Autor'));
+  }
+  if(autEl && !autEl.__autBound){
+    // Soportar tanto <select> como un posible <input> en el futuro
+    autEl.addEventListener('change', e=>{
+      state.aut = e.target.value || 'Autor';
+      state.page = 1;
+      render();
+      toggleAutClear();
+    });
+    autEl.addEventListener('input', e=>{
+      state.aut = e.target.value || 'Autor';
+      state.page = 1;
+      render();
+      toggleAutClear();
+    });
+    autEl.__autBound = true;
+  }
+  if(clear && !clear.__bound){
+    clear.addEventListener('click', ()=>{
+      state.aut = 'Autor';
+      const el = document.getElementById('aut');
+      if(el){
+        if(el.tagName === 'SELECT'){ el.selectedIndex = 0; }
+        else { el.value = ''; }
+        el.focus();
+      }
+      state.page = 1;
+      render();
+      toggleAutClear();
+    });
+    clear.__bound = true;
+  }
+  toggleAutClear();
+})();
+
+
+// === Botón "Limpiar" del buscador ===
+function __toggleClearBtn(){ try{ var el=document.getElementById('clearQ'); var q=document.getElementById('q'); if(!el||!q) return; el.classList.toggle('show', !!q.value.trim()); }catch(_){} }
+(function(){
+  var clear = document.getElementById('clearQ');
+  if(clear && !clear.__bound){
+    clear.addEventListener('click', function(){
+      try{
+        var q = document.getElementById('q');
+        if(!q) return;
+        q.value = '';
+        state.q = '';
+        state.page = 1;
+        render();
+        __toggleClearBtn();
+        q.focus();
+      }catch(_){}
+    });
+    clear.__bound = true;
+  }
+  // Llamada inicial (por si hay query pre-cargada)
+  __toggleClearBtn();
+})(); 
+
+</script>
+
+  <!-- Datos manuales de préstamos para recuento y paginación en el modal de registros -->
+  <script>
+  (function(){
+    // Conjunto de 57 registros extraídos de la hoja de Google Sheets
+    const manualLogs = [
+        {
+      fechaPrestamo: "28/08/2025",
+      fechaDevolucion: "",
+      nombre: "Sonia Franco",
+      grado: "Secretaria",
+      rol: "Administrativa",
+      titulo: "Miedos, pánicos y fobias/ Los años terribles",
+      estado: "En préstamo",
+      ts: ""
+    },
+        {
+      fechaPrestamo: "28/08/2025",
+      fechaDevolucion: "15/09/2025",
+      nombre: "Celeste Arcila",
+      grado: "5° Alef",
+      rol: "Estudiante",
+      titulo: "Diario de Greg2",
+      estado: "Devuelto",
+      ts: ""
+    },
+        {
+      fechaPrestamo: "28/08/2025",
+      fechaDevolucion: "28/08/2025",
+      nombre: "Cristobal Betancur",
+      grado: "6° Alef",
+      rol: "Estudiante",
+      titulo: "Stephen King",
+      estado: "Devuelto",
+      ts: ""
+    },
+        {
+      fechaPrestamo: "28/08/2025",
+      fechaDevolucion: "28/08/2025",
+      nombre: "Salomon Restrepo",
+      grado: "10° Bet",
+      rol: "Estudiante",
+      titulo: "1984 en inglés",
+      estado: "Devuelto",
+      ts: ""
+    },
+        {
+      fechaPrestamo: "29/08/2025",
+      fechaDevolucion: "09/09/2025",
+      nombre: "Camila López Arenas",
+      grado: "9° Alef",
+      rol: "Estudiante",
+      titulo: "Coraline",
+      estado: "Devuelto",
+      ts: "9/9/2025 9:45:35"
+    },
+        {
+      fechaPrestamo: "29/08/2025",
+      fechaDevolucion: "23/09/2022",
+      nombre: "Yael Laloum",
+      grado: "",
+      rol: "Docente",
+      titulo: "Joseph Tenia un abriguito",
+      estado: "En préstamo",
+      ts: ""
+    },
+        {
+      fechaPrestamo: "29/08/2025",
+      fechaDevolucion: "23/09/2022",
+      nombre: "Diana Gómez",
+      grado: "",
+      rol: "Docente",
+      titulo: "El arte de la distorsión",
+      estado: "En préstamo",
+      ts: ""
+    },
+        {
+      fechaPrestamo: "29/08/2025",
+      fechaDevolucion: "19/09/2025",
+      nombre: "Helena Cardona",
+      grado: "5° Alef",
+      rol: "Estudiante",
+      titulo: "Isadora Moon va al ballet",
+      estado: "Devuelto",
+      ts: "19/9/2025 7:51:24"
+    },
+        {
+      fechaPrestamo: "03/09/2025",
+      fechaDevolucion: "10/09/2025",
+      nombre: "Irina Barco",
+      grado: "3° Alef",
+      rol: "Estudiante",
+      titulo: "La casa mágica",
+      estado: "En préstamo",
+      ts: ""
+    },
+        {
+      fechaPrestamo: "03/09/2025",
+      fechaDevolucion: "12/09/2025",
+      nombre: "Martina Velez Roldan",
+      grado: "6° Bet",
+      rol: "Estudiante",
+      titulo: "Cuentos de buenas noches para niñas rebeldes 2",
+      estado: "Devuelto",
+      ts: "12/9/2025 8:54:14"
+    },
+        {
+      fechaPrestamo: "04/09/2025",
+      fechaDevolucion: "18/09/2025",
+      nombre: "Manuela López",
+      grado: "5° Bet",
+      rol: "Estudiante",
+      titulo: "Diario de Greg 15 : tocado y hundido",
+      estado: "Devuelto",
+      ts: "18/9/2025 14:51:56"
+    },
+        {
+      fechaPrestamo: "04/09/2025",
+      fechaDevolucion: "18/09/2025",
+      nombre: "Emilio Bocanegra",
+      grado: "6° Bet",
+      rol: "Estudiante",
+      titulo: "Diario de Greg 17 : Superretorcidos",
+      estado: "Devuelto",
+      ts: "18/09/2025 7:00:07"
+    },
+        {
+      fechaPrestamo: "04/09/2025",
+      fechaDevolucion: "31/10/2025",
+      nombre: "María Paz Aristizabal",
+      grado: "12",
+      rol: "Estudiante",
+      titulo: "Lacrónica",
+      estado: "En préstamo",
+      ts: "04/09/2025 14:25:46"
+    },
+        {
+      fechaPrestamo: "04/09/2025",
+      fechaDevolucion: "31/10/2025",
+      nombre: "Elena Mejía",
+      grado: "12",
+      rol: "Estudiante",
+      titulo: "Lacrónica",
+      estado: "En préstamo",
+      ts: "04/09/2025 14:29:49"
+    },
+        {
+      fechaPrestamo: "04/09/2025",
+      fechaDevolucion: "31/10/2025",
+      nombre: "Valeria Martínez",
+      grado: "10 Bet",
+      rol: "Estudiante",
+      titulo: "1984",
+      estado: "En préstamo",
+      ts: "4/9/2025 14:33:55"
+    },
+        {
+      fechaPrestamo: "04/09/2025",
+      fechaDevolucion: "25/09/2025",
+      nombre: "Nicolas Naranjo",
+      grado: "",
+      rol: "Docente",
+      titulo: "One of us is lying",
+      estado: "En préstamo",
+      ts: "4/9/2025 14:56:26"
+    },
+        {
+      fechaPrestamo: "05/09/2025",
+      fechaDevolucion: "05/09/2025",
+      nombre: "Manuela Rodríguez",
+      grado: "9 Bet",
+      rol: "Estudiante",
+      titulo: "One of us is lying",
+      estado: "Devuelto",
+      ts: "5/9/2025 8:44:44"
+    },
+        {
+      fechaPrestamo: "05/09/2025",
+      fechaDevolucion: "19/09/2025",
+      nombre: "Manuela Rodríguez",
+      grado: "9 Bet",
+      rol: "Estudiante",
+      titulo: "One of us is lying",
+      estado: "En préstamo",
+      ts: "5/9/2025 8:45:27"
+    },
+        {
+      fechaPrestamo: "05/09/2025",
+      fechaDevolucion: "05/09/2025",
+      nombre: "Luciana Botero",
+      grado: "10 Alef",
+      rol: "Estudiante",
+      titulo: "Diccionario Oxford Pocket para estudiantes de inglés",
+      estado: "Devuelto",
+      ts: "5/9/2025 14:30:18"
+    },
+        {
+      fechaPrestamo: "05/09/2025",
+      fechaDevolucion: "05/09/2025",
+      nombre: "Leticia Pulgarin",
+      grado: "10 Bet",
+      rol: "Estudiante",
+      titulo: "La metamorfosis",
+      estado: "Devuelto",
+      ts: "5/9/2025 13:45:05"
+    },
+        {
+      fechaPrestamo: "05/09/2025",
+      fechaDevolucion: "05/09/2025",
+      nombre: "Belén Hernández",
+      grado: "9 Alef",
+      rol: "Estudiante",
+      titulo: "One of us is lying",
+      estado: "Devuelto",
+      ts: "5/9/2025 14:27:44"
+    },
+        {
+      fechaPrestamo: "08/09/2025",
+      fechaDevolucion: "09/09/2025",
+      nombre: "Belen Fernandez",
+      grado: "9 Alef",
+      rol: "Estudiante",
+      titulo: "One of us is lying",
+      estado: "Devuelto",
+      ts: "09/09/2025 8:48:53"
+    },
+        {
+      fechaPrestamo: "08/09/2025",
+      fechaDevolucion: "08/09/2025",
+      nombre: "Nicolas Naranjo",
+      grado: "",
+      rol: "Docente",
+      titulo: "Diccionario Oxford Pocket para estudiantes de inglés",
+      estado: "Devuelto",
+      ts: "08/09/2025 8:02:17"
+    },
+        {
+      fechaPrestamo: "08/09/2025",
+      fechaDevolucion: "08/09/2025",
+      nombre: "Nicolas Naranjo",
+      grado: "",
+      rol: "Docente",
+      titulo: "Diccionario Oxford Pocket para estudiantes de inglés",
+      estado: "Devuelto",
+      ts: "08/09/2025 8:03:39"
+    },
+        {
+      fechaPrestamo: "08/09/2025",
+      fechaDevolucion: "09/09/2025",
+      nombre: "Nicolas Naranjo",
+      grado: "",
+      rol: "Docente",
+      titulo: "Diccionario Oxford Pocket para estudiantes de inglés",
+      estado: "Devuelto",
+      ts: "09/09/2025 8:49:30"
+    },
+        {
+      fechaPrestamo: "09/09/2025",
+      fechaDevolucion: "23/09/2025",
+      nombre: "Camila López",
+      grado: "9 Alef",
+      rol: "Estudiante",
+      titulo: "Bajo la luna de mayo",
+      estado: "En préstamo",
+      ts: "09/09/2025 9:34:31"
+    },
+        {
+      fechaPrestamo: "09/09/2025",
+      fechaDevolucion: "09/09/2025",
+      nombre: "Jacobo Saray",
+      grado: "9 Bet",
+      rol: "Estudiante",
+      titulo: "One of us is lying",
+      estado: "Devuelto",
+      ts: "09/09/2025 15:11:16"
+    },
+        {
+      fechaPrestamo: "09/09/2025",
+      fechaDevolucion: "15/09/2025",
+      nombre: "Mariana Botero",
+      grado: "4 Bet",
+      rol: "Estudiante",
+      titulo: "Drácula y yo",
+      estado: "Devuelto",
+      ts: "15/09/2025 8:55:16"
+    },
+        {
+      fechaPrestamo: "09/09/2025",
+      fechaDevolucion: "15/09/2025",
+      nombre: "Leticia Eusse",
+      grado: "4 Bet",
+      rol: "Estudiante",
+      titulo: "¡Dime algo sorprendente!",
+      estado: "Devuelto",
+      ts: "15/09/2025 8:56:05"
+    },
+        {
+      fechaPrestamo: "10/09/2025",
+      fechaDevolucion: "10/09/2025",
+      nombre: "Belén Fernandez",
+      grado: "9 Alef",
+      rol: "Estudiante",
+      titulo: "One of us is lying",
+      estado: "Devuelto",
+      ts: "10/09/2025 9:20:28"
+    },
+        {
+      fechaPrestamo: "10/09/2025",
+      fechaDevolucion: "10/09/2025",
+      nombre: "Miranda Montoya",
+      grado: "7 Alef",
+      rol: "Estudiante",
+      titulo: "La vuelta al mundo en ochenta días",
+      estado: "Devuelto",
+      ts: "10/09/2025 9:14:53"
+    },
+        {
+      fechaPrestamo: "10/09/2025",
+      fechaDevolucion: "24/09/2025",
+      nombre: "Kelly Pulgarin",
+      grado: "",
+      rol: "Docente",
+      titulo: "Nano y sus amigos",
+      estado: "En préstamo",
+      ts: "10/09/2025 8:23:14"
+    },
+        {
+      fechaPrestamo: "10/09/2025",
+      fechaDevolucion: "24/09/2025",
+      nombre: "Kelly Pulgarin",
+      grado: "",
+      rol: "Docente",
+      titulo: "Nano va a la playa",
+      estado: "En préstamo",
+      ts: "10/09/2025 8:23:44"
+    },
+        {
+      fechaPrestamo: "10/09/2025",
+      fechaDevolucion: "24/09/2025",
+      nombre: "Kelly Pulgarin",
+      grado: "",
+      rol: "Docente",
+      titulo: "Las palabras del mar",
+      estado: "En préstamo",
+      ts: "10/09/2025 8:24:25"
+    },
+        {
+      fechaPrestamo: "10/09/2025",
+      fechaDevolucion: "10/09/2025",
+      nombre: "Jacobo Saray",
+      grado: "9 Bet",
+      rol: "Estudiante",
+      titulo: "One of us is lying",
+      estado: "Devuelto",
+      ts: "10/09/2025 14:38:17"
+    },
+        {
+      fechaPrestamo: "10/09/2025",
+      fechaDevolucion: "10/09/2025",
+      nombre: "Noah Bluman",
+      grado: "7 Alef",
+      rol: "Estudiante",
+      titulo: "Harry Potter : and the sorcerer's stone",
+      estado: "Devuelto",
+      ts: "10/09/2025 11:57:11"
+    },
+        {
+      fechaPrestamo: "10/09/2025",
+      fechaDevolucion: "11/09/2025",
+      nombre: "Tomás Rios",
+      grado: "4 Alef",
+      rol: "Estudiante",
+      titulo: "Los cretinos",
+      estado: "Devuelto",
+      ts: "11/09/2025 8:51:23"
+    },
+        {
+      fechaPrestamo: "11/09/2025",
+      fechaDevolucion: "11/09/2025",
+      nombre: "Tomas Rios",
+      grado: "4 Alef",
+      rol: "Estudiante",
+      titulo: "La maravillosa medicina de Jorge",
+      estado: "En préstamo",
+      ts: "11/09/2025 8:56:25"
+    },
+        {
+      fechaPrestamo: "11/09/2025",
+      fechaDevolucion: "30/09/2025",
+      nombre: "Hobbis Oswaldo Ortiz Moreno",
+      grado: "Docente",
+      rol: "Docente",
+      titulo: "Crimen y misterio",
+      estado: "En préstamo",
+      ts: "11/09/2025 10:27:35"
+    },
+        {
+      fechaPrestamo: "11/09/2025",
+      fechaDevolucion: "30/09/2025",
+      nombre: "Hobbis Oswaldo Ortiz Moreno",
+      grado: "Docente",
+      rol: "Docente",
+      titulo: "La metamorfosis",
+      estado: "En préstamo",
+      ts: "11/09/2025 10:29:14"
+    },
+        {
+      fechaPrestamo: "11/09/2025",
+      fechaDevolucion: "30/09/2025",
+      nombre: "Manuela Chica Henao",
+      grado: "",
+      rol: "Estudiante",
+      titulo: "Cuentos para niños que creen en marcianos",
+      estado: "En préstamo",
+      ts: "11/09/2025 10:30:59"
+    },
+        {
+      fechaPrestamo: "11/09/2025",
+      fechaDevolucion: "30/09/2025",
+      nombre: "Samuel Eduardo Rodríguez Pino",
+      grado: "",
+      rol: "Estudiante",
+      titulo: "El camino de Sherlock",
+      estado: "En préstamo",
+      ts: "11/09/2025 10:32:44"
+    },
+        {
+      fechaPrestamo: "11/09/2025",
+      fechaDevolucion: "30/11/2025",
+      nombre: "Manuela Macias",
+      grado: "Docente",
+      rol: "Docente",
+      titulo: "Coraline",
+      estado: "En préstamo",
+      ts: "11/09/2025 12:31:06"
+    },
+        {
+      fechaPrestamo: "15/09/2025",
+      fechaDevolucion: "15/09/2025",
+      nombre: "Antonia Bolivar",
+      grado: "9 Alef",
+      rol: "Estudiante",
+      titulo: "One of us is lying",
+      estado: "Devuelto",
+      ts: "15/09/2025 9:46:08"
+    },
+        {
+      fechaPrestamo: "15/09/2025",
+      fechaDevolucion: "22/09/2025",
+      nombre: "Montserrat Molano",
+      grado: "5 Bet",
+      rol: "Estudiante",
+      titulo: "Cuentos de buenas noches para niñas rebeldes 2",
+      estado: "En préstamo",
+      ts: "15/09/2025 9:02:01"
+    },
+        {
+      fechaPrestamo: "15/09/2025",
+      fechaDevolucion: "15/09/2025",
+      nombre: "Alicia Henao",
+      grado: "5 Bet",
+      rol: "Estudiante",
+      titulo: "Harry Potter y la piedra filosofal",
+      estado: "En préstamo",
+      ts: "15/09/2025 9:03:03"
+    },
+        {
+      fechaPrestamo: "15/09/2025",
+      fechaDevolucion: "15/09/2025",
+      nombre: "Magdalena Velásquez",
+      grado: "3 Bet",
+      rol: "Estudiante",
+      titulo: "Cuentos de buenas noches para niñas rebeldes",
+      estado: "En préstamo",
+      ts: "15/09/2025 12:32:28"
+    },
+        {
+      fechaPrestamo: "15/09/2025",
+      fechaDevolucion: "17/09/2025",
+      nombre: "Olivia García",
+      grado: "3 Bet",
+      rol: "Estudiante",
+      titulo: "Paula y Lou : tigres, estrellas y un hombre cocodrilo",
+      estado: "Devuelto",
+      ts: "17/09/2025 9:22:16"
+    },
+        {
+      fechaPrestamo: "15/09/2025",
+      fechaDevolucion: "31/12/2025",
+      nombre: "Camilo Gómez",
+      grado: "Docente",
+      rol: "Docente",
+      titulo: "Mi primer libro de manualidades : una guía tamaño real",
+      estado: "En préstamo",
+      ts: "15/09/2025 15:03:38"
+    },
+        {
+      fechaPrestamo: "17/09/2025",
+      fechaDevolucion: "18/09/2025",
+      nombre: "Carolina Lopez",
+      grado: "",
+      rol: "Estudiante",
+      titulo: "Diccionario Oxford Pocket para estudiantes de inglés",
+      estado: "Devuelto",
+      ts: "18/09/2025 7:01:06"
+    },
+        {
+      fechaPrestamo: "18/09/2025",
+      fechaDevolucion: "25/09/2025",
+      nombre: "Leticia Eusse",
+      grado: "4 Bet",
+      rol: "Estudiante",
+      titulo: "Los elefantes no pueden bailar",
+      estado: "En préstamo",
+      ts: "18/09/2025 9:03:49"
+    },
+        {
+      fechaPrestamo: "18/09/2025",
+      fechaDevolucion: "22/09/2025",
+      nombre: "Jeronimo Gutierrez",
+      grado: "11 Bet",
+      rol: "Estudiante",
+      titulo: "De la tierra a la luna",
+      estado: "Devuelto",
+      ts: "22/09/2025 15:17:27"
+    },
+        {
+      fechaPrestamo: "18/09/2025",
+      fechaDevolucion: "19/9/2025",
+      nombre: "Sonia Franco",
+      grado: "",
+      rol: "Administrativo",
+      titulo: "Las 48 leyes del poder",
+      estado: "Devuelto",
+      ts: "19/09/2025 13:46:58"
+    },
+        {
+      fechaPrestamo: "19/09/2025",
+      fechaDevolucion: "25/09/2025",
+      nombre: "Pedro Angel Toro",
+      grado: "4 Bet",
+      rol: "Estudiante",
+      titulo: "Mascotas inventadas",
+      estado: "En préstamo",
+      ts: "19/09/2025 8:59:03"
+    },
+        {
+      fechaPrestamo: "19/09/2025",
+      fechaDevolucion: "30/09/2025",
+      nombre: "Martina Quintero",
+      grado: "5 Bet",
+      rol: "Estudiante",
+      titulo: "Los peores años de mi vida : ¡sacadme de aquí!",
+      estado: "En préstamo",
+      ts: "19/09/2025 9:01:48"
+    },
+        {
+      fechaPrestamo: "22/09/2025",
+      fechaDevolucion: "26/09/2025",
+      nombre: "Yael",
+      grado: "",
+      rol: "Docente",
+      titulo: "¿Quién destruyó el circo?",
+      estado: "En préstamo",
+      ts: "22/09/2025 7:29:57"
+    },
+        {
+      fechaPrestamo: "22/09/2025",
+      fechaDevolucion: "29/09/2025",
+      nombre: "Emma Vélez Muñoz",
+      grado: "3 Bet",
+      rol: "Estudiante",
+      titulo: "El Sombrerón",
+      estado: "En préstamo",
+      ts: "22/09/2025 8:58:23"
+    }
+      ];
+    // Ordena manualmente los registros por fecha de préstamo descendente antes de formatear
+    function __cthDateValue2(str){
+      const s = String(str || '').trim();
+      let m;
+      m = s.match(/^Date\((\d{4}),\s*(\d{1,2}),\s*(\d{1,2})/i);
+      if (m) {
+        return new Date(Number(m[1]), Number(m[2]), Number(m[3])).getTime();
+      }
+      m = s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/);
+      if (m) {
+        return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])).getTime();
+      }
+      m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if (m) {
+        return new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1])).getTime();
+      }
+      return 0;
+    }
+    manualLogs.sort((a,b) => __cthDateValue2(b.fechaPrestamo) - __cthDateValue2(a.fechaPrestamo));
+    // Formatea las fechas en los registros (solo apariencia, no afecta orden)
+    manualLogs.forEach(it => {
+      try {
+        it.fechaPrestamo = formatGvizDate(it.fechaPrestamo);
+        it.fechaDevolucion = formatGvizDate(it.fechaDevolucion);
+      } catch(_){ /* silencio */ }
+    });
+    // Sobrescribe loadRecentLogs para que devuelva los registros manuales
+    if (typeof loadRecentLogs === 'function') {
+      window.loadRecentLogs = async function(limit = 30){
+        const data = manualLogs.slice();
+        return (typeof limit === 'number' && limit > 0) ? data.slice(0, limit) : data;
+      };
+    }
+  })();
+  </script>
+
+<!-- Date picker dialog (reutilizable) -->
+
+<!-- Date picker dialog (reutilizable, mejorado) -->
+<dialog id="dateDlg" class="dpdlg dp-big">
+  <div class="modal dp">
+    <header class="dp-head">
+      <div class="dp-titles">
+        <h2 id="dateDlgTitle">Selecciona una fecha</h2>
+        <p id="dateDlgSub" class="dp-sub">Haz clic en el día del calendario</p>
+      </div>
+      </header>
+
+    <div class="dp-body">
+      <label class="dp-field">
+        <span class="dp-label">Fecha</span>
+        <div class="dp-inputwrap">
+          <input id="dateDlgInput" type="date" lang="es-CO" class="dp-input">
+          <span id="dateDlgPretty" class="dp-pretty"></span>
+        <div class="dp-inline-actions"><button type="button" id="dateDlgOk" class="btn primary">Aceptar</button><button type="button" id="dateDlgCancel" class="btn ghost">Cancelar</button></div></div></label>
+    </div>
+  </div>
+</dialog>
+
+
+
+<style>
+  #__cth_loader_overlay__{
+    position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+    background:rgba(15,23,42,.45); z-index:2147483000; backdrop-filter:blur(2px);
+  }
+  #__cth_loader_card__{
+    background:#fff; padding:18px 20px; border-radius:14px;
+    box-shadow:0 10px 30px rgba(2,8,23,.18); min-width:260px; text-align:center;
+    font:500 16px system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,"Noto Sans",sans-serif;
+  }
+  #__cth_spinner__{
+    width:34px; height:34px; border:3px solid #e5e7eb; border-top-color:#0ea5e9; border-radius:50%;
+    margin:0 auto 10px; animation:__cth_spin__ .9s linear infinite;
+  }
+  @keyframes __cth_spin__{ to{ transform:rotate(360deg) } }
+  #__cth_loader_msg__{ color:#0f172a; font-weight:600; margin-top:4px }
+  #__cth_loader_sub__{ color:#475569; font-size:13px; margin-top:2px }
+
+/* === Forzar siempre tema claro en dashboard === */
+#logsDlg .modal{ background:#ffffff !important; color:#0f172a !important; border:1px solid #e5e7eb !important; }
+#logsDlg header h2{ color:#0f172a !important; }
+#logsDlg #logsStats > div{ background:#f8fafc !important; border:1px solid #e5e7eb !important; color:#0f172a !important; }
+#logsDlg #logsControls{ background:#f8fafc !important; border:1px solid #e5e7eb !important; }
+#logsDlg #logsControls input[type="search"],
+#logsDlg #logsControls select{ background:#ffffff !important; border:1px solid #cbd5e1 !important; color:#0f172a !important; }
+#logsDlg #logsWrap{ background:#ffffff !important; border:1px solid #e5e7eb !important; }
+#logsDlg #logsTable thead tr th{ background:#f1f5f9 !important; border-bottom:1px solid #e5e7eb !important; color:#0f172a !important; }
+#logsDlg #logsTable tbody tr:nth-child(even){ background:#f8fafc !important; }
+#logsDlg #logsTable tbody tr:hover{ background:#f1f5f9 !important; }
+#logsDlg #logsTable tbody td{ color:#0f172a !important; border-bottom:1px solid #e5e7eb !important; }
+#logsDlg #logsTable tbody td:nth-child(8){ color:#475569 !important; }
+#logsDlg #logsCount{ background:#e2e8f0 !important; border:1px solid #cbd5e1 !important; color:#0f172a !important; padding:2px 8px; border-radius:8px; }
+
+</style>
+<div id="__cth_loader_overlay__" role="alert" aria-live="assertive">
+  <div id="__cth_loader_card__">
+    <div id="__cth_spinner__"></div>
+    <div id="__cth_loader_msg__">Procesando…</div>
+    <div id="__cth_loader_sub__">Por favor espera un momento</div>
+  </div>
+</div>
+<script>
+  function __CTH_SHOW__(t,s){
+    try{
+      var ov=document.getElementById('__cth_loader_overlay__');
+      document.getElementById('__cth_loader_msg__').textContent=t||'Procesando…';
+      document.getElementById('__cth_loader_sub__').textContent=s||'Por favor espera un momento';
+      ov.style.display='flex';
+    }catch(_){}
+  }
+  function __CTH_HIDE__(){
+    try{ document.getElementById('__cth_loader_overlay__').style.display='none'; }catch(_){}
+  }
+</script>
+
+
+<style>
+  /* Spinner estilo "círculo" dentro del modal */
+  #__modalSpinner__{
+    position:absolute; inset:0; display:none; align-items:center; justify-content:center;
+    background:rgba(255,255,255,.55); z-index:9999;
+  }
+  #__modalSpinnerCard__{
+    background:#fff; border-radius:12px; padding:16px 18px; text-align:center;
+    box-shadow:0 10px 30px rgba(2,8,23,.15);
+    font:600 14px system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,"Noto Sans",sans-serif;
+  }
+  .__ring__{
+    width:64px; height:64px; border-radius:50%;
+    background:
+      radial-gradient(farthest-side,#0ea5e9 94%,#0000) top/10px 10px no-repeat,
+      conic-gradient(#0ea5e9 10%,#0000 0);
+    -webkit-mask: radial-gradient(farthest-side,#0000 calc(100% - 10px),#000 0);
+    animation: __spin__ 1s infinite linear;
+    margin: 2px auto 10px;
+  }
+  @keyframes __spin__ { to { transform: rotate(1turn); } }
+  #__modalSpinnerMsg__{color:#0f172a; margin-top:2px}
+  #__modalSpinnerSub__{color:#475569; font-weight:500; font-size:12px; margin-top:2px}
+
+/* === Forzar siempre tema claro en dashboard === */
+#logsDlg .modal{ background:#ffffff !important; color:#0f172a !important; border:1px solid #e5e7eb !important; }
+#logsDlg header h2{ color:#0f172a !important; }
+#logsDlg #logsStats > div{ background:#f8fafc !important; border:1px solid #e5e7eb !important; color:#0f172a !important; }
+#logsDlg #logsControls{ background:#f8fafc !important; border:1px solid #e5e7eb !important; }
+#logsDlg #logsControls input[type="search"],
+#logsDlg #logsControls select{ background:#ffffff !important; border:1px solid #cbd5e1 !important; color:#0f172a !important; }
+#logsDlg #logsWrap{ background:#ffffff !important; border:1px solid #e5e7eb !important; }
+#logsDlg #logsTable thead tr th{ background:#f1f5f9 !important; border-bottom:1px solid #e5e7eb !important; color:#0f172a !important; }
+#logsDlg #logsTable tbody tr:nth-child(even){ background:#f8fafc !important; }
+#logsDlg #logsTable tbody tr:hover{ background:#f1f5f9 !important; }
+#logsDlg #logsTable tbody td{ color:#0f172a !important; border-bottom:1px solid #e5e7eb !important; }
+#logsDlg #logsTable tbody td:nth-child(8){ color:#475569 !important; }
+#logsDlg #logsCount{ background:#e2e8f0 !important; border:1px solid #cbd5e1 !important; color:#0f172a !important; padding:2px 8px; border-radius:8px; }
+
+</style>
+<script>
+  function __showModalSpinner__(msg, sub){
+    var dlg = document.getElementById('dlg');
+    if(!dlg) return;
+    var ov = document.getElementById('__modalSpinner__');
+    if(!ov){
+      ov = document.createElement('div');
+      ov.id = '__modalSpinner__';
+      ov.innerHTML = '<div id="__modalSpinnerCard__"><div class="__ring__"></div><div id="__modalSpinnerMsg__">Procesando…</div><div id="__modalSpinnerSub__">Por favor espera un momento</div></div>';
+      dlg.appendChild(ov);
+    }
+    document.getElementById('__modalSpinnerMsg__').textContent = msg || 'Procesando…';
+    document.getElementById('__modalSpinnerSub__').textContent = sub || 'Por favor espera un momento';
+    ov.style.display = 'flex';
+  }
+  function __hideModalSpinner__(){
+    var ov = document.getElementById('__modalSpinner__');
+    if(ov) ov.style.display = 'none';
+  }
+</script>
+
+
+
+
+
+
+
+
+<script>
+// Redirigir el click del botón "Reservar" a la ventana unificada sin tocar listeners previos
+(function(){
+  const btn = document.getElementById('reserveBtn');
+  if(!btn) return;
+  btn.addEventListener('click', function(ev){
+    // Intercepta el click antes de los demás handlers
+    ev.preventDefault();
+    ev.stopImmediatePropagation();
+    reservarLibroUnified();
+  }, true); // capture: true
+})();
+</script>
+
+<style>
+/* ===== Ventana de reserva (diseño replicado) ===== */
+:root{
+  --rv-bg:#ffffff; --rv-text:#0f172a; --rv-muted:#64748b; --rv-ring:#38bdf8; --rv-primary:#0ea5e9; --rv-border:#e5e7eb;
+}
+.rv-backdrop::backdrop{background:rgba(15,23,42,.55)}
+.rv-modal{
+  width: min(840px, 88vw);
+  border: 0;
+  padding: 0;
+  border-radius: 24px;
+  background: transparent;
+}
+.rv-card{
+  background: var(--rv-bg);
+  border-radius: 24px;
+  padding: 22px 22px 18px;
+  box-shadow:
+    0 30px 90px rgba(2,8,23,.25),
+    0 8px 20px rgba(2,8,23,.07);
+}
+.rv-head{ text-align:center; margin-bottom: 18px;}
+.rv-title{
+  font-size: 30px; line-height:1.1; margin:0; font-weight: 900; color: var(--rv-text);
+}
+@media(min-width:1024px){ .rv-title{ font-size: 34px; } }
+.rv-sub{ margin-top:8px; color: var(--rv-muted); font-size: 18px; }
+
+.rv-body{ margin-top: 10px; }
+.rv-grid{ display:grid; grid-template-columns: 1fr; row-gap:16px; column-gap:16px; }
+@media(min-width:940px){ .rv-grid{ grid-template-columns: 1fr 1fr; } }
+.rv-field{ display:flex; flex-direction:column; gap:10px; }
+.rv-label{ font-weight: 800; font-size:20px; color:#111827; }
+
+.rv-input, .rv-select {
+  font-size:18px; padding:16px 14px;
+  border:1px solid var(--rv-border);
+  border-radius: 16px; outline: none; background:#fff;
+  box-shadow: 0 10px 30px rgba(2,8,23,.06);
+}
+.rv-input:focus, .rv-select:focus {
+  border-color: var(--rv-ring);
+  box-shadow: 0 0 0 5px rgba(56,189,248,.35);
+}
+.rv-disabled{ opacity:.55 }
+.rv-msg{ font-size:18px; color:#111827; white-space:pre-line; padding: 10px 4px; text-align:center; }
+#notifyDlg .rv-card{ max-width:720px; }
+#confirmDlg .rv-msg{ text-align:center; }
+#confirmDlg .rv-sub{ text-align:center; }
+#notifyDlg .rv-title{ text-align:center; }
+
+/* Botones */
+.rv-actions{ display:flex; justify-content:center; gap:16px; margin-top: 14px; }
+.rv-btn{
+  border-radius: 16px; padding:14px 22px; font-weight: 800; cursor: pointer;
+  border:1px solid var(--rv-border); background:#fff;
+}
+.rv-btn.primary{ background: var(--rv-primary); color: #fff; border-color: var(--rv-primary); }
+.rv-btn.ghost{ background: #fff; color: #111827; }
+
+/* Ayuda */
+.rv-help{ grid-column:1 / -1; text-align:center; color: var(--rv-muted); margin-top:8px; font-size:16px; }
+.rv-help b{ font-weight:900; color:#111827 }
+/* ===== Fin ventana de reserva ===== */
+
+/* === Forzar siempre tema claro en dashboard === */
+#logsDlg .modal{ background:#ffffff !important; color:#0f172a !important; border:1px solid #e5e7eb !important; }
+#logsDlg header h2{ color:#0f172a !important; }
+#logsDlg #logsStats > div{ background:#f8fafc !important; border:1px solid #e5e7eb !important; color:#0f172a !important; }
+#logsDlg #logsControls{ background:#f8fafc !important; border:1px solid #e5e7eb !important; }
+#logsDlg #logsControls input[type="search"],
+#logsDlg #logsControls select{ background:#ffffff !important; border:1px solid #cbd5e1 !important; color:#0f172a !important; }
+#logsDlg #logsWrap{ background:#ffffff !important; border:1px solid #e5e7eb !important; }
+#logsDlg #logsTable thead tr th{ background:#f1f5f9 !important; border-bottom:1px solid #e5e7eb !important; color:#0f172a !important; }
+#logsDlg #logsTable tbody tr:nth-child(even){ background:#f8fafc !important; }
+#logsDlg #logsTable tbody tr:hover{ background:#f1f5f9 !important; }
+#logsDlg #logsTable tbody td{ color:#0f172a !important; border-bottom:1px solid #e5e7eb !important; }
+#logsDlg #logsTable tbody td:nth-child(8){ color:#475569 !important; }
+#logsDlg #logsCount{ background:#e2e8f0 !important; border:1px solid #cbd5e1 !important; color:#0f172a !important; padding:2px 8px; border-radius:8px; }
+
+</style>
+
+<dialog id="reserveDlg" class="rv-modal rv-backdrop">
+  <div class="rv-card">
+    <header class="rv-head">
+      <h2 class="rv-title">Datos de quien toma prestado</h2>
+      <div class="rv-sub">Ingresa la información para registrar el préstamo</div>
+    </header>
+
+    <section class="rv-body">
+      <div class="rv-grid">
+        <label class="rv-field">
+          <span class="rv-label">Nombre</span>
+          <input id="rvName" class="rv-input" placeholder="Ej: Juan Pérez" autocomplete="off"/>
+        </label>
+
+        <label class="rv-field">
+          <span class="rv-label">Rol</span>
+          <select id="rvRole" class="rv-select">
+            <option value="" selected>Selecciona un rol</option>
+            <option>Estudiante</option>
+            <option>Docente</option>
+            <option>Administrativo</option>
+            <option>Oficios Varios</option>
+            <option>Particular</option>
+          </select>
+        </label>
+
+        <label class="rv-field">
+          <span class="rv-label">Grado</span>
+          <input id="rvGrade" class="rv-input" placeholder="Ej: 9°" autocomplete="off" disabled/>
+        </label>
+        <label class="rv-field">
+          <span class="rv-label">Fecha de devolución</span>
+          <input id="rvDate" class="rv-input" type="date"/>
+        </label>
+      </div>
+
+      <div class="rv-actions">
+        <button type="button" id="rvOk" class="rv-btn primary">Reservar</button>
+        <button type="button" id="rvCancel" class="rv-btn ghost">Cancelar</button>
+      </div>
+
+      <div class="rv-help">El grado sólo aplica para rol <b>Estudiante</b>.</div>
+    </section>
+  </div>
+
+<!-- Confirm & Notify Modals (unified style) -->
+
+</dialog>
+
+<script>
+// === Reserva unificada (diseño replicado) ===
+(function(){
+  // Intercepta el click de Reservar sin romper handlers previos
+  const btn = document.getElementById('reserveBtn');
+  if(btn){
+    // Evita duplicar interceptores
+    if(!btn.__rvInterceptAttached){
+      btn.addEventListener('click', function(e){
+        try{
+          if(typeof isUnlocked !== 'undefined' && !isUnlocked){ return; } // respeta tu lógica de PIN
+          e.stopImmediatePropagation();
+          e.preventDefault();
+          reservarLibroUnified();
+        }catch(err){
+          console.error(err);
+        }
+      }, true); // captura
+      btn.__rvInterceptAttached = true;
+    }
+  }
+
+  function openReserveDialogUnified(){
+    return new Promise((resolve, reject)=>{
+      const dlg   = document.getElementById('reserveDlg');
+      const name  = document.getElementById('rvName');
+      const role  = document.getElementById('rvRole');
+      const grade = document.getElementById('rvGrade');
+      const date  = document.getElementById('rvDate');
+      const ok    = document.getElementById('rvOk');
+      const cancel= document.getElementById('rvCancel');
+
+      // Reset
+      name.value=''; role.value=''; grade.value=''; grade.disabled=true; grade.classList.add('rv-disabled');
+      // Fecha por defecto: hoy + 14 días
+      try{
+        const d = new Date();
+        const y = d.getFullYear(); const m = String(d.getMonth()+1).padStart(2,'0'); const da = String(d.getDate()).padStart(2,'0');
+        date.value = `${y}-${m}-${da}`;
+        date.min = `${y}-${m}-${da}`;
+        date.min = `${y}-${m}-${da}`;
+        const t = new Date(); const ty=t.getFullYear(); const tm=String(t.getMonth()+1).padStart(2,'0'); const td=String(t.getDate()).padStart(2,'0');
+        date.min = `${ty}-${tm}-${td}`;
+      }catch(_){}
+
+      function onRoleChange(){
+        const v = (role.value||'').toLowerCase();
+        const isStudent = v === 'alumno' || v === 'estudiante';
+        grade.disabled = !isStudent;
+        grade.classList.toggle('rv-disabled', !isStudent);
+        if(!isStudent) grade.value='';
+      }
+      role.addEventListener('change', onRoleChange);
+
+      function cleanup(){
+        ok.removeEventListener('click', onOk);
+        cancel.removeEventListener('click', onCancel);
+        role.removeEventListener('change', onRoleChange);
+      }
+      function onCancel(){ cleanup(); dlg.close(); reject(new Error('cancel')); }
+      function onOk(){
+        const estudiante = (name.value||'').trim();
+        const rolSel     = (role.value||'').trim();
+        if(!estudiante){ uiAlert('Falta nombre', 'Ingresa el nombre.'); return; }
+        if(!rolSel){ uiAlert('Falta rol', 'Selecciona un rol.'); return; }
+        if(!date.value){ uiAlert('Falta fecha', 'Selecciona la fecha de devolución.'); return; }
+        const rol = /^alumno$/i.test(rolSel) ? 'Estudiante' : rolSel;
+        const grado = grade.disabled ? '' : (grade.value||'').trim();
+        const fechaEntrega = (function(){ const [y,m,d]=(date.value||'').split('-'); return `${d}/${m}/${y}`; })();
+        cleanup(); dlg.close();
+        resolve({ estudiante, grado, rol, fechaEntrega });
+      }
+      ok.addEventListener('click', onOk);
+      cancel.addEventListener('click', onCancel);
+      dlg.showModal();
+      name.focus();
+    });
+  }
+
+  // Mantén tu función original sin borrarla; sólo usamos esta unión
+  window.reservarLibroUnified = async function(){
+    if(typeof isUnlocked !== 'undefined' && !isUnlocked){ uiAlert('Necesita PIN', 'Primero desbloquea con el PIN.'); return; }
+    if(typeof currentBook === 'undefined' || !currentBook){ return; }
+    try{
+      const { estudiante, grado, rol, fechaEntrega } = await openReserveDialogUnified();
+      // Fecha de préstamo = hoy (servidor). La fecha de devolución se define en el mismo formulario.
+
+      const payload = {
+        action: 'reserve',
+        token: typeof TOKEN_CACHE !== 'undefined' ? TOKEN_CACHE : '',
+        titulo: currentBook.titulo || currentBook.Titulo || document.getElementById('fTitulo')?.textContent?.trim() || '',
+        estudiante, grado, rol, fechaEntrega
+      };
+
+      __CTH_SHOW__ && __CTH_SHOW__('Registrando préstamo…','Por favor no cierres esta ventana');
+      __showModalSpinner__ && __showModalSpinner__('Registrando préstamo…','No cierres esta ventana');
+      try{
+        const data = await postToWebApp(payload);
+        if(data && data.ok){
+          __CTH_HIDE__ && __CTH_HIDE__(); __hideModalSpinner__ && __hideModalSpinner__(); const __roleText = (/^Estudiante$/i.test(rol) && (grado||'').trim()) ? `Estudiante (Grado: ${(grado||'').trim()})` : (rol||'');
+await uiAlert('Reserva registrada ✅', `Título: ${payload.titulo}
+Reservado por: ${estudiante}
+Rol: ${__roleText}`);
+try{ if(typeof loansCache!=='undefined' && currentBook?.titulo){ loansCache.delete(currentBook.titulo); } }catch(_){}
+          await boot();
+
+// === Clear rápido para filtro Autor ===
+(function(){
+  const autEl = document.getElementById('aut');
+  const clear = document.getElementById('clearAut');
+  function toggleAutClear(){
+    if(!clear) return;
+    clear.classList.toggle('show', !!(state.aut && state.aut !== 'Autor'));
+  }
+  if(autEl && !autEl.__autBound){
+    // Soportar tanto <select> como un posible <input> en el futuro
+    autEl.addEventListener('change', e=>{
+      state.aut = e.target.value || 'Autor';
+      state.page = 1;
+      render();
+      toggleAutClear();
+    });
+    autEl.addEventListener('input', e=>{
+      state.aut = e.target.value || 'Autor';
+      state.page = 1;
+      render();
+      toggleAutClear();
+    });
+    autEl.__autBound = true;
+  }
+  if(clear && !clear.__bound){
+    clear.addEventListener('click', ()=>{
+      state.aut = 'Autor';
+      const el = document.getElementById('aut');
+      if(el){
+        if(el.tagName === 'SELECT'){ el.selectedIndex = 0; }
+        else { el.value = ''; }
+        el.focus();
+      }
+      state.page = 1;
+      render();
+      toggleAutClear();
+    });
+    clear.__bound = true;
+  }
+  toggleAutClear();
+})();
+
+
+// === Botón "Limpiar" del buscador ===
+function __toggleClearBtn(){ try{ var el=document.getElementById('clearQ'); var q=document.getElementById('q'); if(!el||!q) return; el.classList.toggle('show', !!q.value.trim()); }catch(_){} }
+(function(){
+  var clear = document.getElementById('clearQ');
+  if(clear && !clear.__bound){
+    clear.addEventListener('click', function(){
+      try{
+        var q = document.getElementById('q');
+        if(!q) return;
+        q.value = '';
+        state.q = '';
+        state.page = 1;
+        render();
+        __toggleClearBtn();
+        q.focus();
+      }catch(_){}
+    });
+    clear.__bound = true;
+  }
+  // Llamada inicial (por si hay query pre-cargada)
+  __toggleClearBtn();
+})(); 
+
+          document.getElementById('dlg')?.close();
+        }else{
+          uiAlert('No se pudo reservar', 'No se pudo reservar: ' + (data?.error || data?.message || ''));
+        }
+      }finally{
+        __CTH_HIDE__ && __CTH_HIDE__();
+        __hideModalSpinner__ && __hideModalSpinner__();
+      }
+    }catch(e){ /* cancel */ }
+  }
+})();
+// === Fin Reserva unificada ===
+</script>
+
+
+<style>
+/* === Centro de notificación de resultado === */
+.cth-notice-ov{position:fixed;inset:0;display:none;align-items:center;justify-content:center;
+  z-index:99999;pointer-events:none;}
+.cth-notice-card{background:#fff;border:1px solid #e5e7eb;border-radius:24px;padding:22px 28px;box-shadow:0 30px 90px rgba(2,8,23,.25),0 8px 20px rgba(2,8,23,.07);display:flex;gap:14px;align-items:center}
+.cth-notice-icon{width:30px;height:30px;flex:0 0 30px}
+.cth-notice-text{font-weight:800;color:#0f172a;font-size:18px}
+
+/* === Forzar siempre tema claro en dashboard === */
+#logsDlg .modal{ background:#ffffff !important; color:#0f172a !important; border:1px solid #e5e7eb !important; }
+#logsDlg header h2{ color:#0f172a !important; }
+#logsDlg #logsStats > div{ background:#f8fafc !important; border:1px solid #e5e7eb !important; color:#0f172a !important; }
+#logsDlg #logsControls{ background:#f8fafc !important; border:1px solid #e5e7eb !important; }
+#logsDlg #logsControls input[type="search"],
+#logsDlg #logsControls select{ background:#ffffff !important; border:1px solid #cbd5e1 !important; color:#0f172a !important; }
+#logsDlg #logsWrap{ background:#ffffff !important; border:1px solid #e5e7eb !important; }
+#logsDlg #logsTable thead tr th{ background:#f1f5f9 !important; border-bottom:1px solid #e5e7eb !important; color:#0f172a !important; }
+#logsDlg #logsTable tbody tr:nth-child(even){ background:#f8fafc !important; }
+#logsDlg #logsTable tbody tr:hover{ background:#f1f5f9 !important; }
+#logsDlg #logsTable tbody td{ color:#0f172a !important; border-bottom:1px solid #e5e7eb !important; }
+#logsDlg #logsTable tbody td:nth-child(8){ color:#475569 !important; }
+#logsDlg #logsCount{ background:#e2e8f0 !important; border:1px solid #cbd5e1 !important; color:#0f172a !important; padding:2px 8px; border-radius:8px; }
+
+</style>
+<script>
+window.showCenterNotice = function(msg, opts){
+  opts = opts || {};
+  let root = document.getElementById('cthNotice');
+  if(!root){
+    root = document.createElement('div');
+    root.id = 'cthNotice';
+    root.className = 'cth-notice-ov';
+    root.innerHTML = '<div class="cth-notice-card">\
+      <svg class="cth-notice-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">\
+        <circle cx="12" cy="12" r="12" fill="#10b981"></circle>\
+        <path d="M7 12.5l3 3 7-7" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>\
+      </svg>\
+      <div class="cth-notice-text"></div>\
+    </div>';
+    document.body.appendChild(root);
+  }
+  root.querySelector('.cth-notice-text').textContent = msg || '';
+  root.style.display = 'flex';
+  // auto close
+  const dur = typeof opts.duration === 'number' ? opts.duration : 3000;
+  clearTimeout(root.__t);
+  root.__t = setTimeout(()=>{ root.style.display='none'; }, dur);
+}
+
+function __closeAllDialogs__(){
+  try{ document.querySelectorAll('dialog[open]').forEach(d=>{ try{d.close();}catch(_){}}); }catch(_){}
+  try{ if(typeof __CTH_HIDE__==='function') __CTH_HIDE__(); }catch(_){}
+  try{ if(typeof __hideModalSpinner__==='function') __hideModalSpinner__(); }catch(_){}
+}
+// ====== Custom UI Helpers for Devolución ======
+function uiConfirm(title, message, sub='', okText='Confirmar devolución'){ 
+  const dlg = document.getElementById('confirmDlg');
+  if(!dlg) return Promise.resolve(confirm(`${title}\n\n${message}`));
+  dlg.querySelector('#cTitle').textContent = title || 'Confirmar';
+  dlg.querySelector('#cSub').textContent = sub || '';
+  dlg.querySelector('#cMsg').textContent = message || '';
+  const ok = document.getElementById('cOk');
+  if(ok) ok.textContent = okText || 'Confirmar devolución';
+  return new Promise(resolve => {
+    const cancel = document.getElementById('cCancel');
+    function cleanup(){ if(ok) ok.onclick=null; if(cancel) cancel.onclick=null; try{dlg.close();}catch(_){}
+      try{ dlg.classList.remove('error'); }catch(_){ } }
+    if(cancel) cancel.onclick = () => { cleanup(); resolve(false); };
+    if(ok) ok.onclick = () => { cleanup(); resolve(true); };
+    dlg.addEventListener('cancel', (e)=>{ e.preventDefault(); cleanup(); resolve(false); }, {once:true});
+    try{ dlg.showModal(); }catch(_){ resolve(confirm(`${title}\n\n${message}`)); }
+  });
+}
+function uiAlert(title, message, variant, opts){
+  const dlg = document.getElementById('notifyDlg');
+  if(!dlg) { alert(`${title}
+${message||''}`); return Promise.resolve(); }
+  opts = opts || {};
+  if(opts.hideOk){ try{ dlg.classList.add('no-ok'); }catch(_){ } }
+  try{ dlg.classList.toggle('error', variant === 'error'); }catch(_){}
+  dlg.querySelector('#nTitle').textContent = title || 'Aviso';
+  dlg.querySelector('#nMsg').textContent = message || '';
+  return new Promise(resolve => {
+    const ok = document.getElementById('nOk');
+    let t = null;
+    function cleanup(){
+      if(ok) ok.onclick=null;
+      try{ dlg.close(); }catch(_){}
+      try{ dlg.classList.remove('no-ok'); dlg.classList.remove('error'); }catch(_){}
+      if(t){ clearTimeout(t); t=null; }
+      try{ if(opts && typeof opts.onClose === 'function'){ opts.onClose(); } }catch(_){}
+    }
+    if(ok) ok.onclick = () => { cleanup(); resolve(); };
+    dlg.addEventListener('cancel', (e)=>{ e.preventDefault(); cleanup(); resolve(); }, {once:true});
+    try{ dlg.showModal(); }catch(_){ alert(`${title}
+${message||''}`); resolve(); return; }
+    if(typeof opts.autoCloseMs === 'number' && opts.autoCloseMs > 0){
+      t = setTimeout(() => { cleanup(); resolve(); }, opts.autoCloseMs);
+    }
+  });
+}
+// ==============================================
+
+/* Global borrower picker attached to window (always available) */
+if (!window.uiPickBorrower) {
+  window.uiPickBorrower = function(title, sub, names){
+    const dlg = document.getElementById('confirmDlg');
+    if(!dlg){ return Promise.resolve(null); }
+    // Set headings
+    const tEl = dlg.querySelector('#cTitle'); if(tEl) tEl.textContent = title || 'Selecciona un nombre';
+    const sEl = dlg.querySelector('#cSub');   if(sEl) sEl.textContent = sub || '';
+    // Elements
+    const msg   = dlg.querySelector('#cMsg');
+    const list  = dlg.querySelector('#cList');
+    const okBtn = document.getElementById('cOk');
+    const cBtn  = document.getElementById('cCancel');
+    // Hide default confirm content to show the list
+    if(msg)   msg.style.display = 'none';
+    if(okBtn) okBtn.style.display = 'none';
+    if(list){ list.style.display='flex'; list.innerHTML=''; }
+
+    return new Promise(resolve => {
+      function cleanup(){
+        if(cBtn) cBtn.onclick = null;
+        if(list){ list.innerHTML=''; list.style.display='none'; }
+        if(msg)   msg.style.display = '';
+        if(okBtn) okBtn.style.display = '';
+        try{ dlg.close(); }catch(_){}
+      }
+      if(cBtn) cBtn.onclick = () => { cleanup(); resolve(null); };
+      (names||[]).forEach(n => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'rv-chip';
+        b.textContent = n || '(sin nombre)';
+        b.onclick = () => { cleanup(); resolve(n||''); };
+        list.appendChild(b);
+      });
+      dlg.addEventListener('cancel', (e)=>{ e.preventDefault(); cleanup(); resolve(null); }, {once:true});
+      try{ dlg.showModal(); }catch(_){ cleanup(); resolve(null); }
+    });
+  };
+}
+
+
+async function refreshAvailabilityUI(title, ejemplares){
+  try{
+    const res  = await fetch(`${LOOKUP_URL}?action=loans-by-title&title=${encodeURIComponent(title)}`, { cache:'no-store' });
+    const data = await res.json();
+    const items   = Array.isArray(data.items) ? data.items : [];
+    const activos = items.filter(isActiveLoan).length;
+
+    const fPrestamo = document.getElementById('fPrestamo');
+    if (fPrestamo) fPrestamo.textContent = activos;
+
+    // Actualiza estado interno y la tarjeta visible
+    setBookLoansInState(title, activos);
+    updateCardStatus(title);
+
+    const fDisp = document.getElementById('fDisponibilidad');
+    if (fDisp){
+      const disponible = (Number(ejemplares||0) - activos) > 0;
+      fDisp.textContent = disponible ? 'Disponible' : 'No disponible';
+      fDisp.classList?.toggle('ok',  disponible);
+      fDisp.classList?.toggle('bad', !disponible);
+    }
+
+    // Fallback: si no se puede actualizar la tarjeta en vivo
+    // no reload; UI updated in place
+  }catch(e){ console.warn('refreshAvailabilityUI:', e); }
+}
+
+
+function setBookLoansInState(title, activos){
+  try{
+    let changed = false;
+    [state.all, state.rows].forEach(list=>{
+      (list||[]).forEach(b=>{
+        if ((b.titulo||'').toLowerCase() === String(title||'').toLowerCase()){
+          b.prestamo = activos;
+          const avail = (Number(b.ejemplares||0) - Number(b.prestamo||0)) > 0;
+          b.disponible = avail ? 'Disponible' : 'No disponible';
+          changed = true;
+        }
+      });
+    });
+    if (changed){
+      // recompute counters and (optionally) re-render current page quickly
+      computeCounters(state.rows);
+      const start = (state.page-1)*state.per;
+      const slice = state.rows.slice(start, start+state.per);
+      // Update just the badge of visible card (no full redraw to preserve event handlers)
+      updateCardStatus(title);
+    }
+  }catch(e){ console.warn('setBookLoansInState:', e); }
+}
+
+function updateCardStatus(title){
+  try{
+    const sel = `.card[data-title="${CSS.escape(title)}"]`;
+    const card = document.querySelector(sel);
+    if(!card) return;
+    // find book in current state
+    const book = [...(state.rows||[])].find(b => (b.titulo||'').toLowerCase() === String(title||'').toLowerCase());
+    if(!book) return;
+    const statusEl = card.querySelector('.badge.status');
+    if(!statusEl) return;
+    const avail = (Number(book.ejemplares||0) - Number(book.prestamo||0)) > 0;
+    statusEl.textContent = (avail ? '✅ Disponible' : '❌ No disponible');
+    statusEl.classList.toggle('ok',  avail);
+    statusEl.classList.toggle('bad', !avail);
+  }catch(e){ console.warn('updateCardStatus:', e); }
+}
+
+async function updateVisibleCardsAvailability(){
+  try{
+    const cards = Array.from(document.querySelectorAll('.card'));
+    // Concurrency control
+    const pool = 4;
+    let i = 0;
+    async function worker(){
+      while(i < cards.length){
+        const my = i++;
+        const el = cards[my];
+        const title = el?.getAttribute('data-title') || el?.getAttribute('aria-label') || el?.querySelector('.title')?.textContent || '';
+        if(!title) continue;
+        try{
+          const res = await fetch(`${LOOKUP_URL}?action=loans-by-title&title=${encodeURIComponent(title)}`, { cache: 'no-store' });
+          const data = await res.json();
+          const items  = Array.isArray(data.items) ? data.items : [];
+          const activos = items.filter(isActiveLoan).length;
+          setBookLoansInState(title, activos);
+          updateCardStatus(title);
+        }catch(e){ /*silencio*/ }
+      }
+    }
+    await Promise.all(new Array(Math.min(pool, cards.length)).fill(0).map(()=>worker()));
+  }catch(e){ console.warn('updateVisibleCardsAvailability', e); }
+}
+</script>
+
+<dialog id="confirmDlg" class="rv-modal rv-backdrop">
+  <div class="rv-card">
+    <header class="rv-head">
+      <h2 class="rv-title" id="cTitle">Confirmar</h2>
+      <div class="rv-sub" id="cSub"></div>
+    </header>
+    <section class="rv-body">
+      <div class="rv-msg" id="cMsg"></div>
+      
+      <div id="cList" class="rv-list" style="display:none;"></div>
+      <div class="rv-actions">
+        <button type="button" id="cOk" class="rv-btn primary">Confirmar devolución</button>
+        <button type="button" id="cCancel" class="rv-btn ghost">Cancelar</button>
+      </div>
+    </section>
+  </div>
+</dialog>
+
+<dialog id="notifyDlg" class="rv-modal rv-backdrop">
+  <div class="rv-card">
+    <header class="rv-head">
+      <h2 class="rv-title" id="nTitle">¡Listo!</h2>
+    </header>
+    <section class="rv-body">
+      <div class="rv-msg" id="nMsg" style="text-align:center"></div>
+      <div class="rv-actions">
+        <button type="button" id="nOk" class="rv-btn primary">Aceptar</button>
+      </div>
+    </section>
+  </div>
+</dialog>
+
+<style>
+#notifyDlg.no-ok .rv-actions{ display:none; }
+
+/* === Forzar siempre tema claro en dashboard === */
+#logsDlg .modal{ background:#ffffff !important; color:#0f172a !important; border:1px solid #e5e7eb !important; }
+#logsDlg header h2{ color:#0f172a !important; }
+#logsDlg #logsStats > div{ background:#f8fafc !important; border:1px solid #e5e7eb !important; color:#0f172a !important; }
+#logsDlg #logsControls{ background:#f8fafc !important; border:1px solid #e5e7eb !important; }
+#logsDlg #logsControls input[type="search"],
+#logsDlg #logsControls select{ background:#ffffff !important; border:1px solid #cbd5e1 !important; color:#0f172a !important; }
+#logsDlg #logsWrap{ background:#ffffff !important; border:1px solid #e5e7eb !important; }
+#logsDlg #logsTable thead tr th{ background:#f1f5f9 !important; border-bottom:1px solid #e5e7eb !important; color:#0f172a !important; }
+#logsDlg #logsTable tbody tr:nth-child(even){ background:#f8fafc !important; }
+#logsDlg #logsTable tbody tr:hover{ background:#f1f5f9 !important; }
+#logsDlg #logsTable tbody td{ color:#0f172a !important; border-bottom:1px solid #e5e7eb !important; }
+#logsDlg #logsTable tbody td:nth-child(8){ color:#475569 !important; }
+#logsDlg #logsCount{ background:#e2e8f0 !important; border:1px solid #cbd5e1 !important; color:#0f172a !important; padding:2px 8px; border-radius:8px; }
+
+</style>
+
+<style>
+/* Botón del notify en estado de error: sólo cuando el diálogo #notifyDlg tiene la clase .error */
+#notifyDlg.error .rv-btn.primary,
+#notifyDlg.error button.primary,
+#notifyDlg.error #nOk{
+  background:#ef4444;
+  border-color:#ef4444;
+  color:#fff;
+}
+#notifyDlg.error #nOk:hover{ filter:brightness(.95); }
+
+/* === Forzar siempre tema claro en dashboard === */
+#logsDlg .modal{ background:#ffffff !important; color:#0f172a !important; border:1px solid #e5e7eb !important; }
+#logsDlg header h2{ color:#0f172a !important; }
+#logsDlg #logsStats > div{ background:#f8fafc !important; border:1px solid #e5e7eb !important; color:#0f172a !important; }
+#logsDlg #logsControls{ background:#f8fafc !important; border:1px solid #e5e7eb !important; }
+#logsDlg #logsControls input[type="search"],
+#logsDlg #logsControls select{ background:#ffffff !important; border:1px solid #cbd5e1 !important; color:#0f172a !important; }
+#logsDlg #logsWrap{ background:#ffffff !important; border:1px solid #e5e7eb !important; }
+#logsDlg #logsTable thead tr th{ background:#f1f5f9 !important; border-bottom:1px solid #e5e7eb !important; color:#0f172a !important; }
+#logsDlg #logsTable tbody tr:nth-child(even){ background:#f8fafc !important; }
+#logsDlg #logsTable tbody tr:hover{ background:#f1f5f9 !important; }
+#logsDlg #logsTable tbody td{ color:#0f172a !important; border-bottom:1px solid #e5e7eb !important; }
+#logsDlg #logsTable tbody td:nth-child(8){ color:#475569 !important; }
+#logsDlg #logsCount{ background:#e2e8f0 !important; border:1px solid #cbd5e1 !important; color:#0f172a !important; padding:2px 8px; border-radius:8px; }
+
+</style>
+
+<script id="kill-card-tooltips">
+(function(){
+  function stripTitles(root){
+    if(!root) return;
+    var nodes = root.querySelectorAll('.card[title], .card *[title]');
+    for(var i=0;i<nodes.length;i++){ nodes[i].removeAttribute('title'); }
+  }
+  // Initial sweep
+  try{ stripTitles(document); }catch(e){}
+  // On any mouseover within a card, remove titles
+  document.addEventListener('mouseover', function(ev){
+    try{
+      var el = ev.target && ev.target.closest ? ev.target.closest('.card') : null;
+      if(el){ stripTitles(el); }
+    }catch(_){}
+  }, true);
+  // Patch global render() if present
+  try{
+    if(typeof window.render === 'function' && !window.render.__noTooltipPatched){
+      var __r = window.render;
+      window.render = function(){
+        var out = __r.apply(this, arguments);
+        try{ stripTitles(document.getElementById('grid') || document); }catch(_){}
+        return out;
+      };
+      window.render.__noTooltipPatched = true;
+    }
+  }catch(_){}
+  // Observe future mutations in the grid
+  try{
+    var grid = document.getElementById('grid');
+    if(grid && 'MutationObserver' in window){
+      var mo = new MutationObserver(function(){ stripTitles(grid); });
+      mo.observe(grid, {childList:true, subtree:true, attributes:true, attributeFilter:['title']});
+    }
+  }catch(_){}
+})();
+</script>
+
+
+<!-- === Registros recientes (modal) === -->
+<dialog id="logsDlg">
+  <div class="modal" style="max-width:960px">
+    <header style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <h2 style="margin:0">Registros recientes</h2>
+      <div class="right"><button id="logsClose" class="close-btn" onclick="document.getElementById('logsDlg').close()">Cerrar</button></div>
+    </header>
+    
+  <div id="logsStats" style="display:grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap:10px; padding:6px 2px 8px 2px"></div>
+      <div id="logsControls" style="display:flex; gap:10px; align-items:center; padding:6px 2px 10px 2px">
+    <input id="logsSearch" type="search" placeholder="Buscar (nombre o título)..." 
+           style="flex:1; padding:8px 10px; border:1px solid #e5e7eb; border-radius:10px; font-size:14px">
+    <select id="logsEstado" style="padding:8px 10px; border:1px solid #e5e7eb; border-radius:10px; font-size:14px">
+      <option value="">Todos</option>
+      <option value="En préstamo">En préstamo</option>
+      <option value="Devuelto">Devuelto</option>
+    </select>
+    <span id="logsCount" style="font-size:13px; color:#64748b; white-space:nowrap">0 resultados</span>
+  </div>
+
+      <div id="logsWrap" class="kv full" style="overflow:auto; max-height:65vh; padding:0;">
+      <table id="logsTable" style="width:100%; border-collapse:collapse; font-size:14px">
+        <thead style="position:sticky; top:0; background:#f8fafc; border-bottom:1px solid #e5e7eb">
+          <tr>
+            <th style="text-align:left; padding:10px">Fecha préstamo</th>
+            <th style="text-align:left; padding:10px">Fecha devolución</th>
+            <th style="text-align:left; padding:10px">Nombre</th>
+            <th style="text-align:left; padding:10px">Grado</th>
+            <th style="text-align:left; padding:10px">Rol</th>
+            <th style="text-align:left; padding:10px">Título</th>
+            <th style="text-align:left; padding:10px">Estado</th>
+            <!-- Eliminado: columna Timestamp -->
+          </tr>
+        </thead>
+        <tbody id="logsBody">
+          <tr><td style="padding:12px" colspan="7">Cargando…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</dialog>
+
+
+<script>
+// === Registros: forzar openLogs y usar GViz por GID con parser robusto ===
+(function(){
+  const LOANS_GID = '1311459646'; // pestaña Prestamos
+
+  function parseGVizRobusto(txt){
+    const start = txt.indexOf('{'); const end = txt.lastIndexOf('}');
+    if (start === -1 || end === -1) throw new Error('Respuesta GViz inesperada');
+    const json = JSON.parse(txt.slice(start, end + 1));
+    const cols = json.table.cols.map(c => (c.label || '').trim());
+    const rows = json.table.rows.map(r =>
+      r.c.map(cell => {
+        if (!cell) return '';
+        if (cell.f != null) return String(cell.f);
+        return cell.v != null ? String(cell.v) : '';
+      })
+    );
+    return { cols, rows };
+  }
+
+  function idx(cols, name){ const t = name.toLowerCase().trim(); return cols.findIndex(c => (c||'').toLowerCase().trim() === t); }
+  function parseLoansRow(cols, row){
+    const get = (name)=>{ const i = idx(cols, name); return i>=0 ? (row[i] ?? '') : ''; };
+    return {
+      fechaPrestamo   : get('FECHA DE PRESTAMO'),
+      fechaDevolucion : get('FECHA DEVOLUCIÓN'),
+      nombre          : get('NOMBRE'),
+      grado           : get('GRADO'),
+      rol             : get('ROL'),
+      titulo          : get('TITULO'),
+      estado          : get('Estado'),
+      ts              : get('Timestamp'),
+    };
+  }
+
+  // Formatea 'Date(YYYY,MM,DD[,hh,mm,ss])' o ISO 'YYYY-MM-DD' a 'Septiembre 2 de 2025'
+  function formatGvizDate(str){
+    str = String(str||'').trim();
+    let m = str.match(/^Date\((\d{4}),\s*(\d{1,2}),\s*(\d{1,2})(?:,\s*(\d{1,2}),\s*(\d{1,2}),\s*(\d{1,2}))?\)$/i);
+    if(m){
+      const y=+m[1], mo=+m[2], d=+m[3];
+      const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      return `${meses[mo]||''} ${d} de ${y}`;
+    }
+    m = str.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/);
+    if(m){
+      const y=+m[1], mo=+m[2]-1, d=+m[3];
+      const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      return `${meses[mo]||''} ${d} de ${y}`;
+    }
+    return str;
+  }
+
+  async function loadRecentLogs(limit = 30){
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${LOANS_GID}&t=${Date.now()}`;
+    const res = await fetch(url, { cache: 'no-store' });
+    const txt = await res.text();
+    const parse = (typeof parseGViz === 'function') ? (t=>{const p=parseGViz(t); return {cols:p.cols, rows:p.rows};}) : parseGVizRobusto;
+    const data = parse(txt);
+    // Normaliza a arrays de strings si viene del parseGViz original
+    const cols = data.cols.map(c => (c||'').trim());
+    const rows = data.rows.map(r => Array.isArray(r) ? r : (r.c || []).map(c => c ? (c.f ?? c.v ?? '') : ''));
+    const items = rows.map(r => parseLoansRow(cols, r)).filter(x => x.titulo);
+    // Ordena los elementos por la fecha de préstamo de manera descendente.
+    // Se analiza el valor de la fecha en distintos formatos (Date(YYYY,MM,DD), ISO, DD/MM/YYYY).
+    function __cthDateValue(str){
+      const s = String(str || '').trim();
+      let m;
+      // Formato GViz "Date(YYYY,MM,DD[,hh,mm,ss])"
+      m = s.match(/^Date\((\d{4}),\s*(\d{1,2}),\s*(\d{1,2})/i);
+      if (m) {
+        return new Date(Number(m[1]), Number(m[2]), Number(m[3])).getTime();
+      }
+      // Formato ISO "YYYY-MM-DD" o "YYYY/MM/DD"
+      m = s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/);
+      if (m) {
+        return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])).getTime();
+      }
+      // Formato "DD/MM/YYYY"
+      m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if (m) {
+        return new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1])).getTime();
+      }
+      return 0;
+    }
+    items.sort((a,b) => __cthDateValue(b.fechaPrestamo) - __cthDateValue(a.fechaPrestamo));
+    try{ items.forEach(it => { it.fechaPrestamo = formatGvizDate(it.fechaPrestamo); it.fechaDevolucion = formatGvizDate(it.fechaDevolucion); }); }catch(_){}
+    return items.slice(0, limit);
+  }
+
+  // Define/Reemplaza openLogs global sin tocar el resto del sitio
+  window.openLogs = async function(){
+    if(!window.isUnlocked){
+      if(typeof uiAlert === 'function'){ return uiAlert('Necesita PIN', 'Primero desbloquea con el PIN.'); }
+      return;
+    }
+    const dlg = document.getElementById('logsDlg');
+    const tbody = document.getElementById('logsBody');
+    if(!dlg || !tbody){ console.warn('[logs] Falta el dialog'); return; }
+    try{ dlg.showModal(); }catch(_){ dlg.setAttribute('open',''); dlg.style.display='block'; }
+    tbody.innerHTML = '<tr><td style="padding:12px" colspan="7">Cargando…</td></tr>';
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${LOANS_GID}&t=${Date.now()}`;
+    try{
+      // Pedimos un número alto de registros para abarcar todo el historial de préstamos
+      const items = await loadRecentLogs(500);
+      if(!items.length){
+        tbody.innerHTML = '<tr><td style="padding:12px" colspan="7">No hay registros o la hoja está vacía.</td></tr>';
+        return;
+      }
+      // Construye las filas sin la columna de timestamp
+      tbody.innerHTML = items.map(it => `
+        <tr style="border-bottom:1px solid #eef2f7">
+          <td style="padding:8px 10px">${it.fechaPrestamo||''}</td>
+          <td style="padding:8px 10px">${it.fechaDevolucion||''}</td>
+          <td style="padding:8px 10px">${it.nombre||''}</td>
+          <td style="padding:8px 10px">${it.grado||''}</td>
+          <td style="padding:8px 10px">${it.rol||''}</td>
+          <td style="padding:8px 10px">${it.titulo||''}</td>
+          <td style="padding:8px 10px">${it.estado ? `<span style=\"font-weight:bold;color:${/en préstamo/i.test(it.estado)?'#dc2626':'#16a34a'}\">${it.estado}</span>` : ''}</td>
+        </tr>`).join('');
+    }catch(e){
+      console.error('[logs] Error cargando', e);
+      tbody.innerHTML = '<tr><td style="padding:12px" colspan="7">⚠️ Error cargando registros. '
+        + 'Prueba la URL: <a href="'+url+'" target="_blank" rel="noopener">GViz Prestamos</a></td></tr>';
+    }
+  };
+
+  // Enlaza el botón sin interferir con tus otros scripts
+  (function bindBtn(){
+    const btn = document.getElementById('logsBtn');
+    if(btn && !btn.__logsBoundForce){
+      btn.addEventListener('click', window.openLogs);
+      btn.__logsBoundForce = true;
+    }
+  })();
+})();
+</script>
+
+
+<script>
+// === Parche: detectar desbloqueo desde la UI si isUnlocked no es global ===
+(function(){
+  function isUnlockedNow(){
+    try{
+      if (typeof window.isUnlocked !== 'undefined' && window.isUnlocked === true) return true;
+      const btn = document.getElementById('unlock');
+      const txt = (btn?.innerText || btn?.textContent || '').toLowerCase();
+      if (btn) {
+        if (btn.classList.contains('unlocked') || btn.classList.contains('is-unlocked')) return true;
+        if (txt.includes('desbloqueado')) return true;
+      }
+      if (window.app && app.state && (app.state.unlocked === true || app.state.isUnlocked === true)) return true;
+    }catch(_){}
+    return false;
+  }
+  window.__isUnlockedNow = isUnlockedNow;
+
+  const __open = window.openLogs;
+  window.openLogs = async function(){
+    if (!window.__isUnlockedNow()) {
+      if (typeof uiAlert === 'function') return uiAlert('Necesita PIN', 'Primero desbloquea con el PIN.');
+      return;
+    }
+    return __open && __open.apply(this, arguments);
+  };
+
+  function __syncUnlockedFlag(){
+    try{ if (isUnlockedNow()) window.isUnlocked = true; }catch(_){}
+  }
+  __syncUnlockedFlag();
+  const unlockBtn = document.getElementById('unlock');
+  if (unlockBtn && !unlockBtn.__syncBound){
+    unlockBtn.addEventListener('click', ()=> setTimeout(__syncUnlockedFlag, 80));
+    unlockBtn.__syncBound = true;
+  }
+  if (!window.__syncUnlockedInterval){
+    window.__syncUnlockedInterval = setInterval(__syncUnlockedFlag, 1500);
+  }
+})();
+</script>
+
+
+<script>
+// === Controles de búsqueda/filtro y "Ver más" para Registros ===
+(function(){
+  let __allLogs = [];
+  let __page = 1;
+  // Tamaño de página ajustado para mostrar hasta 1000 registros en una sola vista
+  const PAGE_SIZE = 1000;
+
+  function getControls(){
+    return {
+      search: document.getElementById('logsSearch'),
+      estado: document.getElementById('logsEstado'),
+      count:  document.getElementById('logsCount'),
+      body:   document.getElementById('logsBody'),
+      wrap:   document.getElementById('logsWrap'),
+    };
+  }
+
+  function normalize(s){ return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+
+  function applyFilters(){
+    const {search, estado} = getControls();
+    const q = normalize(search?.value||'');
+    const est = (estado?.value||'').trim();
+    let items = __allLogs.slice();
+    if(q){
+      items = items.filter(x => normalize(x.nombre).includes(q) || normalize(x.titulo).includes(q));
+    }
+    if(est){
+      items = items.filter(x => (x.estado||'').trim().toLowerCase() === est.toLowerCase());
+    }
+    return items;
+  }
+
+  function render(items){
+    const {body, count} = getControls();
+    if(!body) return;
+    if(!items.length){
+      body.innerHTML = '<tr><td style="padding:12px" colspan="7">No se encontraron registros.</td></tr>';
+      if(count) count.textContent = '0 resultados';
+      return;
+    }
+    // Calcula la paginación: número total de páginas y rango a mostrar
+    const totalPages = Math.ceil(items.length / PAGE_SIZE) || 1;
+    const start = (__page - 1) * PAGE_SIZE;
+    const end = Math.min(items.length, __page * PAGE_SIZE);
+    const slice = items.slice(start, end);
+    // Construye el cuerpo con las filas visibles
+    body.innerHTML = slice.map(it => `
+      <tr style="border-bottom:1px solid #eef2f7">
+        <td style="padding:8px 10px">${it.fechaPrestamo||''}</td>
+        <td style="padding:8px 10px">${it.fechaDevolucion||''}</td>
+        <td style="padding:8px 10px">${it.nombre||''}</td>
+        <td style="padding:8px 10px">${it.grado||''}</td>
+        <td style="padding:8px 10px">${it.rol||''}</td>
+        <td style="padding:8px 10px">${it.titulo||''}</td>
+        <td style="padding:8px 10px">${it.estado ? `<span style=\\\"font-weight:bold;color:${/en préstamo/i.test(it.estado)?'#dc2626':'#16a34a'}\\\">${it.estado}</span>` : ''}</td>
+      </tr>`).join('');
+    // Agrega una barra de navegación para paginación al final de la tabla
+    if(items.length > 0){
+      body.innerHTML += `
+      <tr><td colspan="7" style="padding:14px 10px;">
+        <div style="display:flex;justify-content:center;align-items:center;gap:12px;">
+          <button id="logsPrev" style="padding:8px 16px; border:1px solid #e5e7eb; border-radius:10px; background:#fff; cursor:pointer; ${__page===1?'opacity:0.5;cursor:not-allowed':''}">Anterior</button>
+          <span style="font-weight:500;color:#334155">${__page} de ${totalPages}</span>
+          <button id="logsNext" style="padding:8px 16px; border:1px solid #e5e7eb; border-radius:10px; background:#fff; cursor:pointer; ${__page===totalPages?'opacity:0.5;cursor:not-allowed':''}">Siguiente</button>
+        </div>
+      </td></tr>`;
+    }
+    // Actualiza el texto de resultados filtrados
+    if(count) count.textContent = `${items.length} resultado${items.length!==1?'s':''}`;
+    // Configura los botones de anterior y siguiente para cambiar de página
+    const prev = document.getElementById('logsPrev');
+    const nextBtn = document.getElementById('logsNext');
+    if(prev){
+      prev.onclick = () => {
+        if(__page > 1){
+          __page--;
+          render(items);
+        }
+      };
+    }
+    if(nextBtn){
+      nextBtn.onclick = () => {
+        if(__page < totalPages){
+          __page++;
+          render(items);
+        }
+      };
+    }
+  }
+
+  // Hookear a la openLogs existente para poblar __allLogs y activar filtros
+  const __origOpen = window.openLogs;
+  window.openLogs = async function(){
+    const r = await __origOpen.apply(this, arguments);
+    // Espera a que el tbody esté en el DOM
+    const {body, search, estado} = getControls();
+    if(!body) return r;
+
+    // Si ya renderizamos, no repetimos
+    if(body.__logsEnh) return r;
+    body.__logsEnh = true;
+
+    // Intercepta la carga: cuando se llene por primera vez, capturamos items del DOM o recargamos por función
+    try{
+      // Si existe loadRecentLogs, usemos la misma función para obtener todos
+      if(typeof loadRecentLogs === 'function'){
+        const data = await (async ()=>{
+          try{ return await loadRecentLogs(500); }catch(e){ return []; }
+        })();
+        if(Array.isArray(data) && data.length){
+          __allLogs = data;
+          __page = 1;
+          const items = applyFilters();
+          render(items);
+        }
+      }
+    }catch(e){ /* silencioso */ }
+
+    // Listeners
+    if(search && !search.__bound){
+      if(!window.__debounce) window.__debounce=(fn,ms)=>{let t;return (...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);}};search.addEventListener('input', window.__debounce(()=>{ __page = 1; render(applyFilters()); },250));
+      search.__bound = true;
+    }
+    if(estado && !estado.__bound){
+      estado.addEventListener('change', ()=>{ __page = 1; render(applyFilters()); });
+      estado.__bound = true;
+    }
+    return r;
+  };
+})();
+</script>
+
+
+<script>
+// === Quitar selector "X por página" y dejar fijo en 12 ===
+(function(){
+  function removePerPage(){
+    try{
+      const selects = Array.from(document.querySelectorAll('select'));
+      const target = selects.find(sel => {
+        const texts = Array.from(sel.options || []).map(o => (o.textContent||'').trim().toLowerCase());
+        return texts.includes('12 por página') && texts.includes('24 por página') && texts.includes('48 por página');
+      });
+      if(target){
+        // Fija el tamaño de página en 12 para la lógica interna (mejor esfuerzo, sin romper)
+        try{
+          if(typeof setPageSize === 'function'){ setPageSize(12); }
+          else if(window.app && app.state){ app.state.perPage = 12; }
+          else if(typeof window.perPage !== 'undefined'){ window.perPage = 12; }
+        }catch(_){}
+        // Oculta el select para dar "respiro" visual
+        target.style.display = 'none';
+        // si hay un contenedor directo estilado, puedes ocultarlo también:
+        const parent = target.parentElement;
+        if(parent && parent.classList && parent.classList.contains('per-page')){
+          parent.style.display = 'none';
+        }
+      }
+    }catch(e){ console.warn('removePerPage error', e); }
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', removePerPage);
+  else removePerPage();
+})();
+</script>
+
+
+
+
+
+
+
+
+<script>
+// === Visibilidad de "Registros" robusta (con MutationObserver) ===
+(function(){
+  function isUnlockedNow(){
+    try{
+      if (typeof window.isUnlocked !== 'undefined') return !!window.isUnlocked;
+      if (typeof window.__isUnlockedNow === 'function') return !!window.__isUnlockedNow();
+      const btn = document.getElementById('unlock');
+      if (!btn) return false;
+      const txt = (btn.innerText || btn.textContent || '').toLowerCase();
+      if (btn.classList.contains('unlocked') || btn.classList.contains('is-unlocked')) return true;
+      if (txt.includes('desbloqueado')) return true;
+      return false;
+    }catch(_){ return false; }
+  }
+
+  function syncLogsVisibility(){
+    const logsBtn = document.getElementById('logsBtn');
+    if(!logsBtn) return;
+    logsBtn.style.display = isUnlockedNow() ? 'inline-flex' : 'none';
+  }
+
+  // Hookear updateLockUI si existe
+  (function hookUpdate() {
+    try{
+      const prev = window.updateLockUI;
+      window.updateLockUI = function(){
+        try{ if (typeof prev === 'function') prev(); }catch(_){}
+        syncLogsVisibility();
+      };
+    }catch(_){}
+  })();
+
+  // Observer para cambios de texto/atributos en el botón y para reemplazos de nodos
+  function observeUnlockBtn(){
+    const btn = document.getElementById('unlock');
+    if(!btn || btn.__logsObserver) return;
+    const obs = new MutationObserver(syncLogsVisibility);
+    obs.observe(btn, { attributes:true, childList:true, characterData:true, subtree:true });
+    btn.__logsObserver = obs;
+  }
+
+  // Observer global por si el botón se re-renderiza
+  const rootObs = new MutationObserver(function(muts){
+    for(const m of muts){
+      if (m.type === 'childList'){
+        if ([...m.addedNodes].some(n => n.id === 'unlock' || (n.querySelector && n.querySelector('#unlock')))){
+          observeUnlockBtn();
+          syncLogsVisibility();
+        }
+      }
+    }
+  });
+  rootObs.observe(document.documentElement || document.body, { childList:true, subtree:true });
+
+  // Eventos útiles
+  window.addEventListener('visibilitychange', syncLogsVisibility);
+  window.addEventListener('focus', syncLogsVisibility);
+
+  // Click en el botón desbloqueo (sirve para lock/unlock)
+  document.addEventListener('click', function(e){
+    const el = e.target.closest ? e.target.closest('#unlock') : null;
+    if (el) setTimeout(syncLogsVisibility, 120);
+  }, true);
+
+  // Inicial
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', ()=>{ observeUnlockBtn(); syncLogsVisibility(); });
+  }else{
+    observeUnlockBtn(); syncLogsVisibility();
+  }
+})();
+</script>
+
+
+<script>
+// === Visibilidad de "Registros" con sincronización agresiva de estado ===
+(function(){
+  function readUIUnlocked(){
+    try{
+      const btn = document.getElementById('unlock');
+      if(!btn) return null;
+      const txt = (btn.innerText || btn.textContent || '').toLowerCase().trim();
+      // Estados explícitos del botón
+      if (txt.includes('desbloqueado')) return true;      // verde
+      if (txt.includes('desbloquear')) return false;      // gris (bloqueado)
+      // Clases auxiliares
+      if (btn.classList.contains('unlocked') || btn.classList.contains('is-unlocked')) return true;
+      return null;
+    }catch(_){ return null; }
+  }
+
+  function isUnlockedNow(){
+    const fromUI = readUIUnlocked();
+    if(fromUI !== null){
+      // ¡Fuente de verdad!: fuerza la bandera global
+      window.isUnlocked = !!fromUI;
+      return fromUI;
+    }
+    // Fallbacks
+    if (typeof window.isUnlocked !== 'undefined') return !!window.isUnlocked;
+    if (typeof window.__isUnlockedNow === 'function') return !!window.__isUnlockedNow();
+    return false;
+  }
+
+  function syncLogsVisibility(){
+    const logsBtn = document.getElementById('logsBtn');
+    if(!logsBtn) return;
+    const unlocked = isUnlockedNow();
+    logsBtn.style.display = unlocked ? 'inline-flex' : 'none';
+  }
+
+  // Enlaza updateLockUI si existe (lo llamamos y luego sincronizamos)
+  (function hookUpdate() {
+    try{
+      const prev = window.updateLockUI;
+      if (!prev || !prev.__logsHooked){
+        const wrapped = function(){ try{ if (typeof prev === 'function') prev(); }catch(_){ } syncLogsVisibility(); };
+        wrapped.__logsHooked = true;
+        window.updateLockUI = wrapped;
+      }
+    }catch(_){}
+  })();
+
+  // Observa cambios en el botón (texto/clases) y reemplazos del DOM
+  function observeUnlockBtn(){
+    const btn = document.getElementById('unlock');
+    if(!btn || btn.__logsObserver) return;
+    const obs = new MutationObserver(function(){ setTimeout(syncLogsVisibility, 20); });
+    obs.observe(btn, { attributes:true, childList:true, characterData:true, subtree:true });
+    btn.__logsObserver = obs;
+  }
+
+  const rootObs = new MutationObserver(function(muts){
+    for(const m of muts){
+      if (m.type === 'childList'){
+        if ([...m.addedNodes].some(n => n.id === 'unlock' || (n.querySelector && n.querySelector('#unlock')))){
+          observeUnlockBtn();
+          syncLogsVisibility();
+        }
+      }
+    }
+  });
+  rootObs.observe(document.documentElement || document.body, { childList:true, subtree:true });
+
+  // Eventos útiles
+  window.addEventListener('visibilitychange', syncLogsVisibility);
+  window.addEventListener('focus', syncLogsVisibility);
+  document.addEventListener('click', function(e){
+    const el = e.target.closest ? e.target.closest('#unlock') : null;
+    if (el) setTimeout(syncLogsVisibility, 60);
+  }, true);
+
+  // Intervalo de sincronización más frecuente (por si el texto cambia asíncronamente)
+  if (!window.__logsAggressiveInterval){
+    window.__logsAggressiveInterval = setInterval(syncLogsVisibility, 400);
+  }
+
+  // Inicial
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', ()=>{ observeUnlockBtn(); syncLogsVisibility(); });
+  }else{
+    observeUnlockBtn(); syncLogsVisibility();
+  }
+})();
+</script>
+
+
+
+<script>
+// === Dashboard de estadísticas para Registros (v2 con fallback DOM) ===
+(function(){
+  function statCard(label, value, sub){
+    return `<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;padding:10px 12px">
+      <div style="font-size:12px;color:#64748b">${label}</div>
+      <div style="font-size:20px;font-weight:700;margin-top:2px">${value}</div>
+      ${sub?`<div style="font-size:12px;color:#94a3b8;margin-top:2px">${sub}</div>`:''}
+    </div>`;
+  }
+  
+  
+  function listCard(label, items){
+    const medal = '🏅';
+    const lis = items.slice(0,5).map(([k,v]) => `
+      <li style="display:grid;grid-template-columns:1fr auto;align-items:start;gap:8px;margin:0 0 6px 0">
+        <span style="white-space:normal;overflow:visible;word-break:break-word;line-height:1.25">${medal} ${k}</span>
+        <strong style="justify-self:end; font-variant-numeric: tabular-nums; min-width:2ch; text-align:right">${v}</strong>
+      </li>
+    `).join('') || '<li style="color:#94a3b8">Sin datos</li>';
+    return `<div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;padding:8px 10px">
+      <div style="font-size:12px;color:#64748b;margin-bottom:6px">${label}</div>
+      <ol style="margin:0;padding-left:0;list-style-position:inside">${lis}</ol>
+    </div>`;
+  }
+  function normalize(s){ return (s||'').toString().trim(); }
+  function computeStats(arr){
+    const total = arr.length;
+    let prestamo = 0, devuelto = 0;
+    const byTitulo = Object.create(null);
+    const byNombre = Object.create(null);
+    for(const it of arr){
+      // Normaliza el estado a minúsculas y sin tildes para contar correctamente
+      let estado = normalize(it.estado).toLowerCase();
+      try{
+        estado = estado.normalize('NFD').replace(/[̀-ͯ]/g,'');
+      }catch(_){ /* soporta navegadores antiguos */ }
+      if(estado === 'en prestamo') prestamo++;
+      else if(estado === 'devuelto') devuelto++;
+      const t = normalize(it.titulo);
+      if(t) byTitulo[t] = (byTitulo[t]||0)+1;
+      const n = normalize(it.nombre);
+      if(n) byNombre[n] = (byNombre[n]||0)+1;
+    }
+    const sortPairs = obj => Object.entries(obj).sort((a,b)=> b[1]-a[1]);
+    return { total, prestamo, devuelto, topTitulos: sortPairs(byTitulo), topUsuarios: sortPairs(byNombre) };
+  }
+  function renderStats(all, filtered){
+  const host = document.getElementById('logsStats');
+  if(!host) return;
+  const A = computeStats(all||[]);
+  const topRow = [
+    statCard('Registros (totales)', A.total),
+    statCard('En préstamo (totales)', A.prestamo),
+    statCard('Devueltos (totales)', A.devuelto)
+  ].join('');
+
+  const bottomRow = [
+    listCard('Top usuarios (totales)', A.topUsuarios),
+    listCard('Top títulos (totales)', A.topTitulos)
+  ].join('');
+
+  host.innerHTML = `
+    <div class="stats-top" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:8px">
+      ${topRow}
+    </div>
+    <div class="stats-bottom" style="display:grid;grid-template-columns:repeat(2,minmax(220px,1.2fr));gap:10px">
+      ${bottomRow}
+    </div>`;
+}
+  function domRowsToArray(){
+    const tbody = document.getElementById('logsBody');
+    if(!tbody) return [];
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    return rows.map(tr => {
+      const tds = tr.querySelectorAll('td');
+      // Con siete columnas visibles (sin timestamp), ignoramos filas incompletas
+      if(tds.length < 7) return null;
+      return {
+        fechaPrestamo  : tds[0].textContent.trim(),
+        fechaDevolucion: tds[1].textContent.trim(),
+        nombre         : tds[2].textContent.trim(),
+        grado          : tds[3].textContent.trim(),
+        rol            : tds[4].textContent.trim(),
+        titulo         : tds[5].textContent.trim(),
+        estado         : tds[6].textContent.trim(),
+      };
+    }).filter(Boolean);
+  }
+  (function hookFilters(){
+    const prevOpen = window.openLogs;
+    window.openLogs = async function(){
+      const r = await prevOpen.apply(this, arguments);
+      const doInit = async () => {
+        let data = window.__allLogs && Array.isArray(window.__allLogs) ? window.__allLogs : [];
+        if (!data.length && typeof loadRecentLogs === 'function') {
+          try { data = await loadRecentLogs(500); } catch(_){}
+        }
+        if (!data.length) {
+          data = domRowsToArray();
+        }
+        window.__allLogs = Array.isArray(data) ? data : [];
+        renderStats(window.__allLogs, window.__allLogs);
+      };
+      setTimeout(doInit, 120);
+      return r;
+    };
+    window.__renderLogsStats = function(filtered){
+      const all = window.__allLogs || domRowsToArray();
+      renderStats(all, Array.isArray(filtered) && filtered.length ? filtered : all);
+    };
+    const tbody = document.getElementById('logsBody');
+    if (tbody && !tbody.__statsObserver){
+      const obs = new MutationObserver(()=>{
+        const filtered = domRowsToArray();
+        window.__renderLogsStats(filtered);
+      });
+      obs.observe(tbody, { childList: true, subtree: false });
+      tbody.__statsObserver = obs;
+    }
+  })();
+})();
+</script>
+
+
+
+<style>
+/* ========= Estética del dashboard de Registros (sólo CSS, sin romper estructura) ========= */
+
+/* Modal: caja más limpia y respirada */
+#logsDlg .modal{
+  border-radius:20px !important;
+  box-shadow:0 40px 90px rgba(2,8,23,.25) !important;
+  background:#ffffff !important;
+  border:1px solid #e5e7eb !important;
+}
+#logsDlg header{ position:relative; }
+#logsDlg header h2{
+  font-size:26px;
+  line-height:1.1;
+  font-weight:900;
+  margin:0;
+  color:#0f172a;
+}
+#logsDlg .right .close-btn{
+  border-radius:12px;
+  background:#0ea5e9;
+  border-color:#0ea5e9;
+  color:#fff;
+  font-weight:800;
+}
+#logsDlg .right .close-btn:hover{ filter:brightness(.96); }
+
+/* KPI cards: look de tarjeta consistente (sobrescribe inline con !important) */
+#logsDlg #logsStats > div{
+  background:#f8fafc !important;
+  border:1px solid #e5e7eb !important;
+  border-radius:14px !important;
+  padding:12px 14px !important;
+  box-shadow:0 8px 24px rgba(2,8,23,.06) !important;
+}
+
+/* Controles de búsqueda/filtro */
+#logsDlg #logsControls{
+  background:#ffffff;
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+  padding:10px;
+  box-shadow:0 8px 24px rgba(2,8,23,.06);
+  position:relative;
+}
+#logsDlg #logsControls input[type="search"],
+#logsDlg #logsControls select{
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  padding:10px 12px;
+  outline:none;
+  box-shadow:0 6px 18px rgba(2,8,23,.05);
+  font-size:14px;
+}
+#logsDlg #logsControls input[type="search"]:focus,
+#logsDlg #logsControls select:focus{
+  border-color:#0ea5e9;
+  box-shadow:0 0 0 4px rgba(14,165,233,.25);
+}
+
+/* Chip de resultados: se “sube” visualmente al header sin mover el HTML */
+#logsDlg #logsCount{
+  position:absolute;
+  top:-52px; /* lo posiciona visualmente dentro del header */
+  right:0;
+  background:#111827;
+  color:#fff;
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.2px;
+  box-shadow:0 10px 20px rgba(2,8,23,.18);
+  border:1px solid #0b0f1a;
+  white-space:nowrap;
+}
+
+/* Wrap de tabla: contenedor con bordes y scroll suave */
+#logsDlg #logsWrap{
+  border-radius:14px !important;
+  border:1px solid #e5e7eb;
+  background:#fff;
+  box-shadow:0 10px 30px rgba(2,8,23,.06);
+}
+
+/* Tabla: sticky header + zebra + hover + celdas respiradas */
+#logsDlg #logsTable{
+  border-collapse:separate !important;
+  border-spacing:0;
+  width:100%;
+  font-size:14px;
+}
+#logsDlg #logsTable thead tr th{
+  position:sticky;
+  top:0;
+  background:#f8fafc !important;
+  border-bottom:1px solid #e5e7eb !important;
+  padding:12px 12px !important;
+  color:#475569;
+  font-weight:800;
+  z-index:1;
+}
+#logsDlg #logsTable tbody tr{
+  transition: background .12s ease, transform .06s ease;
+}
+#logsDlg #logsTable tbody tr:nth-child(even){
+  background:#fafafa;
+}
+#logsDlg #logsTable tbody tr:hover{
+  background:#eef6ff;
+}
+#logsDlg #logsTable tbody td{
+  padding:12px 12px !important;
+  border-bottom:1px solid #eef2f7;
+  color:#0f172a;
+  vertical-align:top;
+}
+
+/* Bordes redondeados a la primera/última fila visibles */
+#logsDlg #logsTable thead tr th:first-child{ border-top-left-radius:12px; }
+#logsDlg #logsTable thead tr th:last-child{ border-top-right-radius:12px; }
+#logsDlg #logsTable tbody tr:last-child td:first-child{ border-bottom-left-radius:12px; }
+#logsDlg #logsTable tbody tr:last-child td:last-child{ border-bottom-right-radius:12px; }
+
+/* Columna “Estado”: tipografía y colores sutiles (sin tocar HTML) */
+#logsDlg #logsTable tbody td:nth-child(7){
+  font-weight:800;
+  letter-spacing:.2px;
+}
+/* Fallback neutro */
+#logsDlg #logsTable tbody td:nth-child(7){ color:#111827; }
+
+/* Eliminada la regla de estilo para la columna de timestamp que ya no existe */
+
+/* Botón “Ver más” */
+#logsDlg #logsBody #logsMore{
+  border:1px solid #e5e7eb;
+  background:#fff;
+  border-radius:10px;
+  padding:10px 14px;
+  cursor:pointer;
+  box-shadow:0 6px 18px rgba(2,8,23,.05);
+}
+#logsDlg #logsBody #logsMore:hover{ background:#f8fafc; }
+
+/* Responsive: que todo respire en pantallas pequeñas */
+@media (max-width: 720px){
+  #logsDlg .modal{ padding:14px !important; }
+  #logsDlg #logsControls{ flex-wrap:wrap; }
+  #logsDlg #logsControls #logsCount{ position:static; margin-left:auto; }
+}
+
+/* Dark-mode styles fully removed */
+</style>
+
+
+<script id="clear-unified-js">
+(function(){
+  function toggleBtn(btn, show){ if(!btn) return; btn.classList.toggle('show', !!show); }
+  function get(el){ return document.getElementById(el); }
+
+  function bindSearch(){
+    var q = get('q'), btn = get('clearQ');
+    if(!q || !btn || q.__clearBound) return;
+    var sync = function(){ toggleBtn(btn, q.value && q.value.trim().length>0); };
+    q.addEventListener('input', sync);
+    q.addEventListener('change', sync);
+    btn.addEventListener('click', function(){
+      q.value='';
+      if(typeof state!=='undefined'){ state.q=''; state.page=1; }
+      if(typeof render==='function') render();
+      sync(); q.focus();
+    });
+    q.__clearBound = true; sync();
+  }
+
+  function bindSelect(idSelect, idBtn, defaultLabel, stateKey){
+    var el = get(idSelect), btn = get(idBtn);
+    if(!el || !btn || el['__bound_'+stateKey]) return;
+    var sync = function(){
+      var val = (typeof state!=='undefined' && state[stateKey]!=null) ? state[stateKey] : el.value;
+      toggleBtn(btn, !!(val && val !== defaultLabel));
+    };
+    ['input','change'].forEach(function(evt){
+      el.addEventListener(evt, function(e){
+        if(typeof state!=='undefined'){ state[stateKey] = e.target.value || defaultLabel; state.page = 1; }
+        if(typeof render==='function') render();
+        sync();
+      });
+    });
+    btn.addEventListener('click', function(){
+      if(typeof state!=='undefined'){ state[stateKey] = defaultLabel; state.page = 1; }
+      if(el.tagName==='SELECT'){ el.selectedIndex = 0; el.dispatchEvent(new Event('change')); }
+      else { el.value=''; el.dispatchEvent(new Event('input')); }
+      if(typeof render==='function') render();
+      sync(); el.focus();
+    });
+    el['__bound_'+stateKey] = true; sync();
+  }
+
+  function bindAll(){
+    try{ bindSearch(); }catch(_){}
+    try{ if(get('cat') && get('clearCat')) bindSelect('cat','clearCat','Categoría','cat'); }catch(_){}
+    try{ if(get('aut') && get('clearAut')) bindSelect('aut','clearAut','Autor','aut'); }catch(_){}
+  }
+
+  if(document.readyState!=='loading') bindAll();
+  else document.addEventListener('DOMContentLoaded', bindAll);
+
+  var oldBoot = (typeof boot==='function') ? boot : null;
+  if(oldBoot){
+    window.boot = function(){ try{ oldBoot(); } finally { bindAll(); } };
+  }
+  var mo = new MutationObserver(function(){ bindAll(); });
+  mo.observe(document.documentElement, {subtree:true, childList:true});
+})();
+</script>
+
+
+<!-- ====== Estado column filter (surgical, non-invasive) ====== -->
+<script id="estadoFilterHook">
+(function(){
+  function norm(s){
+    try{
+      return (s||'').toString().toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    }catch(_){
+      return (s||'').toString().toLowerCase();
+    }
+  }
+  function findEstadoIndex(tbl){
+    if(!tbl || !tbl.tHead || !tbl.tHead.rows.length) return -1;
+    var ths = tbl.tHead.rows[0].cells;
+    for(var i=0;i<ths.length;i++){
+      if(norm(ths[i].textContent).indexOf('estado')!==-1) return i;
+    }
+    return -1;
+  }
+  function applyFilter(mode){
+    var dlg = document.getElementById('logsDlg');
+    var tbl = document.getElementById('logsTable');
+    var tbody = document.getElementById('logsBody');
+    if(!tbl || !tbody) return;
+    var idx = findEstadoIndex(tbl);
+    if(idx<0) return;
+    var shown = 0, total = 0;
+    Array.prototype.forEach.call(tbody.rows, function(tr){
+      if(!tr || !tr.cells || !tr.cells.length) return;
+      // skip "Cargando…" / "No hay registros" rows (no estado cell)
+      var hasStateCell = !!tr.cells[idx];
+      if(!hasStateCell) return;
+      total++;
+      var txt = norm(tr.cells[idx].textContent||'');
+      var keep = true;
+      if(mode==='prestamo') keep = /en prestamo/.test(txt);
+      else if(mode==='devuelto') keep = /devuelto/.test(txt);
+      tr.style.display = keep ? '' : 'none';
+      if(keep) shown++;
+    });
+    // Sync dropdown if present
+    var sel = document.getElementById('logsEstado');
+    if(sel){
+      var target = mode==='prestamo' ? 'En préstamo' : (mode==='devuelto' ? 'Devuelto' : '');
+      if(sel.value !== target) sel.value = target;
+    }
+    // Update count chip, if present
+    var countEl = document.getElementById('logsCount');
+    if(countEl){
+      var labelCount = (mode ? shown : total);
+      countEl.textContent = labelCount + ' resultados';
+    }
+    if(dlg) dlg.dataset.estadoFilter = mode || '';
+  }
+  function bind(){
+    var tbl = document.getElementById('logsTable');
+    var dlg = document.getElementById('logsDlg');
+    if(!tbl || tbl.__estadoBound) return;
+    var idx = findEstadoIndex(tbl);
+    if(idx<0) return;
+    var th = tbl.tHead.rows[0].cells[idx];
+    if(th){
+      th.style.cursor = 'pointer';
+      th.title = 'Filtrar por Estado (clic para alternar: En préstamo → Devuelto → Todos)';
+      th.addEventListener('click', function(){
+        var current = (dlg && dlg.dataset.estadoFilter) || '';
+        var next = current === '' ? 'prestamo' : (current === 'prestamo' ? 'devuelto' : '');
+        applyFilter(next);
+      });
+    }
+    var sel = document.getElementById('logsEstado');
+    if(sel && !sel.__estadoSelBound){
+      sel.addEventListener('change', function(){
+        var v = this.value;
+        applyFilter(v==='En préstamo' ? 'prestamo' : (v==='Devuelto' ? 'devuelto' : ''));
+      });
+      sel.__estadoSelBound = true;
+    }
+    tbl.__estadoBound = true;
+    // If a default value exists in dropdown, honor it
+    if(sel && sel.value){
+      var v = sel.value;
+      applyFilter(v==='En préstamo' ? 'prestamo' : (v==='Devuelto' ? 'devuelto' : ''));
+    }
+  }
+  // Hook into openLogs if exists, to bind right after rendering
+  try{
+    var prev = window.openLogs;
+    if(typeof prev === 'function'){
+      window.openLogs = async function(){
+        var res = await prev.apply(this, arguments);
+        setTimeout(bind, 0);
+        return res;
+      };
+    }
+  }catch(_){}
+  // Also try to bind now (in case modal is already in DOM)
+  if(document.getElementById('logsDlg')) setTimeout(bind, 0);
+  // Observe mutations to re-bind once the table is rendered/updated
+  try{
+    var mo = new MutationObserver(function(){ bind(); });
+    mo.observe(document.documentElement, {subtree:true, childList:true});
+  }catch(_){}
+})();
+</script>
+
+
+<!-- == CTH Clean Print Start == -->
+<script id="cthCleanPrint">
+(function(){
+  function $(s,root){ return (root||document).querySelector(s); }
+  function norm(s){
+    try{ return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+    catch(_){ return (s||'').toString().toLowerCase(); }
+  }
+  function getHeadInfo(){
+    var headRow = document.querySelector('#logsTable thead tr');
+    var heads = Array.prototype.slice.call((headRow||{}).cells||[]).map(function(th){ return (th.textContent||'').trim(); });
+    var idxEstado = heads.findIndex(function(h){ return norm(h).indexOf('estado')===0; });
+    var idxTimestamp = heads.findIndex(function(h){ return norm(h).indexOf('timestamp')===0; });
+    return {heads, idxEstado, idxTimestamp};
+  }
+  function getAllRows(){
+    var tbody = document.getElementById('logsBody');
+    return Array.prototype.slice.call((tbody||{}).rows||[]);
+  }
+  function isRowVisibleNow(tr){
+    // visible si el display real no es none (ignorando nuestra futura impresión)
+    return window.getComputedStyle(tr).display !== 'none';
+  }
+  function rowsToArrays(rows, idxTimestamp){
+    return rows.map(function(tr){
+      var tds = Array.prototype.slice.call(tr.cells||[]);
+      var vals = tds.map(function(td){ return (td.textContent||'').replace(/\s+\n/g,' ').replace(/\s{2,}/g,' ').trim(); });
+      if(idxTimestamp>=0 && idxTimestamp < vals.length) vals.splice(idxTimestamp,1);
+      return vals;
+    });
+  }
+  
+  function pickRowsByMode(mode, respectView){
+    var info = getHeadInfo();
+
+    // If we are not restricted to the current view and we have the
+    // full dataset in memory (window.__allLogs), prefer that so that
+    // printing "todos / en préstamo / devueltos" abarque TODOS los registros,
+    // no solo la página actual del DOM.
+    try{
+      if(!respectView && Array.isArray(window.__allLogs) && window.__allLogs.length){
+        var full = window.__allLogs.slice();
+        var normalized = function(s){
+          try{ return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+          catch(_){ return (s||'').toString().toLowerCase(); }
+        };
+        var rows = full.filter(function(it){
+          if(mode==='prestamo'){
+            return normalized(it.estado||'').indexOf('en prestamo')>-1;
+          }else if(mode==='devuelto'){
+            return normalized(it.estado||'').indexOf('devuelto')>-1;
+          }
+          return true;
+        }).map(function(it){
+          // Ensure column order matches table headers (sin Timestamp):
+          return [
+            it.fechaPrestamo || '',
+            it.fechaDevolucion || '',
+            it.nombre || '',
+            it.grado || '',
+            it.rol || '',
+            it.titulo || '',
+            it.estado || ''
+          ];
+        });
+        return { headings: info.heads.filter(function(h,i){ return i!==info.idxTimestamp; }), rows: rows };
+      }
+    }catch(_){ /* fallback below */ }
+
+    // Fallback: use rows currently present in the DOM
+    var rows = getAllRows();
+    var chosen = [];
+    rows.forEach(function(tr){
+      if(!tr || !tr.cells || !tr.cells.length) return;
+      if(respectView && !isRowVisibleNow(tr)) return; // solo vista actual
+      if(mode==='prestamo' || mode==='devuelto'){
+        var estCell = (info.idxEstado>=0 && tr.cells[info.idxEstado]) ? (tr.cells[info.idxEstado].textContent||'') : '';
+        var est = norm(estCell);
+        var isPrest = est.indexOf('en prestamo')>-1;
+        var isDevol = est.indexOf('devuelto')>-1;
+        if(mode==='prestamo' && !isPrest) return;
+        if(mode==='devuelto' && !isDevol) return;
+      }
+      chosen.push(tr);
+    });
+    return {headings: info.heads.filter(function(h,i){ return i!==info.idxTimestamp; }),
+            rows: rowsToArrays(chosen, info.idxTimestamp)};
+  }
+
+  function buildDoc(title, sub, headings, rows){
+    var esc = function(t){ return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+    var ths = headings.map(function(h){ return '<th>'+esc(h)+'</th>'; }).join('');
+    var trs = rows.map(function(r){
+      return '<tr>'+ r.map(function(c){ return '<td>'+esc(c)+'</td>'; }).join('') +'</tr>';
+    }).join('');
+    var css = [
+      '@page{size:A4;margin:12mm}',
+      'body{font:13px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;color:#111}',
+      'h1{font-size:18px;margin:0 0 6px} .sub{color:#374151;margin:0 0 12px;font-size:12px}',
+      'table{border-collapse:collapse;width:100%} th,td{border:1px solid #e5e7eb;padding:6px 8px;text-align:left}',
+      'thead th{background:#f1f5f9;-webkit-print-color-adjust:exact;print-color-adjust:exact}',
+      'tr:nth-child(even) td{background:#fafafa}',
+      'thead{display:table-header-group}',
+      'tr{page-break-inside:avoid}'
+    ].join('');
+    return '<!doctype html><html lang="es"><head><meta charset="utf-8"><title>'+esc(title)+'</title>'+
+           '<style>'+css+'</style>  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head><body>'+
+           '<h1>'+esc(title)+'</h1><div class="sub">'+esc(sub)+'</div>'+
+           '<table><thead><tr>'+ths+'</tr></thead><tbody>'+trs+'</tbody></table>'+
+           '
+<script type="module">
+const CLIENT_ID = (window.GOOGLE_CLIENT_ID || "TU_CLIENT_ID.apps.googleusercontent.com");
+function showGoogleButton() {
+  const mount = document.getElementById('googleBtn');
+  if (!mount || !window.google?.accounts?.id) return;
+  google.accounts.id.initialize({
+    client_id: CLIENT_ID,
+    callback: async ({ credential }) => {
+      const res = await fetch('/.netlify/functions/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ credential })
+      });
+      if (!res.ok) {
+        alert('Acceso denegado');
+        return;
+      }
+      window.isUnlocked = true;
+      if (typeof window.__applyPrivacyLock__ === 'function') window.__applyPrivacyLock__();
+      if (typeof window.updateLockUI === 'function') window.updateLockUI();
+      const logsBtn = document.getElementById('logsBtn'); if (logsBtn) logsBtn.style.display = 'inline-flex';
+      mount.style.display = 'none';
+    }
+  });
+  google.accounts.id.renderButton(mount, { type: 'standard', theme: 'outline', size: 'large' });
+  mount.style.display = 'block';
+}
+document.getElementById('unlock')?.addEventListener('click', showGoogleButton);
+</script>
+
+</body></html>';
+  }
+  function cleanPrint(mode, respectView){
+    var now = new Date(); 
+    var modeLabel = (mode==='prestamo'?'En préstamo':(mode==='devuelto'?'Devueltos':(mode==='all'?'Todos':'Vista actual')));
+    var info = pickRowsByMode(mode, !!respectView);
+    var title = 'Registros de biblioteca — '+modeLabel;
+    var sub = now.toLocaleString('es-CO')+' — '+info.rows.length+' registros';
+    var doc = buildDoc(title, sub, info.headings, info.rows);
+    var w = window.open('', '_blank');
+    if(!w){ alert('Permite ventanas emergentes para imprimir.'); return; }
+    w.document.open(); w.document.write(doc); w.document.close(); w.focus();
+    setTimeout(function(){ try{ w.print(); }catch(e){} }, 250);
+  }
+  function installBtns(){
+    var dlg = document.getElementById('logsDlg');
+    if(!dlg) return;
+    if(document.getElementById('cthPrintBtns')) return;
+    var host = dlg.querySelector('#logsStats') || dlg.querySelector('.modal header') || dlg.querySelector('.modal') || dlg;
+    var box = document.createElement('div');
+    box.id = 'cthPrintBtns';
+    box.style.display='flex'; box.style.gap='8px'; box.style.flexWrap='wrap'; box.style.alignItems='center';
+    var mk = function(id, txt){ var b=document.createElement('button'); b.textContent=txt; b.id=id; b.className='btn'; b.style.border='1px solid #e5e7eb'; b.style.background='#fff'; b.style.borderRadius='10px'; b.style.padding='6px 10px'; b.style.fontWeight='700'; return b; };
+    var b1=null; /* botón vista actual eliminado */
+    var b2=mk('cthPrAll','Imprimir (todos)');
+    var b3=mk('cthPrPrest','Imprimir (en préstamo)');
+    var b4=mk('cthPrDev','Imprimir (devueltos)');
+    box.appendChild(b2); box.appendChild(b3); box.appendChild(b4);
+    var after = dlg.querySelector('.modal header');
+    if(after && after.parentElement){ after.parentElement.insertBefore(box, after.nextSibling); }
+    else{ host.appendChild(box); }
+b2.addEventListener('click', function(){ cleanPrint('all', false); });
+    b3.addEventListener('click', function(){ cleanPrint('prestamo', false); });
+    b4.addEventListener('click', function(){ cleanPrint('devuelto', false); });
+  }
+  // Hook into existing openLogs for safe install
+  try{
+    var prev = window.openLogs;
+    if(typeof prev==='function'){
+      window.openLogs = async function(){
+        var r = await prev.apply(this, arguments);
+        setTimeout(installBtns, 0);
+        return r;
+      };
+    }
+  }catch(_){}
+  if(document.getElementById('logsDlg')) setTimeout(installBtns, 0);
+})();
+</script>
+<!-- == CTH Clean Print End == -->
+
+
+<script type="module">
+const CLIENT_ID = (window.GOOGLE_CLIENT_ID || "TU_CLIENT_ID.apps.googleusercontent.com");
+function showGoogleButton() {
+  const mount = document.getElementById('googleBtn');
+  if (!mount || !window.google?.accounts?.id) return;
+  google.accounts.id.initialize({
+    client_id: CLIENT_ID,
+    callback: async ({ credential }) => {
+      const res = await fetch('/.netlify/functions/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ credential })
+      });
+      if (!res.ok) {
+        alert('Acceso denegado');
+        return;
+      }
+      window.isUnlocked = true;
+      if (typeof window.__applyPrivacyLock__ === 'function') window.__applyPrivacyLock__();
+      if (typeof window.updateLockUI === 'function') window.updateLockUI();
+      const logsBtn = document.getElementById('logsBtn'); if (logsBtn) logsBtn.style.display = 'inline-flex';
+      mount.style.display = 'none';
+    }
+  });
+  google.accounts.id.renderButton(mount, { type: 'standard', theme: 'outline', size: 'large' });
+  mount.style.display = 'block';
+}
+document.getElementById('unlock')?.addEventListener('click', showGoogleButton);
+</script>
+
+</body>
+</html>
+
+<script id="logsScrollLock">
+// Bloquea el scroll de fondo mientras el modal de Registros está abierto
+(function(){
+  const dlg = document.getElementById('logsDlg');
+  if(!dlg || dlg.__scrollLockBound) return;
+  function lock(){
+    document.documentElement.classList.add('modal-lock');
+    document.body.classList.add('modal-lock');
+    // Evita scroll de fondo con rueda/touch fuera del modal
+    function blocker(ev){
+      if (dlg.open && !dlg.contains(ev.target)) { ev.preventDefault(); }
+    }
+    document.__cthBlocker = blocker;
+    window.addEventListener('wheel', blocker, {passive:false, capture:true});
+    window.addEventListener('touchmove', blocker, {passive:false, capture:true});
+  }
+  function unlock(){
+    document.documentElement.classList.remove('modal-lock');
+    document.body.classList.remove('modal-lock');
+    if(document.__cthBlocker){
+      window.removeEventListener('wheel', document.__cthBlocker, {capture:true});
+      window.removeEventListener('touchmove', document.__cthBlocker, {capture:true});
+      document.__cthBlocker = null;
+    }
+  }
+  // Hook a openLogs para aplicar lock al abrir
+  try{
+    const prev = window.openLogs;
+    window.openLogs = async function(){
+      lock();
+      try{ return await prev.apply(this, arguments); }
+      finally{ /* unlock en 'close' */ }
+    };
+  }catch(_){}
+  dlg.addEventListener('close', unlock);
+  dlg.addEventListener('cancel', unlock);
+  dlg.__scrollLockBound = true;
+})();
+</script>
+
+<script id="logsIOSBounceFix">
+(function(){
+  const dlg = document.getElementById('logsDlg');
+  if(!dlg || dlg.__iosFixBound) return;
+
+  function trapIOSOverscroll(el){
+    if(!el || el.__trapBound) return;
+    let startY = 0;
+    el.addEventListener('touchstart', function(e){
+      if(!e.touches || !e.touches.length) return;
+      startY = e.touches[0].clientY;
+    }, {passive:true});
+    el.addEventListener('touchmove', function(e){
+      if(!e.touches || !e.touches.length) return;
+      const currentY = e.touches[0].clientY;
+      const deltaY = currentY - startY;
+      const maxScroll = el.scrollHeight - el.clientHeight;
+      const atTop = el.scrollTop <= 0;
+      const atBottom = el.scrollTop >= (maxScroll - 1);
+      // Si estamos en el borde superior e intentan seguir subiendo, o en el inferior y siguen bajando -> detener
+      if (maxScroll <= 0 || (atTop && deltaY > 0) || (atBottom && deltaY < 0)) {
+        e.preventDefault();
+      }
+    }, {passive:false});
+    el.__trapBound = true;
+  }
+
+  function ensureTrap(){
+    const wrap = document.getElementById('logsWrap');
+    if(wrap) trapIOSOverscroll(wrap);
+  }
+
+  // Hook a openLogs para aplicar el fix justo después de abrir/renderizar
+  try{
+    const prev = window.openLogs;
+    window.openLogs = async function(){
+      const res = await prev.apply(this, arguments);
+      // Espera un tick para que el contenido exista y mida bien
+      setTimeout(ensureTrap, 0);
+      return res;
+    };
+  }catch(_){}
+
+  // Si por cualquier motivo el modal ya está abierto, aplica también
+  if (dlg.open) setTimeout(ensureTrap, 0);
+
+  dlg.__iosFixBound = true;
+})();
+</script>
+
+<script>
+// === Registros: override final con paginación 25 por página y contadores correctos ===
+(function(){
+  // Evita dobles inicializaciones
+  if (window.__CTH_LOGS_FINAL_OVERRIDE__) return;
+  window.__CTH_LOGS_FINAL_OVERRIDE__ = true;
+
+  const LOANS_GID = '1311459646'; // pestaña Prestamos
+  const PAGE_SIZE = 25;
+
+  // Parser robusto por si parseGViz no existe
+  function parseGVizRobusto(txt){
+    const s = txt.indexOf('{'); const e = txt.lastIndexOf('}');
+    if(s === -1 || e === -1) throw new Error('GViz inválido');
+    const json = JSON.parse(txt.slice(s, e+1));
+    const cols = (json.table.cols||[]).map(c => (c.label||'').trim());
+    const rows = (json.table.rows||[]).map(r => (r.c||[]).map(c => c ? (c.f ?? c.v ?? '') : ''));
+    return {cols, rows};
+  }
+  // Date GViz -> texto "Mes d de yyyy". Acepta también DD/MM/YYYY o ISO.
+  function formatGvizDate(v){
+    if (v == null) return '';
+    const s = String(v);
+    if (/^Date\(\d+,\d+,\d+(?:,\d+,\d+,\d+)?\)$/.test(s)){
+      const m = s.match(/^Date\((\d+),(\d+),(\d+)/); const y=+m[1], mo=+m[2], d=+m[3];
+      const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      return `${meses[mo]||''} ${d} de ${y}`;
+    }
+    let m = s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);
+    if (m){ const y=+m[1], mo=(+m[2])-1, d=+m[3];
+      const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      return `${meses[mo]||''} ${d} de ${y}`;
+    }
+    m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (m){ const d=+m[1], mo=(+m[2])-1, y=+m[3];
+      const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      return `${meses[mo]||''} ${d} de ${y}`;
+    }
+    return s;
+  }
+  function dateValue(s){
+    s = String(s||'').trim();
+    let m;
+    if ((m = s.match(/^Date\((\d+),(\d+),(\d+)/))) return new Date(+m[1], +m[2], +m[3]).getTime();
+    if ((m = s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/))) return new Date(+m[1], +m[2]-1, +m[3]).getTime();
+    if ((m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/))) return new Date(+m[3], +m[2]-1, +m[1]).getTime();
+    return 0;
+  }
+  function parseLoansRow(cols, row){
+    const idx = Object.fromEntries(cols.map((c,i)=>[c.trim().toLowerCase(), i]));
+    function g(name){ const i = idx[name]; return i != null ? row[i] : ''; }
+    return {
+      fechaPrestamo: g('fecha de prestamo') || g('fecha de préstamo') || g('fecha prestamo') || g('fecha préstamo'),
+      fechaDevolucion: g('fecha devolucion') || g('fecha de devolucion') || g('fecha devolución'),
+      nombre: g('nombre'),
+      grado: g('grado'),
+      rol: g('rol'),
+      titulo: g('titulo') || g('título'),
+      estado: g('estado')
+    };
+  }
+
+  async function fetchAllLogs(){
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${LOANS_GID}&t=${Date.now()}`;
+    const res = await fetch(url, {cache:'no-store'});
+    const txt = await res.text();
+    const parse = (typeof parseGViz === 'function') ? (t=>{const p=parseGViz(t); return {cols:p.cols, rows:p.rows};}) : parseGVizRobusto;
+    const data = parse(txt);
+    const cols = data.cols;
+    const items = data.rows.map(r => parseLoansRow(cols, r)).filter(x => x.titulo);
+    items.sort((a,b)=> dateValue(b.fechaPrestamo) - dateValue(a.fechaPrestamo));
+    // Formato amigable
+    items.forEach(it=>{
+      it.fechaPrestamo = formatGvizDate(it.fechaPrestamo);
+      it.fechaDevolucion = formatGvizDate(it.fechaDevolucion);
+    });
+    return items;
+  }
+
+  // Estado
+  let __all = []; let __page = 1;
+
+  function el(id){ return document.getElementById(id); }
+  function normalize(s){ return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+
+  function setStats(items){
+    const total = items.length;
+    const prest = items.filter(x => /en préstamo/i.test(x.estado)).length;
+    const dev = items.filter(x => /devuelto/i.test(x.estado)).length;
+    const host = el('logsStats');
+    if (host){
+      host.innerHTML = [
+        `<div style="background:#eef6ff;border:1px solid #dbeafe;border-radius:12px;padding:10px 12px;"><div style="font-size:12px;color:#64748b">Registros (totales)</div><div style="font-size:20px;font-weight:700;color:#0f172a">${total}</div></div>`,
+        `<div style="background:#fee2e2;border:1px solid #fecaca;border-radius:12px;padding:10px 12px;"><div style="font-size:12px;color:#64748b">En préstamo (totales)</div><div style="font-size:20px;font-weight:700;color:#991b1b">${prest}</div></div>`,
+        `<div style="background:#dcfce7;border:1px solid #bbf7d0;border-radius:12px;padding:10px 12px;"><div style="font-size:12px;color:#64748b">Devueltos (totales)</div><div style="font-size:20px;font-weight:700;color:#166534">${dev}</div></div>`
+      ].join('');
+    }
+  }
+
+  function applyFilters(){
+    const q = normalize(el('logsSearch')?.value || '');
+    const est = (el('logsEstado')?.value || '').trim().toLowerCase();
+    let arr = __all.slice();
+    if (q){
+      arr = arr.filter(x => normalize(x.nombre).includes(q) || normalize(x.titulo).includes(q));
+    }
+    if (est){
+      arr = arr.filter(x => (x.estado||'').toLowerCase() === est);
+    }
+    return arr;
+  }
+
+  function render(){
+    const body = el('logsBody');
+    const count = el('logsCount');
+    const list = applyFilters();
+    if (!body) return;
+    const totalPages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+    if (__page > totalPages) __page = totalPages;
+    if (__page < 1) __page = 1;
+    const start = ( __page - 1) * PAGE_SIZE;
+    const end = Math.min(list.length, __page * PAGE_SIZE);
+    const pageSlice = list.slice(start, end);
+    if (!pageSlice.length){
+      body.innerHTML = '<tr><td style="padding:12px" colspan="7">No se encontraron registros.</td></tr>';
+      if (count) count.textContent = '0 resultados';
+      return;
+    }
+    body.innerHTML = pageSlice.map(it => `
+      <tr style="border-bottom:1px solid #eef2f7">
+        <td style="padding:8px 10px">${it.fechaPrestamo||''}</td>
+        <td style="padding:8px 10px">${it.fechaDevolucion||''}</td>
+        <td style="padding:8px 10px">${it.nombre||''}</td>
+        <td style="padding:8px 10px">${it.grado||''}</td>
+        <td style="padding:8px 10px">${it.rol||''}</td>
+        <td style="padding:8px 10px">${it.titulo||''}</td>
+        <td style="padding:8px 10px">${it.estado ? `<span style="font-weight:bold;color:${/en préstamo/i.test(it.estado)?'#dc2626':'#16a34a'}">${it.estado}</span>` : ''}</td>
+      </tr>`).join('');
+
+    // Pager
+    body.innerHTML += `
+      <tr><td colspan="7" style="padding:14px 10px;">
+        <div style="display:flex;justify-content:center;align-items:center;gap:12px;">
+          <button id="logsPrev" style="padding:8px 16px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;${__page===1?'opacity:0.5;cursor:not-allowed':''}">Anterior</button>
+          <span style="font-weight:500;color:#334155">${__page} de ${totalPages}</span>
+          <button id="logsNext" style="padding:8px 16px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;${__page===totalPages?'opacity:0.5;cursor:not-allowed':''}">Siguiente</button>
+        </div>
+      </td></tr>`;
+
+    const prev = el('logsPrev'); const next = el('logsNext');
+    if (prev){ prev.onclick = ()=>{ if(__page>1){ __page--; render(); } }; }
+    if (next){ next.onclick = ()=>{ if(__page < totalPages){ __page++; render(); } }; }
+
+    if (count){ count.textContent = `${list.length} resultado${list.length!==1?'s':''}`; }
+  }
+
+  async function openLogs(){
+    // Asegura que el modal abra
+    const dlg = el('logsDlg');
+    if (!dlg) return;
+    try{ dlg.showModal(); }catch(_){ dlg.setAttribute('open',''); dlg.style.display='block'; }
+    // Estado de carga
+    const body = el('logsBody'); if (body) body.innerHTML = '<tr><td style="padding:12px" colspan="7">Cargando…</td></tr>';
+    try{
+      __all = await fetchAllLogs();
+      setStats(__all);    // contadores totales
+      try{ window.__allLogs = Array.isArray(__all) ? __all : []; }catch(_){ window.__allLogs = __all||[]; }
+      try{ if(typeof window.__renderLogsStats==='function'){ window.__renderLogsStats(__all); } }catch(_){ /* noop */ }
+
+      __page = 1;
+      // Bind de filtros (una sola vez)
+      const search = el('logsSearch'), estado = el('logsEstado');
+      if (search && !search.__bound){ search.addEventListener('input', ()=>{__page=1; render();}); search.__bound = true; }
+      if (estado && !estado.__bound){ estado.addEventListener('change', ()=>{__page=1; render();}); estado.__bound = true; }
+      render();
+    }catch(e){
+      console.error('[logs] error', e);
+      if (body) body.innerHTML = '<tr><td style="padding:12px" colspan="7">⚠️ Error cargando registros.</td></tr>';
+    }
+  }
+  // Expone y re-vincula el botón limpiando handlers previos
+  window.openLogs = openLogs;
+  const btn = document.getElementById('logsBtn');
+  if (btn){
+    const clone = btn.cloneNode(true);
+    btn.parentNode.replaceChild(clone, btn);
+    clone.addEventListener('click', openLogs);
+  }
+})();
+</script>
