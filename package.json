@@ -1,13 +1,78 @@
-{
-  "name": "bibliotecacth",
-  "version": "1.0.0",
-  "description": "Biblioteca CTH con login de Google",
-  "main": "index.js",
-  "scripts": {
-    "start": "netlify dev"
-  },
-  "dependencies": {
-    "google-auth-library": "^9.14.1",
-    "node-fetch": "^3.3.2"
-  }
+// No requiere paquetes externos
+const crypto = require("crypto");
+
+// Helper para obtener el origin del sitio (útil en deploy y en local)
+function getOrigin(event) {
+  // Si definiste SITE_ORIGIN en variables de entorno, úsalo
+  if (process.env.SITE_ORIGIN) return process.env.SITE_ORIGIN;
+
+  // Caso contrario, lo inferimos del request
+  const proto =
+    event.headers["x-forwarded-proto"] ||
+    event.headers["X-Forwarded-Proto"] ||
+    "https";
+  const host =
+    event.headers.host ||
+    event.headers["x-forwarded-host"] ||
+    event.headers["X-Forwarded-Host"];
+  return `${proto}://${host}`;
 }
+
+exports.handler = async (event) => {
+  try {
+    const origin = getOrigin(event);
+
+    // Donde Google nos devolverá el "code"
+    const redirectUri = `${origin}/.netlify/functions/auth/callback`;
+
+    // Protegemos el flujo con "state"
+    const state = crypto.randomBytes(16).toString("hex");
+
+    // Scopes mínimos para email/perfil
+    const scope = "openid email profile";
+
+    const params = new URLSearchParams({
+      client_id: process.env.GOOGLE_CLIENT_ID,
+      redirect_uri: redirectUri,
+      response_type: "code",
+      scope,
+      access_type: "offline",
+      include_granted_scopes: "true",
+      prompt: "select_account", // o "consent" si quieres forzar el diálogo siempre
+      state,
+    });
+
+    // Si limitas a un dominio (p.ej. theodoro.edu.co), pásalo como "hd"
+    if (process.env.ALLOWED_DOMAIN) {
+      params.set("hd", process.env.ALLOWED_DOMAIN);
+    }
+
+    const googleAuthUrl =
+      "https://accounts.google.com/o/oauth2/v2/auth?" + params.toString();
+
+    // Guardamos el state en cookie para validarlo en /callback
+    // (Léelo y compáralo en la función callback)
+    const cookie = [
+      `oauth_state=${state}`,
+      "Path=/",
+      "HttpOnly",
+      "SameSite=Lax",
+      "Max-Age=600",
+      "Secure", // en Netlify siempre va https; en local, si molesta, puedes quitarlo
+    ].join("; ");
+
+    return {
+      statusCode: 302,
+      headers: {
+        Location: googleAuthUrl,
+        "Set-Cookie": cookie,
+      },
+      body: "",
+    };
+  } catch (err) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "login_build_url_failed", details: String(err) }),
+    };
+  }
+};
