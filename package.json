@@ -1,0 +1,13 @@
+{
+  "name": "bibliotecacth",
+  "version": "1.0.0",
+  "description": "Biblioteca CTH con login de Google",
+  "main": "index.js",
+  "scripts": {
+    "start": "netlify dev"
+  },
+  "dependencies": {
+    "google-auth-library": "^9.14.1",
+    "node-fetch": "^3.3.2"
+  }
+}
