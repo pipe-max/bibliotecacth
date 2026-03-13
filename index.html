@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async></script>
 <style>
   :root{
     --bg:#ffffff;
@@ -1744,7 +1745,11 @@ function __applyPrivacyLock__(){
 __applyPrivacyLock__();
 
 let TOKEN_CACHE = null;
-const UNLOCK_PIN = 'cth-2025-123456';
+let currentUserEmail = null;
+const ALLOWED_EMAILS = ['pipe@theodoro.edu.co', 'bibliotecacth@theodoro.edu.co'];
+// ⚠️ REEMPLAZA este valor con tu Google OAuth Client ID
+// Instrucciones: https://console.cloud.google.com → Credentials → OAuth 2.0 Client IDs
+const GOOGLE_CLIENT_ID = 'TU_CLIENT_ID.apps.googleusercontent.com';
 let currentBook = null;
 
 // Función que actualiza el botón LOGIN según estado de sesión
@@ -1752,13 +1757,39 @@ function updateLoginBtn(){
   const btn = document.getElementById('loginBtn');
   if(!btn) return;
   if(isUnlocked){
-    btn.textContent = '✅ Sesión activa';
+    const name = currentUserEmail ? currentUserEmail.split('@')[0] : 'Sesión';
+    btn.textContent = '✅ ' + name;
     btn.classList.add('logged-in');
-    btn.title = 'Clic para cerrar sesión';
+    btn.title = 'Clic para cerrar sesión (' + (currentUserEmail||'') + ')';
   } else {
     btn.innerHTML = '🔑 Login';
     btn.classList.remove('logged-in');
-    btn.title = 'Ingresar como biblioteca';
+    btn.title = 'Ingresar con Google';
+  }
+}
+
+// Callback que llama Google Identity Services tras autenticar
+function handleGoogleCredential(response){
+  try{
+    // Decodificar el JWT (payload en base64)
+    const payload = JSON.parse(atob(response.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+    const email = (payload.email||'').toLowerCase();
+    if(!ALLOWED_EMAILS.includes(email)){
+      document.getElementById('googleLoginError').style.display = 'flex';
+      // Revocar la sesión de Google para que no quede logueado
+      if(window.google && google.accounts && google.accounts.id) google.accounts.id.revoke(email, ()=>{});
+      return;
+    }
+    // Acceso concedido
+    document.getElementById('googleDlg').close();
+    TOKEN_CACHE = response.credential;
+    currentUserEmail = email;
+    isUnlocked = true;
+    __applyPrivacyLock__();
+    updateLoginBtn();
+    uiAlert && uiAlert('¡Bienvenida!', 'Sesión iniciada como ' + email + '. Ya puedes reservar o registrar devoluciones.');
+  }catch(err){
+    console.error('Error al procesar login Google:', err);
   }
 }
 
@@ -1767,21 +1798,40 @@ document.getElementById('loginBtn')?.addEventListener('click', ()=>{
   if(isUnlocked){
     isUnlocked = false;
     TOKEN_CACHE = null;
+    currentUserEmail = null;
+    if(window.google && google.accounts && google.accounts.id) google.accounts.id.disableAutoSelect();
     __applyPrivacyLock__();
     updateLoginBtn();
     uiAlert && uiAlert('Sesión cerrada', 'Vista pública activada.');
     return;
   }
-  showPinModal().then(pass => {
-    const p = pass.trim();
-    if(p !== UNLOCK_PIN){
-      uiAlert && uiAlert('Contraseña incorrecta', 'La contraseña ingresada no es válida.', 'error');
-      return;
-    }
-    TOKEN_CACHE = p; isUnlocked = true; __applyPrivacyLock__();
-    updateLoginBtn();
-    uiAlert && uiAlert('¡Bienvenida!', 'Sesión iniciada correctamente. Ya puedes reservar o registrar devoluciones.');
-  }).catch(()=>{});
+  // Abrir modal de Google Sign-In
+  const dlg = document.getElementById('googleDlg');
+  document.getElementById('googleLoginError').style.display = 'none';
+  dlg.showModal();
+  // Inicializar GIS y renderizar el botón
+  if(window.google && google.accounts && google.accounts.id){
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: handleGoogleCredential,
+      auto_select: false,
+      cancel_on_tap_outside: false
+    });
+    const btnContainer = document.getElementById('googleSignInBtn');
+    btnContainer.innerHTML = '';
+    google.accounts.id.renderButton(btnContainer, {
+      theme: 'outline',
+      size: 'large',
+      width: 320,
+      text: 'signin_with',
+      shape: 'rectangular',
+      logo_alignment: 'left'
+    });
+  } else {
+    // GIS aún cargando, reintentar
+    setTimeout(()=> document.getElementById('loginBtn')?.click(), 800);
+    dlg.close();
+  }
 });
 
 // Botón legacy #unlock (oculto pero por compatibilidad)
@@ -4826,16 +4876,15 @@ b2.addEventListener('click', function(){ cleanPrint('all', false); });
 </body>
 </html>
 
-<!-- ===== MODAL LOGIN ===== -->
-<dialog id="pinDlg" style="border:none;padding:0;border-radius:24px;box-shadow:0 32px 80px rgba(2,8,23,.28);width:min(440px,94vw);background:transparent;">
-  <div id="pinDlgInner" style="
+<!-- ===== MODAL LOGIN GOOGLE ===== -->
+<dialog id="googleDlg" style="border:none;padding:0;border-radius:24px;box-shadow:0 32px 80px rgba(2,8,23,.28);width:min(420px,94vw);background:transparent;">
+  <div style="
     background:#fff;
     border-radius:24px;
-    padding:36px 32px 28px;
+    padding:36px 32px 30px;
     display:flex;
     flex-direction:column;
     align-items:center;
-    gap:0;
     text-align:center;
     position:relative;
     overflow:hidden;
@@ -4843,179 +4892,53 @@ b2.addEventListener('click', function(){ cleanPrint('all', false); });
     <!-- Línea de acento superior naranja -->
     <div style="position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,#e8622a,#f97316,#fb923c);border-radius:24px 24px 0 0;"></div>
 
-    <!-- Ícono -->
-    <div style="
-      width:64px;height:64px;
-      background:linear-gradient(135deg,#fff3e8,#ffe4cc);
-      border-radius:18px;
-      display:flex;align-items:center;justify-content:center;
-      font-size:30px;
-      margin-bottom:16px;
-      margin-top:10px;
-      box-shadow:0 4px 14px rgba(232,98,42,.20);
-    "></div>
-
-    <!-- Título -->
-    <h2 style="margin:0 0 4px;font-size:22px;font-weight:900;color:#0c1523;letter-spacing:-.4px;font-family:'Inter',sans-serif;">Acceso Biblioteca CTH</h2>
-    <p style="margin:0 0 22px;font-size:13.5px;color:#64748b;font-family:'Inter',sans-serif;">Ingresa con tu cuenta institucional del colegio</p>
-
-    <!-- Campo correo -->
-    <div style="width:100%;margin-bottom:14px;text-align:left;">
-      <label style="font-size:12px;font-weight:700;color:#475569;font-family:'Inter',sans-serif;display:block;margin-bottom:5px;">Correo institucional</label>
-      <input id="loginEmail" type="email" placeholder="usuario@theodoro.edu.co"
-        autocomplete="email"
-        style="
-          width:100%;
-          padding:13px 16px;
-          border:1.5px solid #dde3ed;
-          border-radius:12px;
-          font-size:14px;
-          font-family:'Inter',sans-serif;
-          font-weight:500;
-          outline:none;
-          color:#0c1523;
-          background:#f8fafc;
-          box-sizing:border-box;
-          transition:border-color .15s, box-shadow .15s;
-        "
-        oninput="this.style.borderColor='#f97316';this.style.boxShadow='0 0 0 4px rgba(249,115,22,.15)'"
-      >
+    <!-- Ícono CTH -->
+    <div style="margin-top:10px;margin-bottom:14px;">
+      <img src="cth.png" alt="CTH" style="width:56px;height:56px;object-fit:contain;border-radius:12px;box-shadow:0 4px 14px rgba(0,0,0,.12);">
     </div>
 
-    <!-- Campo contraseña -->
-    <form id="loginForm" onsubmit="event.preventDefault(); showPinModal().then(pass => { /* handle login */ }).catch(() => {});" style="position:relative;width:100%;margin-bottom:20px;text-align:left;">
-      <label style="font-size:12px;font-weight:700;color:#475569;font-family:'Inter',sans-serif;display:block;margin-bottom:5px;">Contraseña</label>
-      <input id="pinInput" type="password" placeholder="••••••••••••"
-        autocomplete="current-password"
-        style="
-          width:100%;
-          padding:13px 46px 13px 16px;
-          border:1.5px solid #dde3ed;
-          border-radius:12px;
-          font-size:15px;
-          font-family:'Inter',sans-serif;
-          font-weight:600;
-          letter-spacing:2px;
-          outline:none;
-          color:#0c1523;
-          background:#f8fafc;
-          box-sizing:border-box;
-          transition:border-color .15s, box-shadow .15s;
-        "
-        oninput="this.style.borderColor='#f97316';this.style.boxShadow='0 0 0 4px rgba(249,115,22,.15)'"
-      >
-      <!-- Ojo para ver/ocultar -->
-      <button type="button" id="pinToggleEye" onclick="
-        const i=document.getElementById('pinInput');
-        i.type=i.type==='password'?'text':'password';
-        this.textContent=i.type==='password'?'👁️':'🙈';
-      " style="
-        position:absolute;right:12px;bottom:13px;
-        background:none;border:none;cursor:pointer;font-size:18px;padding:4px;
-        line-height:1;
-      ">👁️</button>
-    </form>
+    <!-- Título -->
+    <h2 style="margin:0 0 6px;font-size:22px;font-weight:900;color:#0c1523;letter-spacing:-.4px;font-family:'Inter',sans-serif;">Acceso Biblioteca CTH</h2>
+    <p style="margin:0 0 24px;font-size:13.5px;color:#64748b;font-family:'Inter',sans-serif;line-height:1.5;">Ingresa con tu cuenta institucional<br><strong style="color:#0c1523;">@theodoro.edu.co</strong></p>
 
-    <!-- Mensaje de error -->
-    <div id="pinError" style="
+    <!-- Botón Google Sign-In (renderizado por GIS) -->
+    <div id="googleSignInBtn" style="display:flex;justify-content:center;width:100%;margin-bottom:16px;"></div>
+
+    <!-- Mensaje de error: correo no autorizado -->
+    <div id="googleLoginError" style="
       display:none;
+      align-items:center;
+      gap:10px;
       background:#fef2f2;border:1px solid #fecaca;
-      color:#991b1b;border-radius:10px;
-      padding:10px 14px;font-size:13px;font-weight:600;
+      color:#991b1b;border-radius:12px;
+      padding:12px 16px;font-size:13px;font-weight:600;
       font-family:'Inter',sans-serif;
       width:100%;box-sizing:border-box;
       margin-bottom:16px;
-    ">❌ Correo o contraseña incorrectos.</div>
+      text-align:left;
+    ">❌ Este correo no tiene acceso autorizado.<br><span style="font-weight:400;color:#b91c1c;">Solo pueden ingresar las cuentas autorizadas del colegio.</span></div>
 
-    <!-- Botones -->
-    <div style="display:flex;gap:10px;width:100%;">
-      <button id="pinCancelBtn" style="
-        flex:1;padding:13px;border:1.5px solid #dde3ed;border-radius:12px;
-        background:#f8fafc;font-size:15px;font-weight:700;
-        font-family:'Inter',sans-serif;cursor:pointer;color:#4a5568;
-        transition:background .15s,border-color .15s;
-      "
-        onmouseover="this.style.background='#f1f5f9'"
-        onmouseout="this.style.background='#f8fafc'"
-      >Cancelar</button>
-      <button id="pinOkBtn" style="
-        flex:1;padding:13px;border:none;border-radius:12px;
-        background:linear-gradient(135deg,#e8622a,#f97316);
-        font-size:15px;font-weight:700;
-        font-family:'Inter',sans-serif;cursor:pointer;color:#fff;
-        box-shadow:0 4px 14px rgba(232,98,42,.35);
-        transition:filter .15s,transform .1s;
-      "
-        onmouseover="this.style.filter='brightness(1.08)'"
-        onmouseout="this.style.filter=''"
-        onmousedown="this.style.transform='scale(.98)'"
-        onmouseup="this.style.transform=''"
-      >Ingresar</button>
-    </div>
+    <!-- Botón Cancelar -->
+    <button onclick="document.getElementById('googleDlg').close()" style="
+      width:100%;padding:12px;border:1.5px solid #dde3ed;border-radius:12px;
+      background:#f8fafc;font-size:14px;font-weight:700;
+      font-family:'Inter',sans-serif;cursor:pointer;color:#4a5568;
+      transition:background .15s;
+    "
+      onmouseover="this.style.background='#f1f5f9'"
+      onmouseout="this.style.background='#f8fafc'"
+    >Cancelar</button>
   </div>
 </dialog>
 <style>
-  #pinDlg::backdrop{
+  #googleDlg::backdrop{
     background: rgba(10,18,32,.60);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
   }
 </style>
 <script>
-// Credenciales permitidas
-const ALLOWED_EMAIL = 'bibliotecacth@theodoro.edu.co';
-
-function showPinModal(){
-  return new Promise((resolve, reject) => {
-    const dlg      = document.getElementById('pinDlg');
-    const emailFld = document.getElementById('loginEmail');
-    const input    = document.getElementById('pinInput');
-    const err      = document.getElementById('pinError');
-    const okBtn    = document.getElementById('pinOkBtn');
-    const cancelBtn= document.getElementById('pinCancelBtn');
-
-    // Reset
-    emailFld.value = '';
-    input.value = '';
-    input.type = 'password';
-    document.getElementById('pinToggleEye').textContent = '👁️';
-    err.style.display = 'none';
-    emailFld.style.borderColor = '#dde3ed'; emailFld.style.boxShadow = '';
-    input.style.borderColor = '#dde3ed'; input.style.boxShadow = '';
-
-    function cleanup(){
-      okBtn.removeEventListener('click', onOk);
-      cancelBtn.removeEventListener('click', onCancel);
-      input.removeEventListener('keydown', onKey);
-      emailFld.removeEventListener('keydown', onKey);
-    }
-    function onOk(){
-      const mail = emailFld.value.trim().toLowerCase();
-      const pass = input.value.trim();
-      if(!mail || !pass){ emailFld.focus(); return; }
-      // Solo el correo institucional de la biblioteca puede entrar
-      if(mail !== ALLOWED_EMAIL){
-        err.style.display = 'block';
-        emailFld.style.borderColor = '#f87171'; emailFld.style.boxShadow = '0 0 0 4px rgba(248,113,113,.15)';
-        emailFld.focus();
-        return;
-      }
-      cleanup(); dlg.close(); resolve(pass);
-    }
-    function onCancel(){ cleanup(); dlg.close(); reject(new Error('cancel')); }
-    function onKey(e){
-      if(e.key === 'Enter'){ e.preventDefault(); onOk(); }
-      if(e.key === 'Escape'){ e.preventDefault(); onCancel(); }
-    }
-    okBtn.addEventListener('click', onOk);
-    cancelBtn.addEventListener('click', onCancel);
-    input.addEventListener('keydown', onKey);
-    emailFld.addEventListener('keydown', onKey);
-
-    dlg.showModal();
-    setTimeout(()=> emailFld.focus(), 80);
-  });
-}
+// Autenticación ahora manejada por Google Sign-In (ver handleGoogleCredential en el script principal)
 </script>
 <!-- ===== FIN MODAL LOGIN ===== -->
 
