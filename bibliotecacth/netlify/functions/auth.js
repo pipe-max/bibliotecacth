@@ -3,7 +3,7 @@ import { OAuth2Client } from 'google-auth-library';
 import crypto from 'node:crypto';
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const ALLOWED_DOMAIN = (process.env.ALLOWED_DOMAIN || 'theodoro.edu.co').toLowerCase();
-const ALLOWED_EMAILS = (process.env.ALLOWED_EMAILS || '').split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
+const ALLOWED_EMAILS = ['bibliotecacth@theodoro.edu.co', 'pipe@theodoro.edu.co'];
 const SESSION_SECRET = process.env.SESSION_SECRET || crypto.randomUUID();
 const SITE_ORIGIN = process.env.SITE_ORIGIN || 'https://bibliotecacth.netlify.app';
 const cors = {
