@@ -62,10 +62,6 @@
 
   /* Botón LOGIN esquina superior derecha */
   .login-btn{
-    position: absolute;
-    top: 18px;
-    right: 24px;
-    z-index: 10;
     background: linear-gradient(135deg,#e8622a,#f97316);
     color: #fff;
     border: 2.5px solid rgba(255,255,255,0.35);
@@ -79,6 +75,35 @@
     box-shadow: 0 4px 18px rgba(232,98,42,.40);
     transition: filter .15s, transform .12s, box-shadow .15s;
   }
+  /* Contenedor de botones del header */
+  .header-actions{
+    position: absolute;
+    top: 18px;
+    right: 24px;
+    z-index: 10;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  /* Botón Registros en el header */
+  .logs-header-btn{
+    background: rgba(255,255,255,0.20);
+    color: #fff;
+    border: 2px solid rgba(255,255,255,0.45);
+    border-radius: 999px;
+    padding: 10px 22px;
+    font-size: 14px;
+    font-weight: 800;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    letter-spacing: .3px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: background .15s, transform .12s, border-color .15s;
+  }
+  .logs-header-btn:hover{ background: rgba(255,255,255,0.32); border-color: rgba(255,255,255,.7); }
+  .logs-header-btn:active{ transform:scale(.96); }
+
   .login-btn:hover{ filter:brightness(1.08); box-shadow:0 6px 24px rgba(232,98,42,.50); }
   .login-btn:active{ transform:scale(.96); }
   .login-btn.logged-in{
@@ -1133,8 +1158,11 @@ html{ scroll-behavior: smooth; }
 <body>
 <a id="top"></a>
 <header class="site-header">
-  <!-- Botón LOGIN esquina superior derecha -->
-  <button id="loginBtn" class="login-btn" type="button">🔑 Login</button>
+  <!-- Botones esquina superior derecha -->
+  <div class="header-actions">
+    <button id="logsBtn" class="logs-header-btn" type="button" style="display:none">📒 Registros</button>
+    <button id="loginBtn" class="login-btn" type="button">🔑 Login</button>
+  </div>
   <div class="site-header-content">
     <img id="logo" src="CTH.png" alt="Colegio Theodoro Hertzl" title="Ir al inicio" style="display:none">
     <h1>Biblioteca CTH</h1>
@@ -1752,19 +1780,24 @@ const ALLOWED_EMAILS = ['pipe@theodoro.edu.co', 'bibliotecacth@theodoro.edu.co']
 const GOOGLE_CLIENT_ID = '518895415463-kutme23g6q7huel5n0uiadvorv3ges5t.apps.googleusercontent.com';
 let currentBook = null;
 
-// Función que actualiza el botón LOGIN según estado de sesión
+// Función que actualiza el botón LOGIN y muestra/oculta el botón Registros según estado de sesión
 function updateLoginBtn(){
   const btn = document.getElementById('loginBtn');
+  const logsBtn = document.getElementById('logsBtn');
   if(!btn) return;
   if(isUnlocked){
     const name = currentUserEmail ? currentUserEmail.split('@')[0] : 'Sesión';
     btn.textContent = '✅ ' + name;
     btn.classList.add('logged-in');
     btn.title = 'Clic para cerrar sesión (' + (currentUserEmail||'') + ')';
+    // Mostrar botón Registros
+    if(logsBtn) logsBtn.style.display = 'inline-flex';
   } else {
     btn.innerHTML = '🔑 Login';
     btn.classList.remove('logged-in');
     btn.title = 'Ingresar con Google';
+    // Ocultar botón Registros
+    if(logsBtn) logsBtn.style.display = 'none';
   }
 }
 
@@ -3693,41 +3726,56 @@ async function updateVisibleCardsAvailability(){
 
 
 <!-- === Registros recientes (modal) === -->
-<dialog id="logsDlg">
-  <div class="modal" style="max-width:960px">
-    <header style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-      <h2 style="margin:0">Registros recientes</h2>
-      <div class="right"><button id="logsClose" class="close-btn" onclick="document.getElementById('logsDlg').close()">Cerrar</button></div>
-    </header>
-    
-  <div id="logsStats" style="display:grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap:10px; padding:6px 2px 8px 2px"></div>
-      <div id="logsControls" style="display:flex; gap:10px; align-items:center; padding:6px 2px 10px 2px">
-    <input id="logsSearch" type="search" placeholder="Buscar (nombre o título)..." 
-           style="flex:1; padding:8px 10px; border:1px solid #e5e7eb; border-radius:10px; font-size:14px">
-    <select id="logsEstado" style="padding:8px 10px; border:1px solid #e5e7eb; border-radius:10px; font-size:14px">
-      <option value="">Todos</option>
-      <option value="En préstamo">En préstamo</option>
-      <option value="Devuelto">Devuelto</option>
-    </select>
-    <span id="logsCount" style="font-size:13px; color:#64748b; white-space:nowrap">0 resultados</span>
-  </div>
+<dialog id="logsDlg" style="border:none;padding:0;border-radius:22px;box-shadow:0 40px 100px rgba(2,8,23,.28);width:min(1100px,96vw);max-height:92vh;background:transparent;overflow:hidden;">
+  <div style="background:#fff;border-radius:22px;display:flex;flex-direction:column;max-height:92vh;overflow:hidden;">
 
-      <div id="logsWrap" class="kv full" style="overflow:auto; max-height:65vh; padding:0;">
-      <table id="logsTable" style="width:100%; border-collapse:collapse; font-size:14px">
-        <thead style="position:sticky; top:0; background:#f8fafc; border-bottom:1px solid #e5e7eb">
-          <tr>
-            <th style="text-align:left; padding:10px">Fecha préstamo</th>
-            <th style="text-align:left; padding:10px">Fecha devolución</th>
-            <th style="text-align:left; padding:10px">Nombre</th>
-            <th style="text-align:left; padding:10px">Grado</th>
-            <th style="text-align:left; padding:10px">Rol</th>
-            <th style="text-align:left; padding:10px">Título</th>
-            <th style="text-align:left; padding:10px">Estado</th>
-            <!-- Eliminado: columna Timestamp -->
+    <!-- ── Header del modal ── -->
+    <div style="padding:24px 28px 0;flex-shrink:0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="width:46px;height:46px;background:linear-gradient(135deg,#0284c7,#38bdf8);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 14px rgba(2,132,199,.30);flex-shrink:0;">📒</div>
+          <div>
+            <h2 style="margin:0;font-size:21px;font-weight:900;color:#0c1523;font-family:'Inter',sans-serif;letter-spacing:-.3px;">Registros de préstamos</h2>
+            <p style="margin:0;font-size:13px;color:#64748b;font-family:'Inter',sans-serif;">Historial completo · Biblioteca CTH</p>
+          </div>
+        </div>
+        <button id="logsClose" onclick="document.getElementById('logsDlg').close()" style="width:38px;height:38px;border-radius:11px;border:1.5px solid #e2e8f0;background:#f8fafc;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;color:#64748b;font-family:'Inter',sans-serif;flex-shrink:0;transition:background .15s,border-color .15s;" onmouseover="this.style.background='#f1f5f9';this.style.borderColor='#cbd5e1'" onmouseout="this.style.background='#f8fafc';this.style.borderColor='#e2e8f0'">✕</button>
+      </div>
+
+      <!-- Stats cards -->
+      <div id="logsStats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;"></div>
+
+      <!-- Barra de búsqueda y filtros -->
+      <div id="logsControls" style="display:flex;gap:8px;align-items:center;margin-bottom:0;padding-bottom:16px;border-bottom:1.5px solid #f1f5f9;">
+        <div style="position:relative;flex:1;">
+          <span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:14px;opacity:.45;pointer-events:none;">🔍</span>
+          <input id="logsSearch" type="search" placeholder="Buscar por nombre o título..." style="width:100%;padding:10px 14px 10px 38px;border:1.5px solid #e2e8f0;border-radius:12px;font-size:14px;font-family:'Inter',sans-serif;font-weight:500;color:#0c1523;background:#f8fafc;outline:none;box-sizing:border-box;transition:border-color .15s,box-shadow .15s;" onfocus="this.style.borderColor='#0284c7';this.style.boxShadow='0 0 0 4px rgba(2,132,199,.12)'" onblur="this.style.borderColor='#e2e8f0';this.style.boxShadow=''">
+        </div>
+        <select id="logsEstado" style="padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:12px;font-size:14px;font-family:'Inter',sans-serif;font-weight:600;color:#0c1523;background:#f8fafc;outline:none;cursor:pointer;min-width:140px;">
+          <option value="">Todos</option>
+          <option value="En préstamo">📖 En préstamo</option>
+          <option value="Devuelto">✅ Devuelto</option>
+        </select>
+        <span id="logsCount" style="font-size:13px;font-weight:700;color:#475569;white-space:nowrap;background:#f1f5f9;padding:9px 16px;border-radius:999px;font-family:'Inter',sans-serif;border:1px solid #e2e8f0;">—</span>
+      </div>
+    </div>
+
+    <!-- ── Tabla ── -->
+    <div id="logsWrap" style="flex:1;overflow:auto;padding:0 28px 24px;">
+      <table id="logsTable" style="width:100%;border-collapse:collapse;font-size:14px;font-family:'Inter',sans-serif;">
+        <thead style="position:sticky;top:0;z-index:2;">
+          <tr style="background:#f8fafc;">
+            <th style="text-align:left;padding:13px 14px;font-size:11px;font-weight:700;color:#64748b;letter-spacing:.6px;text-transform:uppercase;border-bottom:2px solid #e2e8f0;white-space:nowrap;">Fecha préstamo</th>
+            <th style="text-align:left;padding:13px 14px;font-size:11px;font-weight:700;color:#64748b;letter-spacing:.6px;text-transform:uppercase;border-bottom:2px solid #e2e8f0;white-space:nowrap;">Devolución</th>
+            <th style="text-align:left;padding:13px 14px;font-size:11px;font-weight:700;color:#64748b;letter-spacing:.6px;text-transform:uppercase;border-bottom:2px solid #e2e8f0;">Nombre</th>
+            <th style="text-align:left;padding:13px 14px;font-size:11px;font-weight:700;color:#64748b;letter-spacing:.6px;text-transform:uppercase;border-bottom:2px solid #e2e8f0;">Grado</th>
+            <th style="text-align:left;padding:13px 14px;font-size:11px;font-weight:700;color:#64748b;letter-spacing:.6px;text-transform:uppercase;border-bottom:2px solid #e2e8f0;">Rol</th>
+            <th style="text-align:left;padding:13px 14px;font-size:11px;font-weight:700;color:#64748b;letter-spacing:.6px;text-transform:uppercase;border-bottom:2px solid #e2e8f0;">Título del libro</th>
+            <th style="text-align:left;padding:13px 14px;font-size:11px;font-weight:700;color:#64748b;letter-spacing:.6px;text-transform:uppercase;border-bottom:2px solid #e2e8f0;">Estado</th>
           </tr>
         </thead>
         <tbody id="logsBody">
-          <tr><td style="padding:12px" colspan="7">Cargando…</td></tr>
+          <tr><td style="padding:32px;color:#94a3b8;text-align:center;font-family:'Inter',sans-serif;font-size:14px;" colspan="7">Cargando registros…</td></tr>
         </tbody>
       </table>
     </div>
@@ -3828,14 +3876,14 @@ async function updateVisibleCardsAvailability(){
   // Define/Reemplaza openLogs global sin tocar el resto del sitio
   window.openLogs = async function(){
     if(!window.isUnlocked){
-      if(typeof uiAlert === 'function'){ return uiAlert('Necesita PIN', 'Primero desbloquea con el PIN.'); }
+      if(typeof uiAlert === 'function'){ return uiAlert('Acceso restringido', 'Inicia sesión con tu cuenta de Google para ver los registros.', 'error'); }
       return;
     }
     const dlg = document.getElementById('logsDlg');
     const tbody = document.getElementById('logsBody');
     if(!dlg || !tbody){ console.warn('[logs] Falta el dialog'); return; }
     try{ dlg.showModal(); }catch(_){ dlg.setAttribute('open',''); dlg.style.display='block'; }
-    tbody.innerHTML = '<tr><td style="padding:12px" colspan="7">Cargando…</td></tr>';
+    tbody.innerHTML = '<tr><td style="padding:32px;text-align:center;color:#94a3b8;font-family:\'Inter\',sans-serif;font-size:14px;" colspan="7">⏳ Cargando registros…</td></tr>';
     const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${LOANS_GID}&t=${Date.now()}`;
     try{
       // Pedimos un número alto de registros para abarcar todo el historial de préstamos
@@ -3955,7 +4003,7 @@ async function updateVisibleCardsAvailability(){
     const {body, count} = getControls();
     if(!body) return;
     if(!items.length){
-      body.innerHTML = '<tr><td style="padding:12px" colspan="7">No se encontraron registros.</td></tr>';
+      body.innerHTML = '<tr><td style="padding:32px;text-align:center;color:#94a3b8;font-family:\'Inter\',sans-serif;font-size:14px;" colspan="7">No se encontraron registros.</td></tr>';
       if(count) count.textContent = '0 resultados';
       return;
     }
@@ -3965,24 +4013,24 @@ async function updateVisibleCardsAvailability(){
     const end = Math.min(items.length, __page * PAGE_SIZE);
     const slice = items.slice(start, end);
     // Construye el cuerpo con las filas visibles
-    body.innerHTML = slice.map(it => `
-      <tr style="border-bottom:1px solid #eef2f7">
-        <td style="padding:8px 10px">${it.fechaPrestamo||''}</td>
-        <td style="padding:8px 10px">${it.fechaDevolucion||''}</td>
-        <td style="padding:8px 10px">${it.nombre||''}</td>
-        <td style="padding:8px 10px">${it.grado||''}</td>
-        <td style="padding:8px 10px">${it.rol||''}</td>
-        <td style="padding:8px 10px">${it.titulo||''}</td>
-        <td style="padding:8px 10px">${it.estado ? `<span style=\\\"font-weight:bold;color:${/en préstamo/i.test(it.estado)?'#dc2626':'#16a34a'}\\\">${it.estado}</span>` : ''}</td>
+    body.innerHTML = slice.map((it, i) => `
+      <tr style="border-bottom:1px solid #f1f5f9;transition:background .12s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
+        <td style="padding:11px 14px;font-size:13px;color:#475569;white-space:nowrap;">${it.fechaPrestamo||'—'}</td>
+        <td style="padding:11px 14px;font-size:13px;color:#475569;white-space:nowrap;">${it.fechaDevolucion||'—'}</td>
+        <td style="padding:11px 14px;font-weight:600;color:#0c1523;">${it.nombre||''}</td>
+        <td style="padding:11px 14px;font-size:13px;color:#64748b;">${it.grado||'—'}</td>
+        <td style="padding:11px 14px;">${it.rol ? `<span style="font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:${/docente/i.test(it.rol)?'#eff6ff':'#f0fdf4'};color:${/docente/i.test(it.rol)?'#1d4ed8':'#166534'};">${it.rol}</span>` : ''}</td>
+        <td style="padding:11px 14px;font-weight:500;color:#0c1523;max-width:240px;">${it.titulo||''}</td>
+        <td style="padding:11px 14px;">${it.estado ? `<span style="font-size:12px;font-weight:700;padding:4px 12px;border-radius:999px;background:${/en pr\u00e9stamo/i.test(it.estado)?'#fef2f2':'#f0fdf4'};color:${/en pr\u00e9stamo/i.test(it.estado)?'#dc2626':'#16a34a'};border:1px solid ${/en pr\u00e9stamo/i.test(it.estado)?'#fecaca':'#bbf7d0'};">${it.estado}</span>` : ''}</td>
       </tr>`).join('');
     // Agrega una barra de navegación para paginación al final de la tabla
-    if(items.length > 0){
+    if(totalPages > 1){
       body.innerHTML += `
-      <tr><td colspan="7" style="padding:14px 10px;">
+      <tr><td colspan="7" style="padding:16px 14px;">
         <div style="display:flex;justify-content:center;align-items:center;gap:12px;">
-          <button id="logsPrev" style="padding:8px 16px; border:1px solid #e5e7eb; border-radius:10px; background:#fff; cursor:pointer; ${__page===1?'opacity:0.5;cursor:not-allowed':''}">Anterior</button>
-          <span style="font-weight:500;color:#334155">${__page} de ${totalPages}</span>
-          <button id="logsNext" style="padding:8px 16px; border:1px solid #e5e7eb; border-radius:10px; background:#fff; cursor:pointer; ${__page===totalPages?'opacity:0.5;cursor:not-allowed':''}">Siguiente</button>
+          <button id="logsPrev" style="padding:9px 20px;border:1.5px solid #e2e8f0;border-radius:10px;background:#fff;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;font-size:13px;color:#475569;transition:background .12s;${__page===1?'opacity:0.4;cursor:not-allowed':''}" onmouseover="if(${__page}>1)this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'">← Anterior</button>
+          <span style="font-weight:700;color:#334155;font-family:'Inter',sans-serif;font-size:14px;background:#f1f5f9;padding:8px 16px;border-radius:999px;">${__page} / ${totalPages}</span>
+          <button id="logsNext" style="padding:9px 20px;border:1.5px solid #e2e8f0;border-radius:10px;background:#fff;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;font-size:13px;color:#475569;transition:background .12s;${__page===totalPages?'opacity:0.4;cursor:not-allowed':''}" onmouseover="if(${__page}<${totalPages})this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'">Siguiente →</button>
         </div>
       </td></tr>`;
     }
@@ -4311,23 +4359,22 @@ async function updateVisibleCardsAvailability(){
   const host = document.getElementById('logsStats');
   if(!host) return;
   const A = computeStats(all||[]);
-  const topRow = [
-    statCard('Registros (totales)', A.total),
-    statCard('En préstamo (totales)', A.prestamo),
-    statCard('Devueltos (totales)', A.devuelto)
-  ].join('');
-
-  const bottomRow = [
-    listCard('Top usuarios (totales)', A.topUsuarios),
-    listCard('Top títulos (totales)', A.topTitulos)
-  ].join('');
-
+  const pct = A.total > 0 ? Math.round((A.devuelto / A.total) * 100) : 0;
   host.innerHTML = `
-    <div class="stats-top" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:8px">
-      ${topRow}
+    <div style="background:linear-gradient(135deg,#ecfeff,#e0f2fe);border:1.5px solid #a5f3fc;border-radius:14px;padding:16px 18px;">
+      <div style="font-size:11px;font-weight:700;color:#0891b2;letter-spacing:.6px;text-transform:uppercase;margin-bottom:6px;font-family:'Inter',sans-serif;">📚 Total registros</div>
+      <div style="font-size:32px;font-weight:900;color:#0c1523;font-family:'Inter',sans-serif;letter-spacing:-1px;">${A.total}</div>
+      <div style="font-size:12px;color:#0891b2;margin-top:2px;font-family:'Inter',sans-serif;">${pct}% devueltos</div>
     </div>
-    <div class="stats-bottom" style="display:grid;grid-template-columns:repeat(2,minmax(220px,1.2fr));gap:10px">
-      ${bottomRow}
+    <div style="background:linear-gradient(135deg,#fff1f2,#fee2e2);border:1.5px solid #fecaca;border-radius:14px;padding:16px 18px;">
+      <div style="font-size:11px;font-weight:700;color:#dc2626;letter-spacing:.6px;text-transform:uppercase;margin-bottom:6px;font-family:'Inter',sans-serif;">📖 En préstamo</div>
+      <div style="font-size:32px;font-weight:900;color:#0c1523;font-family:'Inter',sans-serif;letter-spacing:-1px;">${A.prestamo}</div>
+      <div style="font-size:12px;color:#dc2626;margin-top:2px;font-family:'Inter',sans-serif;">libros fuera actualmente</div>
+    </div>
+    <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #bbf7d0;border-radius:14px;padding:16px 18px;">
+      <div style="font-size:11px;font-weight:700;color:#16a34a;letter-spacing:.6px;text-transform:uppercase;margin-bottom:6px;font-family:'Inter',sans-serif;">✅ Devueltos</div>
+      <div style="font-size:32px;font-weight:900;color:#0c1523;font-family:'Inter',sans-serif;letter-spacing:-1px;">${A.devuelto}</div>
+      <div style="font-size:12px;color:#16a34a;margin-top:2px;font-family:'Inter',sans-serif;">registros completados</div>
     </div>`;
 }
   function domRowsToArray(){
