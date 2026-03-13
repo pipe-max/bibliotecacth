@@ -2268,11 +2268,45 @@ __applyPrivacyLock__();
 
 let TOKEN_CACHE = null;
 let currentUserEmail = null;
+const LOGIN_SESSION_KEY = 'cth_login_session_v1';
 const ALLOWED_EMAILS = ['pipe@theodoro.edu.co', 'bibliotecacth@theodoro.edu.co'];
 // ⚠️ REEMPLAZA este valor con tu Google OAuth Client ID
 // Instrucciones: https://console.cloud.google.com → Credentials → OAuth 2.0 Client IDs
 const GOOGLE_CLIENT_ID = '518895415463-kutme23g6q7huel5n0uiadvorv3ges5t.apps.googleusercontent.com';
 let currentBook = null;
+
+function saveLoginSession(){
+  try{
+    if(!isUnlocked || !currentUserEmail || !TOKEN_CACHE){
+      sessionStorage.removeItem(LOGIN_SESSION_KEY);
+      return;
+    }
+    sessionStorage.setItem(LOGIN_SESSION_KEY, JSON.stringify({
+      email: currentUserEmail,
+      token: TOKEN_CACHE
+    }));
+  }catch(_){}
+}
+
+function restoreLoginSession(){
+  try{
+    const raw = sessionStorage.getItem(LOGIN_SESSION_KEY);
+    if(!raw) return false;
+    const data = JSON.parse(raw);
+    const email = String(data.email || '').toLowerCase().trim();
+    const token = String(data.token || '').trim();
+    if(!email || !token || !ALLOWED_EMAILS.includes(email)) return false;
+    currentUserEmail = email;
+    TOKEN_CACHE = token;
+    isUnlocked = true;
+    __applyPrivacyLock__();
+    updateLoginBtn();
+    return true;
+  }catch(_){
+    try{ sessionStorage.removeItem(LOGIN_SESSION_KEY); }catch(__){}
+    return false;
+  }
+}
 
 // Función que actualiza el botón LOGIN y muestra/oculta el botón Registros según estado de sesión
 function updateLoginBtn(){
@@ -2313,6 +2347,7 @@ function handleGoogleCredential(response){
     currentUserEmail = email;
     isUnlocked = true;
     __applyPrivacyLock__();
+    saveLoginSession();
     updateLoginBtn();
     const nombre = email.startsWith('pipe@') ? 'Pipe' : 'Maritza';
     uiAlert && uiAlert('👋 ¡Hola, ' + nombre + '!', 'Ya puedes reservar o registrar devoluciones.', 'login');
@@ -2327,6 +2362,7 @@ document.getElementById('loginBtn')?.addEventListener('click', ()=>{
     isUnlocked = false;
     TOKEN_CACHE = null;
     currentUserEmail = null;
+    try{ sessionStorage.removeItem(LOGIN_SESSION_KEY); }catch(_){}
     if(window.google && google.accounts && google.accounts.id) google.accounts.id.disableAutoSelect();
     __applyPrivacyLock__();
     updateLoginBtn();
@@ -2368,6 +2404,7 @@ document.getElementById('unlock')?.addEventListener('click', ()=>{
 });
 
 updateLoginBtn();
+restoreLoginSession();
 
 // Hook: recordamos el libro actual y habilitamos botones según disponibilidad
 const __openModal = openModal;
