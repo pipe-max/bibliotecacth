@@ -116,7 +116,7 @@
   .site-header-content{
     position: relative;
     z-index: 3;
-    padding-bottom: 95px; /* más alto para subir la barra de búsqueda */
+    padding-bottom: 78px;
   }
 
   .site-header > .site-header-content > #logo{ display:none; }
@@ -128,7 +128,7 @@
     position: relative;
     z-index: 3;
     max-width: 580px;
-    margin: 0 auto;
+    margin: 12px auto 0;
     background: #fff;
     border-radius: 999px;
     box-shadow: 0 8px 32px rgba(2,8,23,.15);
@@ -189,7 +189,7 @@
 
   .promo-banner{
     margin: 18px auto 10px;
-    padding: 28px 44px 22px;
+    padding: 24px 34px 18px;
     border-radius: 30px;
     border: 1px solid #d9e6f2;
     background:
@@ -200,8 +200,8 @@
   }
   .promo-banner-grid{
     display:grid;
-    grid-template-columns: minmax(0,1.42fr) minmax(400px,.72fr);
-    gap:42px;
+    grid-template-columns: minmax(0,1.3fr) minmax(360px,.7fr);
+    gap:30px;
     align-items:center;
   }
   .promo-main{
@@ -241,8 +241,8 @@
   }
   .promo-poster{
     position:relative;
-    width:min(100%, 1040px);
-    margin:18px 0 0;
+    width:min(100%, 920px);
+    margin:14px 0 0;
     border-radius:18px;
     overflow:hidden;
     border:1px solid #d9e6f2;
@@ -300,19 +300,19 @@
   }
   .promo-side{
     display:grid;
-    gap:20px;
+    gap:16px;
     align-content:center;
     align-self:center;
-    padding-top: 34px;
+    padding-top: 24px;
   }
   .promo-card{
     background:rgba(255,255,255,.78);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border:1px solid #e2e8f0;
-    border-radius:28px;
-    padding:28px 30px;
-    min-height: 164px;
+    border-radius:24px;
+    padding:24px 26px;
+    min-height: 150px;
     display:flex;
     flex-direction:column;
     justify-content:center;
@@ -320,7 +320,7 @@
   }
   .promo-card .tag{
     display:inline-block;
-    margin-bottom:14px;
+    margin-bottom:12px;
     color:#64748b;
     font-size:12px;
     font-weight:800;
@@ -328,9 +328,9 @@
     text-transform:uppercase;
   }
   .promo-card h3{
-    margin:0 0 12px;
+    margin:0 0 10px;
     color:#0f172a;
-    font-size:28px;
+    font-size:24px;
     line-height:1.08;
     letter-spacing:-.6px;
   }
@@ -1489,20 +1489,6 @@ html{ scroll-behavior: smooth; }
           <p>Usa esta tarjeta para contar que llegaron títulos nuevos y motivar a explorar el catálogo desde el buscador.</p>
         </article>
       </div>
-    </div>
-  </section>
-
-  <section aria-label="Descubrir por categoría">
-    <div class="discover-bar">
-      <div>
-        <h3>Explora por categoría</h3>
-        <p>Atajos para navegar más rápido por el catálogo.</p>
-      </div>
-      <div id="quickFilters" class="quick-filters"></div>
-    </div>
-    <div id="activeFilters" class="active-filters" aria-live="polite">
-      <div id="activeFiltersText" class="active-filters-text"></div>
-      <button id="resetFiltersBtn" class="reset-filters-btn" type="button">Limpiar filtros</button>
     </div>
   </section>
 
