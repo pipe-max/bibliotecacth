@@ -1,4 +1,25 @@
-[build]
-  publish = "public"
+plugins = []
+headers = []
+redirects = []
+
 [functions]
-  node_bundler = "esbuild"
+
+  [functions."*"]
+
+[build]
+publish = "/Users/andresgonzalez/.gemini/antigravity/scratch/bibliotecacth"
+publishOrigin = "default"
+
+  [build.environment]
+
+  [build.processing]
+
+    [build.processing.css]
+
+    [build.processing.html]
+
+    [build.processing.images]
+
+    [build.processing.js]
+
+  [build.services]
