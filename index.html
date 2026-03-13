@@ -3053,26 +3053,27 @@ function __toggleClearBtn(){ try{ var el=document.getElementById('clearQ'); var 
 }
 .rv-backdrop::backdrop{background:rgba(15,23,42,.55)}
 .rv-modal{
-  width: fit-content;
-  max-width: min(840px, 88vw);
-  min-width: min(340px, 88vw);
+  width: min(900px, 92vw);
   border: 0;
   padding: 0;
   border-radius: 24px;
   background: transparent;
   box-shadow: none !important; /* evita el rectángulo fantasma del selector dialog{} */
-  /* El dialog usa position:fixed con margin:auto del navegador; al ser fit-content
-     su ancho coincide con la tarjeta interior y queda perfectamente centrado */
+  /* Flexbox centra la tarjeta interior dentro del contenedor transparente */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .rv-card{
   background: var(--rv-bg);
-  border-radius: 24px;
-  padding: 22px 22px 18px;
+  border-radius: 28px;
+  padding: 38px 44px 34px;
   box-shadow:
     0 30px 90px rgba(2,8,23,.25),
     0 8px 20px rgba(2,8,23,.07);
+  width: 100%;
 }
-.rv-head{ text-align:center; margin-bottom: 18px;}
+.rv-head{ text-align:center; margin-bottom: 28px;}
 .rv-title{
   font-size: 30px; line-height:1.1; margin:0; font-weight: 900; color: var(--rv-text);
 }
@@ -3080,13 +3081,13 @@ function __toggleClearBtn(){ try{ var el=document.getElementById('clearQ'); var 
 .rv-sub{ margin-top:8px; color: var(--rv-muted); font-size: 18px; }
 
 .rv-body{ margin-top: 10px; }
-.rv-grid{ display:grid; grid-template-columns: 1fr; row-gap:16px; column-gap:16px; }
+.rv-grid{ display:grid; grid-template-columns: 1fr; row-gap:24px; column-gap:22px; }
 @media(min-width:940px){ .rv-grid{ grid-template-columns: 1fr 1fr; } }
-.rv-field{ display:flex; flex-direction:column; gap:10px; }
-.rv-label{ font-weight: 800; font-size:20px; color:#111827; }
+.rv-field{ display:flex; flex-direction:column; gap:12px; }
+.rv-label{ font-weight: 800; font-size:18px; color:#111827; letter-spacing:-.2px; }
 
 .rv-input, .rv-select {
-  font-size:18px; padding:16px 14px;
+  font-size:17px; padding:18px 20px;
   border:1px solid var(--rv-border);
   border-radius: 16px; outline: none; background:#fff;
   box-shadow: 0 10px 30px rgba(2,8,23,.06);
@@ -3103,16 +3104,16 @@ function __toggleClearBtn(){ try{ var el=document.getElementById('clearQ'); var 
 #notifyDlg .rv-title{ text-align:center; }
 
 /* Botones */
-.rv-actions{ display:flex; justify-content:center; gap:16px; margin-top: 14px; }
+.rv-actions{ display:flex; justify-content:center; gap:16px; margin-top: 28px; }
 .rv-btn{
-  border-radius: 16px; padding:14px 22px; font-weight: 800; cursor: pointer;
+  border-radius: 999px; padding:15px 32px; font-weight: 800; cursor: pointer; font-size:16px;
   border:1px solid var(--rv-border); background:#fff;
 }
 .rv-btn.primary{ background: var(--rv-primary); color: #fff; border-color: var(--rv-primary); }
 .rv-btn.ghost{ background: #fff; color: #111827; }
 
 /* Ayuda */
-.rv-help{ grid-column:1 / -1; text-align:center; color: var(--rv-muted); margin-top:8px; font-size:16px; }
+.rv-help{ grid-column:1 / -1; text-align:center; color: var(--rv-muted); margin-top:16px; font-size:15px; }
 .rv-help b{ font-weight:900; color:#111827 }
 /* ===== Fin ventana de reserva ===== */
 
@@ -3637,57 +3638,57 @@ async function updateVisibleCardsAvailability(){
 </script>
 
 <dialog id="confirmDlg" class="rv-modal rv-backdrop">
-  <div class="rv-card" style="text-align:center;max-width:480px;padding:36px 36px 28px;">
+  <div class="rv-card" style="text-align:center;max-width:640px;width:min(640px,100%);padding:52px 60px 44px;">
     <!-- Ícono -->
-    <div style="width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,#dbeafe,#bfdbfe);display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 18px;box-shadow:0 8px 24px rgba(2,132,199,.18);">🔄</div>
+    <div style="width:76px;height:76px;border-radius:22px;background:linear-gradient(135deg,#dbeafe,#bfdbfe);display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 24px;box-shadow:0 10px 30px rgba(2,132,199,.18);">🔄</div>
     <!-- Título -->
-    <h2 id="cTitle" style="margin:0 0 6px;font-size:22px;font-weight:900;color:#0c1523;font-family:'Inter',sans-serif;letter-spacing:-.3px;">Confirmar</h2>
-    <div id="cSub" style="font-size:13px;color:#64748b;font-family:'Inter',sans-serif;margin-bottom:18px;"></div>
+    <h2 id="cTitle" style="margin:0 0 8px;font-size:26px;font-weight:900;color:#0c1523;font-family:'Inter',sans-serif;letter-spacing:-.4px;">Confirmar</h2>
+    <div id="cSub" style="font-size:14px;color:#64748b;font-family:'Inter',sans-serif;margin-bottom:22px;"></div>
     <!-- Mensaje -->
-    <div id="cMsg" style="font-size:14.5px;color:#334155;font-family:'Inter',sans-serif;font-weight:500;line-height:1.65;white-space:pre-line;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;padding:14px 18px;margin-bottom:22px;text-align:left;"></div>
+    <div id="cMsg" style="font-size:15.5px;color:#334155;font-family:'Inter',sans-serif;font-weight:500;line-height:1.7;white-space:pre-line;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:16px;padding:18px 24px;margin-bottom:28px;text-align:left;"></div>
     <!-- Lista (picker) -->
     <div id="cList" class="rv-list" style="display:none;margin-bottom:16px;"></div>
     <!-- Acciones -->
-    <div class="rv-actions" style="gap:12px;">
-      <button type="button" id="cOk" style="flex:1;background:linear-gradient(135deg,#0284c7,#38bdf8);color:#fff;border:none;border-radius:999px;padding:13px 24px;font-size:15px;font-weight:800;font-family:'Inter',sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(2,132,199,.30);transition:filter .15s,transform .12s;" onmouseover="this.style.filter='brightness(1.07)'" onmouseout="this.style.filter=''" onmousedown="this.style.transform='scale(.97)'" onmouseup="this.style.transform=''">Confirmar devolución</button>
-      <button type="button" id="cCancel" style="flex:1;background:#fff;color:#475569;border:1.5px solid #e2e8f0;border-radius:999px;padding:13px 24px;font-size:15px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:background .15s,border-color .15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">Cancelar</button>
+    <div class="rv-actions" style="gap:14px;">
+      <button type="button" id="cOk" style="flex:1;background:linear-gradient(135deg,#0284c7,#38bdf8);color:#fff;border:none;border-radius:999px;padding:16px 28px;font-size:16px;font-weight:800;font-family:'Inter',sans-serif;cursor:pointer;box-shadow:0 6px 20px rgba(2,132,199,.32);transition:filter .15s,transform .12s;" onmouseover="this.style.filter='brightness(1.07)'" onmouseout="this.style.filter=''" onmousedown="this.style.transform='scale(.97)'" onmouseup="this.style.transform=''">Confirmar devolución</button>
+      <button type="button" id="cCancel" style="flex:1;background:#fff;color:#475569;border:1.5px solid #e2e8f0;border-radius:999px;padding:16px 28px;font-size:16px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:background .15s,border-color .15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">Cancelar</button>
     </div>
   </div>
 </dialog>
 
 <dialog id="notifyDlg" class="rv-modal rv-backdrop">
-  <div class="rv-card" id="notifyCard" style="text-align:center;max-width:460px;padding:36px 36px 28px;">
+  <div class="rv-card" id="notifyCard" style="text-align:center;max-width:620px;width:min(620px,100%);padding:52px 60px 44px;">
     <!-- Ícono grande con fondo de color según variante -->
     <div id="nIconWrap" style="
-      width:72px;height:72px;
-      border-radius:22px;
+      width:84px;height:84px;
+      border-radius:24px;
       display:flex;align-items:center;justify-content:center;
-      font-size:36px;
-      margin:0 auto 20px;
+      font-size:42px;
+      margin:0 auto 28px;
       background:linear-gradient(135deg,#dcfce7,#bbf7d0);
-      box-shadow:0 8px 24px rgba(22,163,74,.20);
+      box-shadow:0 10px 30px rgba(22,163,74,.22);
     ">
       <span id="nIcon">✅</span>
     </div>
     <!-- Título -->
     <h2 id="nTitle" style="
-      margin:0 0 10px;
-      font-size:22px;
+      margin:0 0 14px;
+      font-size:26px;
       font-weight:900;
       color:#0c1523;
       font-family:'Inter',sans-serif;
-      letter-spacing:-.3px;
+      letter-spacing:-.4px;
       line-height:1.15;
     ">¡Listo!</h2>
     <!-- Mensaje -->
     <div id="nMsg" style="
-      font-size:14.5px;
+      font-size:16px;
       color:#475569;
       font-family:'Inter',sans-serif;
       font-weight:500;
-      line-height:1.65;
+      line-height:1.7;
       white-space:pre-line;
-      margin-bottom:24px;
+      margin-bottom:32px;
     "></div>
     <!-- Acciones -->
     <div class="rv-actions" style="margin-top:0;">
@@ -3696,12 +3697,12 @@ async function updateVisibleCardsAvailability(){
         color:#fff;
         border:none;
         border-radius:999px;
-        padding:13px 40px;
-        font-size:15px;
+        padding:16px 52px;
+        font-size:17px;
         font-weight:800;
         font-family:'Inter',sans-serif;
         cursor:pointer;
-        box-shadow:0 4px 14px rgba(22,163,74,.30);
+        box-shadow:0 6px 20px rgba(22,163,74,.32);
         transition:filter .15s,transform .12s;
       "
         onmouseover="this.style.filter='brightness(1.07)'"
