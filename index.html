@@ -189,8 +189,8 @@
 
   .promo-banner{
     margin: 18px auto 10px;
-    padding: 26px;
-    border-radius: 28px;
+    padding: 28px 44px 22px;
+    border-radius: 30px;
     border: 1px solid #d9e6f2;
     background:
       radial-gradient(circle at top right, rgba(249,115,22,.18), transparent 28%),
@@ -200,9 +200,9 @@
   }
   .promo-banner-grid{
     display:grid;
-    grid-template-columns: minmax(0,1.2fr) minmax(320px,.8fr);
-    gap:18px;
-    align-items:stretch;
+    grid-template-columns: minmax(0,1.42fr) minmax(400px,.72fr);
+    gap:42px;
+    align-items:center;
   }
   .promo-main{
     min-width:0;
@@ -214,14 +214,14 @@
     display:inline-flex;
     align-items:center;
     gap:8px;
-    padding:8px 12px;
+    padding:10px 18px;
     border-radius:999px;
     background:rgba(255,255,255,.78);
     border:1px solid #dbeafe;
     color:#0f172a;
-    font-size:12px;
+    font-size:11px;
     font-weight:800;
-    letter-spacing:.08em;
+    letter-spacing:.09em;
     text-transform:uppercase;
   }
   .promo-main h2{
@@ -241,12 +241,12 @@
   }
   .promo-poster{
     position:relative;
-    width:min(100%, 560px);
+    width:min(100%, 1040px);
     margin:18px 0 0;
-    border-radius:22px;
+    border-radius:18px;
     overflow:hidden;
     border:1px solid #d9e6f2;
-    box-shadow:0 18px 34px rgba(15,23,42,.12);
+    box-shadow:0 14px 30px rgba(15,23,42,.10);
     background:
       linear-gradient(180deg, rgba(15,23,42,.12), rgba(15,23,42,.04)),
       linear-gradient(145deg, #2d1b12 0%, #5e3721 35%, #a9652b 100%);
@@ -254,7 +254,8 @@
   .promo-poster img{
     width:100%;
     display:block;
-    object-fit:cover;
+    object-fit:contain;
+    background:#e8eef5;
     aspect-ratio:auto;
   }
   .promo-poster-fallback{
@@ -299,25 +300,27 @@
   }
   .promo-side{
     display:grid;
-    gap:18px;
+    gap:20px;
     align-content:center;
     align-self:center;
+    padding-top: 34px;
   }
   .promo-card{
     background:rgba(255,255,255,.78);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border:1px solid #e2e8f0;
-    border-radius:22px;
-    padding:24px 28px;
-    min-height: 198px;
+    border-radius:28px;
+    padding:28px 30px;
+    min-height: 164px;
     display:flex;
     flex-direction:column;
     justify-content:center;
+    box-shadow: 0 6px 18px rgba(15,23,42,.04);
   }
   .promo-card .tag{
     display:inline-block;
-    margin-bottom:12px;
+    margin-bottom:14px;
     color:#64748b;
     font-size:12px;
     font-weight:800;
@@ -325,17 +328,18 @@
     text-transform:uppercase;
   }
   .promo-card h3{
-    margin:0 0 10px;
+    margin:0 0 12px;
     color:#0f172a;
-    font-size:24px;
-    line-height:1.15;
-    letter-spacing:-.45px;
+    font-size:28px;
+    line-height:1.08;
+    letter-spacing:-.6px;
   }
   .promo-card p{
     margin:0;
     color:#64748b;
-    font-size:15px;
-    line-height:1.6;
+    font-size:14px;
+    line-height:1.55;
+    max-width:34ch;
   }
   .discover-bar{
     display:flex;
