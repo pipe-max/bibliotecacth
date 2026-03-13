@@ -1653,7 +1653,7 @@ async function boot(){
 
   // ── 2. Fetch en background (o inicial si no hay caché) ───────────────────
   try {
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}&t=${Date.now()}`;
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}&t=${Date.now()}&r=${Math.random().toString(36).slice(2)}`;
     const res = await fetch(url, { cache: 'no-store' });
     const txt = await res.text();
     const {cols, rows} = parseGViz(txt);
@@ -3053,11 +3053,16 @@ function __toggleClearBtn(){ try{ var el=document.getElementById('clearQ'); var 
 }
 .rv-backdrop::backdrop{background:rgba(15,23,42,.55)}
 .rv-modal{
-  width: min(840px, 88vw);
+  width: fit-content;
+  max-width: min(840px, 88vw);
+  min-width: min(340px, 88vw);
   border: 0;
   padding: 0;
   border-radius: 24px;
   background: transparent;
+  box-shadow: none !important; /* evita el rectángulo fantasma del selector dialog{} */
+  /* El dialog usa position:fixed con margin:auto del navegador; al ser fit-content
+     su ancho coincide con la tarjeta interior y queda perfectamente centrado */
 }
 .rv-card{
   background: var(--rv-bg);
@@ -3947,7 +3952,7 @@ async function updateVisibleCardsAvailability(){
   }
 
   async function loadRecentLogs(limit = 30){
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${LOANS_GID}&t=${Date.now()}`;
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${LOANS_GID}&t=${Date.now()}&r=${Math.random().toString(36).slice(2)}`;
     const res = await fetch(url, { cache: 'no-store' });
     const txt = await res.text();
     const parse = (typeof parseGViz === 'function') ? (t=>{const p=parseGViz(t); return {cols:p.cols, rows:p.rows};}) : parseGVizRobusto;
@@ -3982,6 +3987,8 @@ async function updateVisibleCardsAvailability(){
     try{ items.forEach(it => { it.fechaPrestamo = formatGvizDate(it.fechaPrestamo); it.fechaDevolucion = formatGvizDate(it.fechaDevolucion); }); }catch(_){}
     return items.slice(0, limit);
   }
+  // Exponer globalmente para que los hooks intermedios puedan usarla
+  window.loadRecentLogs = loadRecentLogs;
 
   // Define/Reemplaza openLogs global sin tocar el resto del sitio
   window.openLogs = async function(){
@@ -3994,7 +4001,7 @@ async function updateVisibleCardsAvailability(){
     if(!dlg || !tbody){ console.warn('[logs] Falta el dialog'); return; }
     try{ dlg.showModal(); }catch(_){ dlg.setAttribute('open',''); dlg.style.display='block'; }
     tbody.innerHTML = '<tr><td style="padding:32px;text-align:center;color:#94a3b8;font-family:\'Inter\',sans-serif;font-size:14px;" colspan="7">⏳ Cargando registros…</td></tr>';
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${LOANS_GID}&t=${Date.now()}`;
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${LOANS_GID}&t=${Date.now()}&r=${Math.random().toString(36).slice(2)}`;
     try{
       // Pedimos un número alto de registros para abarcar todo el historial de préstamos
       const items = await loadRecentLogs(500);
@@ -5252,7 +5259,7 @@ b2.addEventListener('click', function(){ cleanPrint('all', false); });
   }
 
   async function fetchAllLogs(){
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${LOANS_GID}&t=${Date.now()}`;
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${LOANS_GID}&t=${Date.now()}&r=${Math.random().toString(36).slice(2)}`;
     const res = await fetch(url, {cache:'no-store'});
     const txt = await res.text();
     const parse = (typeof parseGViz === 'function') ? (t=>{const p=parseGViz(t); return {cols:p.cols, rows:p.rows};}) : parseGVizRobusto;
