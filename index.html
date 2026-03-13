@@ -187,7 +187,7 @@
   }
   .hero-search-wrap .clear-btn.show{ opacity:.7; pointer-events:auto; }
 
-  /* Frase del día — fuera del header, debajo del rectángulo */
+  /* Frase del día — fuera del header, centrada entre rectángulo y cards */
   .hero-daily-quote{
     display: block;
     text-align: center;
@@ -196,8 +196,10 @@
     color: #9ca3af;
     letter-spacing: .2px;
     line-height: 1.45;
-    padding: 0px 0px 0;
-    margin: 0;
+    padding: 0 12px;
+    margin-top: -54px;
+    position: relative;
+    z-index: 5;
     animation: quoteFadeIn .7s ease both;
   }
   @keyframes quoteFadeIn{
@@ -218,7 +220,7 @@
   .toolbar .search-wrap{ display:none !important; }
 
   /* El wrap de la imagen no tiene margen top negativo ahora que el fondo es blanco */
-  .wrap{ padding-top: 0; }
+  .wrap{ padding-top: 28px; }
   .input,select{
     background:var(--card);
     border:1px solid #dde3ed;
