@@ -200,13 +200,14 @@
   }
   .promo-banner-grid{
     display:grid;
-    grid-template-columns: minmax(320px,.92fr) minmax(0,1.08fr);
-    gap:18px;
-    align-items:stretch;
+    grid-template-columns: minmax(240px,320px) minmax(0,1fr);
+    gap:28px;
+    align-items:center;
   }
   .promo-visual{
     position:relative;
-    min-height: 100%;
+    width:100%;
+    max-width:320px;
     border-radius:24px;
     overflow:hidden;
     border:1px solid #d9e6f2;
@@ -264,6 +265,7 @@
   }
   .promo-main{
     min-width:0;
+    max-width:720px;
   }
   .promo-eyebrow{
     display:inline-flex;
@@ -281,15 +283,15 @@
   }
   .promo-main h2{
     margin:14px 0 10px;
-    font-size:36px;
-    line-height:1.02;
+    font-size:30px;
+    line-height:1.06;
     letter-spacing:-.9px;
     color:#0f172a;
-    max-width:12ch;
+    max-width:14ch;
   }
   .promo-main p{
     margin:0;
-    max-width:62ch;
+    max-width:54ch;
     color:#475569;
     font-size:15px;
     line-height:1.68;
@@ -321,40 +323,6 @@
     color:#0f172a;
     border:1px solid #dbe3ee;
     box-shadow:0 8px 18px rgba(15,23,42,.06);
-  }
-  .promo-side{
-    display:grid;
-    gap:12px;
-    align-content:start;
-  }
-  .promo-card{
-    background:rgba(255,255,255,.78);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border:1px solid #e2e8f0;
-    border-radius:22px;
-    padding:18px 18px 16px;
-  }
-  .promo-card .tag{
-    display:inline-block;
-    margin-bottom:10px;
-    color:#64748b;
-    font-size:11px;
-    font-weight:800;
-    letter-spacing:.08em;
-    text-transform:uppercase;
-  }
-  .promo-card h3{
-    margin:0 0 6px;
-    color:#0f172a;
-    font-size:20px;
-    letter-spacing:-.35px;
-  }
-  .promo-card p{
-    margin:0;
-    color:#64748b;
-    font-size:14px;
-    line-height:1.55;
   }
   .discover-bar{
     display:flex;
@@ -1493,23 +1461,11 @@ html{ scroll-behavior: smooth; }
       <div class="promo-main">
         <span class="promo-eyebrow">Destacado de biblioteca</span>
         <h2>Concurso de cuento corto: una aventura en la biblioteca</h2>
-        <p>Este destacado ahora está pensado para promocionar la convocatoria principal de la biblioteca. Podemos usarlo para anunciar bases, fechas de cierre, categorías y cualquier novedad importante del concurso.</p>
+        <p>La pieza gráfica ya contiene toda la información principal del concurso, así que aquí dejamos solo una introducción breve y dos accesos rápidos a lecturas relacionadas dentro del catálogo.</p>
         <div class="promo-actions">
           <button class="promo-btn primary" type="button" data-promo-filter="aventura">Ver libros de aventura</button>
           <button class="promo-btn secondary" type="button" data-promo-filter="cuentos">Explorar cuentos</button>
         </div>
-      </div>
-      <div class="promo-side">
-        <article class="promo-card">
-          <span class="tag">Convocatoria abierta</span>
-          <h3>Cierre: 22 de mayo</h3>
-          <p>Usa esta tarjeta para resaltar la fecha límite, el correo de envío y cualquier instrucción breve para participar.</p>
-        </article>
-        <article class="promo-card">
-          <span class="tag">Categorías</span>
-          <h3>De 6 a 9, de 10 a 13 y 14+</h3>
-          <p>También podemos usar este espacio para mostrar edades, idioma o una nota rápida sobre las bases del concurso.</p>
-        </article>
       </div>
     </div>
   </section>
