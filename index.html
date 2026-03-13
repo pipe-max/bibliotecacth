@@ -1380,7 +1380,7 @@ function asBook(cols, row){
 
 function computeCounters(list){
   tCount.textContent = list.length;
-  const disp = list.filter(b=> (b.disponible||"").toLowerCase().includes("dispon")).length;
+  const disp = list.filter(b=> (b.disponible||"").toLowerCase().trim() === "disponible").length;
   dCount.textContent = disp;
 }
 
