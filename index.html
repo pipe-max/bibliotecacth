@@ -1307,8 +1307,10 @@ function asBook(cols, row){
   const categoria= normalize(get("Categoría"));
   const clasif   = normalize(get("Clasificación"));
   const ejemplar = toInt(get("Ejemplares"));
-  const prestamo = toInt(get("En prestamo"));
-  const dispo    = normalize(get("Disponible")) || (ejemplar - prestamo > 0 ? "Disponible" : "No disponible");
+  // No usar el campo "En prestamo" de la hoja: siempre inicia en 0.
+  // La disponibilidad real se verifica con updateVisibleCardsAvailability() contra el servidor.
+  const prestamo = 0;
+  const dispo    = ejemplar > 0 ? "Disponible" : "No disponible";
   const obs      = normalize(get("Observaciones"));
   const portada  = normalize(get("Portada"));
   return { titulo, autor, sinopsis, editorial, categoria, clasif, ejemplares:ejemplar, prestamo, disponible:dispo, obs, portada };
