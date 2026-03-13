@@ -4373,16 +4373,22 @@ async function updateVisibleCardsAvailability(){
       <div id="logsStats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;"></div>
 
       <!-- Barra de búsqueda y filtros -->
-      <div id="logsControls" style="display:flex;gap:8px;align-items:center;margin-bottom:0;padding-bottom:16px;border-bottom:1.5px solid #f1f5f9;">
-        <div style="position:relative;flex:1;">
+      <div id="logsControls" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:0;padding-bottom:16px;border-bottom:1.5px solid #f1f5f9;">
+        <div style="position:relative;flex:1 1 320px;min-width:260px;">
           <span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:14px;opacity:.45;pointer-events:none;">🔍</span>
           <input id="logsSearch" type="search" placeholder="Buscar por nombre o título..." style="width:100%;padding:10px 14px 10px 38px;border:1.5px solid #e2e8f0;border-radius:12px;font-size:14px;font-family:'Inter',sans-serif;font-weight:500;color:#0c1523;background:#f8fafc;outline:none;box-sizing:border-box;transition:border-color .15s,box-shadow .15s;" onfocus="this.style.borderColor='#0284c7';this.style.boxShadow='0 0 0 4px rgba(2,132,199,.12)'" onblur="this.style.borderColor='#e2e8f0';this.style.boxShadow=''">
         </div>
+        <input id="logsGrade" type="search" placeholder="Filtrar por grado..." style="flex:0 1 170px;min-width:150px;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:12px;font-size:14px;font-family:'Inter',sans-serif;font-weight:500;color:#0c1523;background:#f8fafc;outline:none;box-sizing:border-box;">
+        <input id="logsDateFrom" type="date" aria-label="Desde fecha de préstamo" style="flex:0 1 170px;min-width:155px;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:12px;font-size:14px;font-family:'Inter',sans-serif;font-weight:500;color:#0c1523;background:#f8fafc;outline:none;box-sizing:border-box;">
+        <input id="logsDateTo" type="date" aria-label="Hasta fecha de préstamo" style="flex:0 1 170px;min-width:155px;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:12px;font-size:14px;font-family:'Inter',sans-serif;font-weight:500;color:#0c1523;background:#f8fafc;outline:none;box-sizing:border-box;">
         <select id="logsEstado" style="padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:12px;font-size:14px;font-family:'Inter',sans-serif;font-weight:600;color:#0c1523;background:#f8fafc;outline:none;cursor:pointer;min-width:140px;">
           <option value="">Todos</option>
           <option value="En préstamo">📖 En préstamo</option>
           <option value="Devuelto">✅ Devuelto</option>
         </select>
+        <button id="logsReset" type="button" style="padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;font-size:13px;font-family:'Inter',sans-serif;font-weight:700;color:#475569;cursor:pointer;">Limpiar</button>
+        <button id="logsPdfPrestados" type="button" style="padding:10px 14px;border:none;border-radius:12px;background:linear-gradient(135deg,#0f766e,#14b8a6);font-size:13px;font-family:'Inter',sans-serif;font-weight:800;color:#fff;cursor:pointer;box-shadow:0 8px 18px rgba(20,184,166,.18);">PDF prestados</button>
+        <button id="logsPdfDevueltos" type="button" style="padding:10px 14px;border:none;border-radius:12px;background:linear-gradient(135deg,#166534,#22c55e);font-size:13px;font-family:'Inter',sans-serif;font-weight:800;color:#fff;cursor:pointer;box-shadow:0 8px 18px rgba(34,197,94,.18);">PDF devueltos</button>
         <span id="logsCount" style="font-size:13px;font-weight:700;color:#475569;white-space:nowrap;background:#f1f5f9;padding:9px 16px;border-radius:999px;font-family:'Inter',sans-serif;border:1px solid #e2e8f0;">—</span>
       </div>
     </div>
@@ -5516,6 +5522,7 @@ async function updateVisibleCardsAvailability(){
   function installBtns(){
     var dlg = document.getElementById('logsDlg');
     if(!dlg) return;
+    if(document.getElementById('logsPdfPrestados') || document.getElementById('logsPdfDevueltos')) return;
     if(document.getElementById('cthPrintBtns')) return;
     var host = dlg.querySelector('#logsStats') || dlg.querySelector('.modal header') || dlg.querySelector('.modal') || dlg;
     var box = document.createElement('div');
@@ -5782,6 +5789,10 @@ b2.addEventListener('click', function(){ cleanPrint('all', false); });
     items.sort((a,b)=> dateValue(b.fechaPrestamo) - dateValue(a.fechaPrestamo));
     // Formato amigable
     items.forEach(it=>{
+      it.fechaPrestamoRaw = it.fechaPrestamo;
+      it.fechaDevolucionRaw = it.fechaDevolucion;
+      it.fechaPrestamoTs = dateValue(it.fechaPrestamoRaw);
+      it.fechaDevolucionTs = dateValue(it.fechaDevolucionRaw);
       it.fechaPrestamo = formatGvizDate(it.fechaPrestamo);
       it.fechaDevolucion = formatGvizDate(it.fechaDevolucion);
     });
@@ -5793,6 +5804,14 @@ b2.addEventListener('click', function(){ cleanPrint('all', false); });
 
   function el(id){ return document.getElementById(id); }
   function normalize(s){ return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+  function isoDateValue(s){
+    const m = String(s||'').trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if(!m) return 0;
+    return new Date(+m[1], +m[2]-1, +m[3]).setHours(0,0,0,0);
+  }
+  function stateMatch(value, expected){
+    return normalize(value) === normalize(expected);
+  }
 
   function setStats(items){
     const total = items.length;
@@ -5811,14 +5830,76 @@ b2.addEventListener('click', function(){ cleanPrint('all', false); });
   function applyFilters(){
     const q = normalize(el('logsSearch')?.value || '');
     const est = (el('logsEstado')?.value || '').trim().toLowerCase();
+    const grado = normalize(el('logsGrade')?.value || '');
+    const dateFrom = isoDateValue(el('logsDateFrom')?.value || '');
+    const dateTo = isoDateValue(el('logsDateTo')?.value || '');
     let arr = __all.slice();
     if (q){
       arr = arr.filter(x => normalize(x.nombre).includes(q) || normalize(x.titulo).includes(q));
+    }
+    if (grado){
+      arr = arr.filter(x => normalize(x.grado).includes(grado));
+    }
+    if (dateFrom){
+      arr = arr.filter(x => (x.fechaPrestamoTs || 0) >= dateFrom);
+    }
+    if (dateTo){
+      const endOfDay = dateTo + 86400000 - 1;
+      arr = arr.filter(x => (x.fechaPrestamoTs || 0) <= endOfDay);
     }
     if (est){
       arr = arr.filter(x => (x.estado||'').toLowerCase() === est);
     }
     return arr;
+  }
+
+  function buildPdfDoc(title, sub, rows){
+    const esc = (t)=> String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const headings = ['Fecha préstamo','Devolución','Nombre','Grado','Rol','Título del libro','Estado'];
+    const head = headings.map(h=>`<th>${esc(h)}</th>`).join('');
+    const body = rows.map(it => `
+      <tr>
+        <td>${esc(it.fechaPrestamo)}</td>
+        <td>${esc(it.fechaDevolucion || '—')}</td>
+        <td>${esc(it.nombre)}</td>
+        <td>${esc(it.grado || '—')}</td>
+        <td>${esc(it.rol || '—')}</td>
+        <td>${esc(it.titulo)}</td>
+        <td>${esc(it.estado)}</td>
+      </tr>`).join('');
+    return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${esc(title)}</title><style>
+      @page{size:A4 landscape;margin:10mm}
+      body{font:12px/1.35 Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:#0f172a}
+      h1{font-size:18px;margin:0 0 6px}
+      .sub{margin:0 0 12px;color:#475569;font-size:12px}
+      table{border-collapse:collapse;width:100%}
+      th,td{border:1px solid #dbe3ee;padding:6px 8px;text-align:left;vertical-align:top}
+      th{background:#f1f5f9;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+      tr:nth-child(even) td{background:#fafafa}
+      thead{display:table-header-group}
+      tr{page-break-inside:avoid}
+    </style></head><body><h1>${esc(title)}</h1><div class="sub">${esc(sub)}</div><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></body></html>`;
+  }
+
+  function exportLogsPdf(mode){
+    const filtered = applyFilters().filter(it => {
+      if(mode === 'prestamo') return stateMatch(it.estado, 'En préstamo');
+      if(mode === 'devuelto') return stateMatch(it.estado, 'Devuelto');
+      return true;
+    });
+    const label = mode === 'prestamo' ? 'En préstamo' : mode === 'devuelto' ? 'Devueltos' : 'Todos';
+    const doc = buildPdfDoc(
+      `Registros de biblioteca — ${label}`,
+      `${new Date().toLocaleString('es-CO')} · ${filtered.length} registros`,
+      filtered
+    );
+    const w = window.open('', '_blank');
+    if(!w){ alert('Permite ventanas emergentes para exportar el PDF.'); return; }
+    w.document.open();
+    w.document.write(doc);
+    w.document.close();
+    w.focus();
+    setTimeout(()=>{ try{ w.print(); }catch(_){} }, 250);
   }
 
   function render(){
@@ -5880,9 +5961,39 @@ b2.addEventListener('click', function(){ cleanPrint('all', false); });
 
       __page = 1;
       // Bind de filtros (una sola vez)
-      const search = el('logsSearch'), estado = el('logsEstado');
+      const search = el('logsSearch');
+      const estado = el('logsEstado');
+      const grade = el('logsGrade');
+      const dateFrom = el('logsDateFrom');
+      const dateTo = el('logsDateTo');
+      const reset = el('logsReset');
+      const pdfPrest = el('logsPdfPrestados');
+      const pdfDev = el('logsPdfDevueltos');
       if (search && !search.__bound){ search.addEventListener('input', ()=>{__page=1; render();}); search.__bound = true; }
       if (estado && !estado.__bound){ estado.addEventListener('change', ()=>{__page=1; render();}); estado.__bound = true; }
+      if (grade && !grade.__bound){ grade.addEventListener('input', ()=>{__page=1; render();}); grade.__bound = true; }
+      if (dateFrom && !dateFrom.__bound){ dateFrom.addEventListener('change', ()=>{__page=1; render();}); dateFrom.__bound = true; }
+      if (dateTo && !dateTo.__bound){ dateTo.addEventListener('change', ()=>{__page=1; render();}); dateTo.__bound = true; }
+      if (reset && !reset.__bound){
+        reset.addEventListener('click', ()=>{
+          if (search) search.value = '';
+          if (estado) estado.value = '';
+          if (grade) grade.value = '';
+          if (dateFrom) dateFrom.value = '';
+          if (dateTo) dateTo.value = '';
+          __page = 1;
+          render();
+        });
+        reset.__bound = true;
+      }
+      if (pdfPrest && !pdfPrest.__bound){
+        pdfPrest.addEventListener('click', ()=> exportLogsPdf('prestamo'));
+        pdfPrest.__bound = true;
+      }
+      if (pdfDev && !pdfDev.__bound){
+        pdfDev.addEventListener('click', ()=> exportLogsPdf('devuelto'));
+        pdfDev.__bound = true;
+      }
       render();
     }catch(e){
       console.error('[logs] error', e);
