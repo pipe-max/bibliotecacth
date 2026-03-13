@@ -1694,6 +1694,46 @@ function render(){
   document.getElementById("next").disabled = state.page>=max;
 }
 
+// ── Carga todos los préstamos activos de una vez para contar disponibles real ─
+async function syncLoanCounters(){
+  const LOANS_GID = '1311459646';
+  try {
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${LOANS_GID}&t=${Date.now()}`;
+    const res = await fetch(url, { cache: 'no-store' });
+    const txt = await res.text();
+    const start = txt.indexOf('{'), end = txt.lastIndexOf('}');
+    const json = JSON.parse(txt.slice(start, end + 1));
+    const cols = json.table.cols.map(c => (c.label || '').trim().toUpperCase());
+    const iEst = cols.findIndex(c => c === 'ESTADO');
+    const iDev = cols.findIndex(c => c.includes('DEVOLUCI'));
+    const iTit = cols.findIndex(c => c === 'TITULO');
+    if (iTit < 0) return;
+    // Contar préstamos activos por título (sin devolución y estado != devuelto)
+    const activeByTitle = {};
+    (json.table.rows || []).forEach(r => {
+      const cells = (r.c || []).map(c => c ? (c.f != null ? String(c.f) : (c.v != null ? String(c.v) : '')) : '');
+      const titulo = cells[iTit]?.trim();
+      if (!titulo) return;
+      const estado = iEst >= 0 ? String(cells[iEst] || '').trim().toLowerCase() : '';
+      const fDev   = iDev >= 0 ? String(cells[iDev] || '').trim() : '';
+      const isActive = !(estado === 'devuelto' || fDev);
+      if (isActive) activeByTitle[titulo.toLowerCase()] = (activeByTitle[titulo.toLowerCase()] || 0) + 1;
+    });
+    // Actualizar todos los libros con los préstamos reales
+    [state.all, state.rows].forEach(list => {
+      (list || []).forEach(b => {
+        const key = (b.titulo || '').toLowerCase();
+        b.prestamo = activeByTitle[key] || 0;
+        const avail = (Number(b.ejemplares || 0) - b.prestamo) > 0;
+        b.disponible = avail ? 'Disponible' : 'No disponible';
+      });
+    });
+    computeCounters(state.rows);
+  } catch(e) {
+    console.warn('syncLoanCounters:', e);
+  }
+}
+
 async function boot(){
   const CACHE_KEY = 'cth_books_cache';
   const CACHE_TTL = 5 * 60 * 1000; // 5 minutos máximo de antigüedad
@@ -1709,6 +1749,7 @@ async function boot(){
         renderFilters(items);
         render();
         cacheUsed = true;
+        syncLoanCounters(); // ← actualizar contadores con datos reales del caché
         // Si el caché tiene menos de 5 min, no refrescamos en background
         if (Date.now() - ts < CACHE_TTL) return;
       }
@@ -1731,6 +1772,7 @@ async function boot(){
       renderFilters(items);
       render();
     }
+    syncLoanCounters(); // ← siempre actualizar contadores tras cargar libros frescos
   } catch(err) {
     if (!cacheUsed) console.error('Error cargando catálogo:', err);
   }
