@@ -187,16 +187,17 @@
   }
   .hero-search-wrap .clear-btn.show{ opacity:.7; pointer-events:auto; }
 
-  /* Frase del día bajo el buscador */
+  /* Frase del día — fuera del header, debajo del rectángulo */
   .hero-daily-quote{
-    margin-top: 14px;
+    display: block;
+    text-align: center;
     font-size: 13.5px;
     font-weight: 500;
-    color: #6b7280;
-    text-align: center;
+    color: #9ca3af;
     letter-spacing: .2px;
     line-height: 1.45;
-    padding: 0 12px;
+    padding: 10px 20px 0;
+    margin: 0;
     animation: quoteFadeIn .7s ease both;
   }
   @keyframes quoteFadeIn{
@@ -1190,9 +1191,9 @@ html{ scroll-behavior: smooth; }
       <input id="q" class="hero-q" type="search" placeholder="Escribe el título, autor o categoría…" autocomplete="off">
       <button class="hero-search-btn" type="button" aria-label="Buscar">→</button>
     </div>
-    <p id="dailyQuote" class="hero-daily-quote"></p>
   </div>
 </header>
+<p id="dailyQuote" class="hero-daily-quote"></p>
 <div class="wrap">
   <div class="toolbar">
     <div class="select-wrap"><select id="cat"></select><button id="clearCat" class="clear-btn" type="button" aria-label="Limpiar categoría" title="Limpiar">✖</button></div>
