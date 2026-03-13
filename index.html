@@ -116,7 +116,7 @@
   .site-header-content{
     position: relative;
     z-index: 3;
-    padding-bottom: 60px; /* más alto para subir la barra de búsqueda */
+    padding-bottom: 100px; /* subir la barra de búsqueda */
   }
 
   .site-header > .site-header-content > #logo{ display:none; }
@@ -1171,7 +1171,6 @@ html{ scroll-behavior: smooth; }
     <div class="hero-search-wrap">
       <span class="hero-search-icon">🔍</span>
       <input id="q" class="hero-q" type="search" placeholder="Escribe el título, autor o categoría…" autocomplete="off">
-      <button id="clearQ" class="clear-btn" type="button" aria-label="Limpiar" title="Limpiar">✖</button>
       <button class="hero-search-btn" type="button" aria-label="Buscar">→</button>
     </div>
   </div>
@@ -1820,7 +1819,8 @@ function handleGoogleCredential(response){
     isUnlocked = true;
     __applyPrivacyLock__();
     updateLoginBtn();
-    uiAlert && uiAlert('¡Bienvenida!', 'Sesión iniciada como ' + email + '. Ya puedes reservar o registrar devoluciones.');
+    const nombre = email.startsWith('pipe@') ? 'Pipe' : 'Maritza';
+    uiAlert && uiAlert('👋 ¡Hola, ' + nombre + '!', 'Ya puedes reservar o registrar devoluciones.', 'login');
   }catch(err){
     console.error('Error al procesar login Google:', err);
   }
@@ -3443,7 +3443,17 @@ function uiAlert(title, message, variant, opts){
 ${message||''}`); return Promise.resolve(); }
   opts = opts || {};
   if(opts.hideOk){ try{ dlg.classList.add('no-ok'); }catch(_){ } }
-  try{ dlg.classList.toggle('error', variant === 'error'); }catch(_){}
+  try{
+    dlg.classList.toggle('error', variant === 'error');
+    dlg.classList.toggle('login-toast', variant === 'login');
+  }catch(_){}
+  // Ícono según variante
+  const iconEl = dlg.querySelector('#nIcon');
+  if(iconEl){
+    if(variant === 'login') iconEl.textContent = '🎉';
+    else if(variant === 'error') iconEl.textContent = '❌';
+    else iconEl.textContent = '✅';
+  }
   dlg.querySelector('#nTitle').textContent = title || 'Aviso';
   dlg.querySelector('#nMsg').textContent = message || '';
   return new Promise(resolve => {
@@ -3452,7 +3462,7 @@ ${message||''}`); return Promise.resolve(); }
     function cleanup(){
       if(ok) ok.onclick=null;
       try{ dlg.close(); }catch(_){}
-      try{ dlg.classList.remove('no-ok'); dlg.classList.remove('error'); }catch(_){}
+      try{ dlg.classList.remove('no-ok'); dlg.classList.remove('error'); dlg.classList.remove('login-toast'); }catch(_){}
       if(t){ clearTimeout(t); t=null; }
       try{ if(opts && typeof opts.onClose === 'function'){ opts.onClose(); } }catch(_){}
     }
@@ -3624,12 +3634,14 @@ async function updateVisibleCardsAvailability(){
 </dialog>
 
 <dialog id="notifyDlg" class="rv-modal rv-backdrop">
-  <div class="rv-card">
-    <header class="rv-head">
-      <h2 class="rv-title" id="nTitle">¡Listo!</h2>
+  <div class="rv-card" style="text-align:center;">
+    <!-- Ícono animado arriba -->
+    <div id="nIcon" style="font-size:48px;margin-bottom:10px;line-height:1;">✅</div>
+    <header class="rv-head" style="margin-bottom:10px;">
+      <h2 class="rv-title" id="nTitle" style="font-size:26px;">¡Listo!</h2>
     </header>
     <section class="rv-body">
-      <div class="rv-msg" id="nMsg" style="text-align:center"></div>
+      <div class="rv-msg" id="nMsg" style="text-align:center;font-size:16px;color:#475569;"></div>
       <div class="rv-actions">
         <button type="button" id="nOk" class="rv-btn primary">Aceptar</button>
       </div>
@@ -3639,6 +3651,35 @@ async function updateVisibleCardsAvailability(){
 
 <style>
 #notifyDlg.no-ok .rv-actions{ display:none; }
+
+/* === Estilo especial para mensaje de bienvenida (login) === */
+#notifyDlg.login-toast .rv-card{
+  background: linear-gradient(145deg, #ffffff 0%, #f0f9ff 100%) !important;
+  border: 2px solid #bae6fd !important;
+  box-shadow: 0 30px 90px rgba(2,132,199,.20), 0 8px 20px rgba(2,8,23,.07) !important;
+}
+#notifyDlg.login-toast .rv-title{
+  background: linear-gradient(135deg, #0284c7, #0ea5e9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+#notifyDlg.login-toast .rv-btn.primary{
+  background: linear-gradient(135deg, #0284c7, #38bdf8);
+  border-color: #0284c7;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(2,132,199,.35);
+  font-size: 15px;
+  padding: 13px 36px;
+  border-radius: 999px;
+}
+#notifyDlg.login-toast #nIcon{ animation: popIn .4s cubic-bezier(.34,1.56,.64,1) both; }
+#notifyDlg.login-toast .rv-msg{ font-size:15px; color:#334155; font-weight:500; }
+@keyframes popIn{
+  from{ transform:scale(.4); opacity:0; }
+  to{ transform:scale(1); opacity:1; }
+}
+/* ======================================================= */
 
 /* === Forzar siempre tema claro en dashboard === */
 #logsDlg .modal{ background:#ffffff !important; color:#0f172a !important; border:1px solid #e5e7eb !important; }
@@ -3726,7 +3767,7 @@ async function updateVisibleCardsAvailability(){
 
 
 <!-- === Registros recientes (modal) === -->
-<dialog id="logsDlg" style="border:none;padding:0;border-radius:22px;box-shadow:0 40px 100px rgba(2,8,23,.28);width:min(1100px,96vw);max-height:92vh;background:transparent;overflow:hidden;">
+<dialog id="logsDlg" style="border:none;padding:0;border-radius:22px;box-shadow:0 40px 100px rgba(2,8,23,.28);width:min(1300px,98vw);max-height:92vh;background:transparent;overflow:hidden;">
   <div style="background:#fff;border-radius:22px;display:flex;flex-direction:column;max-height:92vh;overflow:hidden;">
 
     <!-- ── Header del modal ── -->
@@ -3767,11 +3808,11 @@ async function updateVisibleCardsAvailability(){
           <tr style="background:#f8fafc;">
             <th style="text-align:left;padding:13px 14px;font-size:11px;font-weight:700;color:#64748b;letter-spacing:.6px;text-transform:uppercase;border-bottom:2px solid #e2e8f0;white-space:nowrap;">Fecha préstamo</th>
             <th style="text-align:left;padding:13px 14px;font-size:11px;font-weight:700;color:#64748b;letter-spacing:.6px;text-transform:uppercase;border-bottom:2px solid #e2e8f0;white-space:nowrap;">Devolución</th>
-            <th style="text-align:left;padding:13px 14px;font-size:11px;font-weight:700;color:#64748b;letter-spacing:.6px;text-transform:uppercase;border-bottom:2px solid #e2e8f0;">Nombre</th>
-            <th style="text-align:left;padding:13px 14px;font-size:11px;font-weight:700;color:#64748b;letter-spacing:.6px;text-transform:uppercase;border-bottom:2px solid #e2e8f0;">Grado</th>
-            <th style="text-align:left;padding:13px 14px;font-size:11px;font-weight:700;color:#64748b;letter-spacing:.6px;text-transform:uppercase;border-bottom:2px solid #e2e8f0;">Rol</th>
+            <th style="text-align:left;padding:13px 14px;font-size:11px;font-weight:700;color:#64748b;letter-spacing:.6px;text-transform:uppercase;border-bottom:2px solid #e2e8f0;white-space:nowrap;">Nombre</th>
+            <th style="text-align:left;padding:13px 14px;font-size:11px;font-weight:700;color:#64748b;letter-spacing:.6px;text-transform:uppercase;border-bottom:2px solid #e2e8f0;white-space:nowrap;">Grado</th>
+            <th style="text-align:left;padding:13px 14px;font-size:11px;font-weight:700;color:#64748b;letter-spacing:.6px;text-transform:uppercase;border-bottom:2px solid #e2e8f0;white-space:nowrap;">Rol</th>
             <th style="text-align:left;padding:13px 14px;font-size:11px;font-weight:700;color:#64748b;letter-spacing:.6px;text-transform:uppercase;border-bottom:2px solid #e2e8f0;">Título del libro</th>
-            <th style="text-align:left;padding:13px 14px;font-size:11px;font-weight:700;color:#64748b;letter-spacing:.6px;text-transform:uppercase;border-bottom:2px solid #e2e8f0;">Estado</th>
+            <th style="text-align:left;padding:13px 14px;font-size:11px;font-weight:700;color:#64748b;letter-spacing:.6px;text-transform:uppercase;border-bottom:2px solid #e2e8f0;white-space:nowrap;">Estado</th>
           </tr>
         </thead>
         <tbody id="logsBody">
