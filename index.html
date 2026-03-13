@@ -3059,7 +3059,10 @@ function __toggleClearBtn(){ try{ var el=document.getElementById('clearQ'); var 
   border-radius: 24px;
   background: transparent;
   box-shadow: none !important; /* evita el rectángulo fantasma del selector dialog{} */
-  /* Flexbox centra la tarjeta interior dentro del contenedor transparente */
+}
+/* Solo cuando está ABIERTO aplicamos flex para centrar la tarjeta interior.
+   Nunca sobreescribir el display:none que el navegador aplica al dialog cerrado. */
+.rv-modal[open]{
   display: flex;
   align-items: center;
   justify-content: center;
