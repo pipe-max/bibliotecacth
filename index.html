@@ -187,66 +187,115 @@
   }
   .hero-search-wrap .clear-btn.show{ opacity:.7; pointer-events:auto; }
 
-  .hero-intro{
-    max-width: 1120px;
-    margin: 18px auto 8px;
-    display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(280px, .8fr);
-    gap: 18px;
-    align-items: stretch;
+  .promo-banner{
+    margin: 18px auto 10px;
+    padding: 26px;
+    border-radius: 28px;
+    border: 1px solid #d9e6f2;
+    background:
+      radial-gradient(circle at top right, rgba(249,115,22,.18), transparent 28%),
+      radial-gradient(circle at left center, rgba(14,165,233,.16), transparent 32%),
+      linear-gradient(135deg, #ffffff 0%, #f8fbff 48%, #fff7ed 100%);
+    box-shadow: 0 20px 50px rgba(15,23,42,.08);
   }
-  .hero-panel{
-    background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(248,250,252,.98));
-    border: 1px solid #e2e8f0;
-    border-radius: 24px;
-    box-shadow: 0 18px 45px rgba(15,23,42,.08);
-    padding: 22px 24px;
-  }
-  .hero-panel h2{
-    margin: 0 0 8px;
-    font-size: 28px;
-    line-height: 1.05;
-    letter-spacing: -.6px;
-    color: #0f172a;
-  }
-  .hero-panel p{
-    margin: 0;
-    color: #475569;
-    font-size: 15px;
-    line-height: 1.65;
-  }
-  .hero-panel strong{ color: #0f172a; }
-  .hero-stats{
+  .promo-banner-grid{
     display:grid;
-    grid-template-columns: repeat(2,minmax(0,1fr));
-    gap: 12px;
+    grid-template-columns: minmax(0,1.2fr) minmax(320px,.8fr);
+    gap:18px;
+    align-items:stretch;
   }
-  .hero-stat{
-    background: linear-gradient(180deg,#fff,#f8fafc);
-    border: 1px solid #e2e8f0;
-    border-radius: 18px;
-    padding: 18px;
+  .promo-main{
+    min-width:0;
   }
-  .hero-stat .label{
-    display:block;
-    color:#64748b;
+  .promo-eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 12px;
+    border-radius:999px;
+    background:rgba(255,255,255,.78);
+    border:1px solid #dbeafe;
+    color:#0f172a;
     font-size:12px;
     font-weight:800;
-    text-transform:uppercase;
     letter-spacing:.08em;
-    margin-bottom:8px;
+    text-transform:uppercase;
   }
-  .hero-stat b{
-    display:block;
+  .promo-main h2{
+    margin:14px 0 10px;
+    font-size:34px;
+    line-height:1.02;
+    letter-spacing:-.9px;
     color:#0f172a;
-    font-size:30px;
-    line-height:1;
-    margin-bottom:6px;
+    max-width:10ch;
   }
-  .hero-stat small{
-    color:#64748b;
+  .promo-main p{
+    margin:0;
+    max-width:62ch;
+    color:#475569;
+    font-size:15px;
+    line-height:1.68;
+  }
+  .promo-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-top:18px;
+  }
+  .promo-btn{
+    border:none;
+    border-radius:999px;
+    padding:12px 18px;
+    font-family:'Inter',sans-serif;
     font-size:13px;
-    line-height:1.4;
+    font-weight:800;
+    cursor:pointer;
+    transition:transform .12s ease, box-shadow .15s ease, filter .15s ease;
+  }
+  .promo-btn:hover{ transform:translateY(-1px); }
+  .promo-btn.primary{
+    background:linear-gradient(135deg,#0284c7,#0ea5e9);
+    color:#fff;
+    box-shadow:0 12px 26px rgba(2,132,199,.22);
+  }
+  .promo-btn.secondary{
+    background:#fff;
+    color:#0f172a;
+    border:1px solid #dbe3ee;
+    box-shadow:0 8px 18px rgba(15,23,42,.06);
+  }
+  .promo-side{
+    display:grid;
+    gap:12px;
+  }
+  .promo-card{
+    background:rgba(255,255,255,.78);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border:1px solid #e2e8f0;
+    border-radius:22px;
+    padding:18px 18px 16px;
+  }
+  .promo-card .tag{
+    display:inline-block;
+    margin-bottom:10px;
+    color:#64748b;
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+  }
+  .promo-card h3{
+    margin:0 0 6px;
+    color:#0f172a;
+    font-size:20px;
+    letter-spacing:-.35px;
+  }
+  .promo-card p{
+    margin:0;
+    color:#64748b;
+    font-size:14px;
+    line-height:1.55;
   }
   .discover-bar{
     display:flex;
@@ -377,9 +426,9 @@
     .site-header{ min-height:320px; }
     .hero-search-wrap{ max-width:92vw; }
     .site-header-content{ padding-bottom:20px; }
-    .hero-intro{ grid-template-columns:1fr; margin-top:12px; }
-    .hero-panel{ padding:18px; border-radius:20px; }
-    .hero-panel h2{ font-size:24px; }
+    .promo-banner{ padding:18px; border-radius:22px; }
+    .promo-banner-grid{ grid-template-columns:1fr; }
+    .promo-main h2{ font-size:28px; max-width:none; }
   }
   /* Toolbar completa oculta — los filtros se manejan desde el hero */
   .toolbar{ display:none !important; }
@@ -1366,21 +1415,28 @@ html{ scroll-behavior: smooth; }
 </header>
 <p id="dailyQuote" class="hero-daily-quote"></p>
 <div class="wrap">
-  <section class="hero-intro" aria-label="Resumen del catálogo">
-    <div class="hero-panel">
-      <h2>Encuentra lecturas para cada etapa del colegio</h2>
-      <p>El catálogo de <strong>Biblioteca CTH</strong> ahora puede explorarse con búsqueda rápida y filtros visibles. Usa las categorías sugeridas para empezar o escribe una palabra clave para llegar directo al libro que necesitas.</p>
-    </div>
-    <div class="hero-stats" aria-label="Estadísticas del catálogo">
-      <div class="hero-stat">
-        <span class="label">Resultados visibles</span>
-        <b id="heroTotalCount">0</b>
-        <small>Libros que coinciden con la búsqueda actual.</small>
+  <section class="promo-banner" aria-label="Destacados de biblioteca">
+    <div class="promo-banner-grid">
+      <div class="promo-main">
+        <span class="promo-eyebrow">Destacado de biblioteca</span>
+        <h2>Usa este espacio para recomendar lecturas del mes</h2>
+        <p>Puedes cambiar este texto para anunciar colecciones nuevas, autores invitados, actividades de lectura o una selección especial para cada grado. El banner queda listo para destacar lo más importante del mes.</p>
+        <div class="promo-actions">
+          <button class="promo-btn primary" type="button" data-promo-filter="recomendados">Ver recomendaciones</button>
+          <button class="promo-btn secondary" type="button" data-promo-filter="nuevos">Explorar novedades</button>
+        </div>
       </div>
-      <div class="hero-stat">
-        <span class="label">Disponibles en vista</span>
-        <b id="heroAvailableCount">0</b>
-        <small>Disponibilidad actualizada desde préstamos activos.</small>
+      <div class="promo-side">
+        <article class="promo-card">
+          <span class="tag">Recomendación del mes</span>
+          <h3>Selecciona un tema central</h3>
+          <p>Ejemplo: amistad, ciencia, memoria, arte o lectura en familia. Luego guía al usuario con un botón o una palabra clave.</p>
+        </article>
+        <article class="promo-card">
+          <span class="tag">Libros nuevos</span>
+          <h3>Anuncia ingresos recientes</h3>
+          <p>Usa esta tarjeta para contar que llegaron títulos nuevos y motivar a explorar el catálogo desde el buscador.</p>
+        </article>
       </div>
     </div>
   </section>
@@ -1540,7 +1596,6 @@ const __norm = (s)=> (s??'').toString().toLowerCase()
   .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 const $ = (s)=>document.querySelector(s);
 const grid=$("#grid"), tCount=$("#tCount"), dCount=$("#dCount"), pageLabel=$("#pageLabel");
-const heroTotalCount = $("#heroTotalCount"), heroAvailableCount = $("#heroAvailableCount");
 const quickFilters = $("#quickFilters"), activeFilters = $("#activeFilters"), activeFiltersText = $("#activeFiltersText");
 const tooltip = $("#tooltip");
 
@@ -1565,6 +1620,17 @@ $("#resetFiltersBtn")?.addEventListener("click", ()=>{
   if(autEl) autEl.value = "Autor";
   if(typeof __toggleClearBtn === "function") __toggleClearBtn();
   render();
+});
+document.querySelectorAll("[data-promo-filter]").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    const value = btn.getAttribute("data-promo-filter") || "";
+    const qEl = $("#q");
+    state.q = __norm(value);
+    state.page = 1;
+    if(qEl) qEl.value = value;
+    if(typeof __toggleClearBtn === "function") __toggleClearBtn();
+    render();
+  });
 });
 
 function normalize(v){ if(v==null) return ""; if(typeof v==="string") return v.trim(); return String(v).trim(); }
@@ -1600,8 +1666,6 @@ function computeCounters(list){
   tCount.textContent = list.length;
   const disp = list.filter(b=> (b.disponible||"").toLowerCase().trim() === "disponible").length;
   dCount.textContent = disp;
-  if(heroTotalCount) heroTotalCount.textContent = list.length;
-  if(heroAvailableCount) heroAvailableCount.textContent = disp;
 }
 
 function renderFilters(list){
