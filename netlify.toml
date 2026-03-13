@@ -7,7 +7,7 @@ redirects = []
   [functions."*"]
 
 [build]
-publish = "/Users/andresgonzalez/.gemini/antigravity/scratch/bibliotecacth"
+publish = "."
 publishOrigin = "default"
 
   [build.environment]
