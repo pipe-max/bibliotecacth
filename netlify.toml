@@ -7,8 +7,6 @@ redirects = []
   [functions."*"]
 
 [build]
-publish = "."
-publishOrigin = "default"
 
   [build.environment]
 
