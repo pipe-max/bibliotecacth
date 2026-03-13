@@ -299,8 +299,9 @@
   }
   .promo-side{
     display:grid;
-    gap:12px;
-    align-content:start;
+    gap:18px;
+    align-content:center;
+    align-self:center;
   }
   .promo-card{
     background:rgba(255,255,255,.78);
@@ -308,28 +309,33 @@
     -webkit-backdrop-filter: blur(10px);
     border:1px solid #e2e8f0;
     border-radius:22px;
-    padding:18px 18px 16px;
+    padding:24px 28px;
+    min-height: 198px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
   }
   .promo-card .tag{
     display:inline-block;
-    margin-bottom:10px;
+    margin-bottom:12px;
     color:#64748b;
-    font-size:11px;
+    font-size:12px;
     font-weight:800;
     letter-spacing:.08em;
     text-transform:uppercase;
   }
   .promo-card h3{
-    margin:0 0 6px;
+    margin:0 0 10px;
     color:#0f172a;
-    font-size:20px;
-    letter-spacing:-.35px;
+    font-size:24px;
+    line-height:1.15;
+    letter-spacing:-.45px;
   }
   .promo-card p{
     margin:0;
     color:#64748b;
-    font-size:14px;
-    line-height:1.55;
+    font-size:15px;
+    line-height:1.6;
   }
   .discover-bar{
     display:flex;
