@@ -2076,7 +2076,7 @@ if(r.ok){
 const __rol   = __loan.rol || __loan.Rol || '';
 const __grado = __loan.grado || __loan.Grado || '';
 const __roleText = (/^Estudiante$/i.test(__rol) && (__grado||'').trim()) ? `Estudiante (Grado: ${(__grado||'').trim()})` : (__rol||'');
-await uiAlert('Devolución registrada ✅', `Título: ${titulo}
+await uiAlert('Devolución registrada', `Título: ${titulo}
 Devuelto por: ${nombre}${__roleText?`
 Rol: ${__roleText}`:''}`, null, { hideOk:true, autoCloseMs:3000, onClose:function(){ try{ document.getElementById('dlg').close(); }catch(_){} } });
         
@@ -3277,7 +3277,7 @@ function __toggleClearBtn(){ try{ var el=document.getElementById('clearQ'); var 
         const data = await postToWebApp(payload);
         if(data && data.ok){
           __CTH_HIDE__ && __CTH_HIDE__(); __hideModalSpinner__ && __hideModalSpinner__(); const __roleText = (/^Estudiante$/i.test(rol) && (grado||'').trim()) ? `Estudiante (Grado: ${(grado||'').trim()})` : (rol||'');
-await uiAlert('Reserva registrada ✅', `Título: ${payload.titulo}
+await uiAlert('Reserva registrada', `Título: ${payload.titulo}
 Reservado por: ${estudiante}
 Rol: ${__roleText}`);
 try{ if(typeof loansCache!=='undefined' && currentBook?.titulo){ loansCache.delete(currentBook.titulo); } }catch(_){}
@@ -3447,12 +3447,28 @@ ${message||''}`); return Promise.resolve(); }
     dlg.classList.toggle('error', variant === 'error');
     dlg.classList.toggle('login-toast', variant === 'login');
   }catch(_){}
-  // Ícono según variante
-  const iconEl = dlg.querySelector('#nIcon');
-  if(iconEl){
-    if(variant === 'login') iconEl.textContent = '🎉';
-    else if(variant === 'error') iconEl.textContent = '❌';
-    else iconEl.textContent = '✅';
+  // Ícono y color del wrap según variante
+  const iconEl   = dlg.querySelector('#nIcon');
+  const wrapEl   = dlg.querySelector('#nIconWrap');
+  if(variant === 'login'){
+    if(iconEl) iconEl.textContent = '🎉';
+    if(wrapEl) wrapEl.style.background = 'linear-gradient(135deg,#dbeafe,#bfdbfe)';
+    if(wrapEl) wrapEl.style.boxShadow  = '0 8px 24px rgba(2,132,199,.20)';
+  } else if(variant === 'error'){
+    if(iconEl) iconEl.textContent = '❌';
+    if(wrapEl) wrapEl.style.background = 'linear-gradient(135deg,#fee2e2,#fecaca)';
+    if(wrapEl) wrapEl.style.boxShadow  = '0 8px 24px rgba(220,38,38,.18)';
+  } else {
+    if(iconEl) iconEl.textContent = '✅';
+    if(wrapEl) wrapEl.style.background = 'linear-gradient(135deg,#dcfce7,#bbf7d0)';
+    if(wrapEl) wrapEl.style.boxShadow  = '0 8px 24px rgba(22,163,74,.20)';
+  }
+  // Color del botón Aceptar según variante
+  const okBtn = document.getElementById('nOk');
+  if(okBtn){
+    if(variant === 'error') okBtn.style.background = 'linear-gradient(135deg,#dc2626,#ef4444)';
+    else if(variant === 'login') okBtn.style.background = 'linear-gradient(135deg,#0284c7,#38bdf8)';
+    else okBtn.style.background = 'linear-gradient(135deg,#16a34a,#22c55e)';
   }
   dlg.querySelector('#nTitle').textContent = title || 'Aviso';
   dlg.querySelector('#nMsg').textContent = message || '';
@@ -3616,41 +3632,94 @@ async function updateVisibleCardsAvailability(){
 </script>
 
 <dialog id="confirmDlg" class="rv-modal rv-backdrop">
-  <div class="rv-card">
-    <header class="rv-head">
-      <h2 class="rv-title" id="cTitle">Confirmar</h2>
-      <div class="rv-sub" id="cSub"></div>
-    </header>
-    <section class="rv-body">
-      <div class="rv-msg" id="cMsg"></div>
-      
-      <div id="cList" class="rv-list" style="display:none;"></div>
-      <div class="rv-actions">
-        <button type="button" id="cOk" class="rv-btn primary">Confirmar devolución</button>
-        <button type="button" id="cCancel" class="rv-btn ghost">Cancelar</button>
-      </div>
-    </section>
+  <div class="rv-card" style="text-align:center;max-width:480px;padding:36px 36px 28px;">
+    <!-- Ícono -->
+    <div style="width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,#dbeafe,#bfdbfe);display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 18px;box-shadow:0 8px 24px rgba(2,132,199,.18);">🔄</div>
+    <!-- Título -->
+    <h2 id="cTitle" style="margin:0 0 6px;font-size:22px;font-weight:900;color:#0c1523;font-family:'Inter',sans-serif;letter-spacing:-.3px;">Confirmar</h2>
+    <div id="cSub" style="font-size:13px;color:#64748b;font-family:'Inter',sans-serif;margin-bottom:18px;"></div>
+    <!-- Mensaje -->
+    <div id="cMsg" style="font-size:14.5px;color:#334155;font-family:'Inter',sans-serif;font-weight:500;line-height:1.65;white-space:pre-line;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;padding:14px 18px;margin-bottom:22px;text-align:left;"></div>
+    <!-- Lista (picker) -->
+    <div id="cList" class="rv-list" style="display:none;margin-bottom:16px;"></div>
+    <!-- Acciones -->
+    <div class="rv-actions" style="gap:12px;">
+      <button type="button" id="cOk" style="flex:1;background:linear-gradient(135deg,#0284c7,#38bdf8);color:#fff;border:none;border-radius:999px;padding:13px 24px;font-size:15px;font-weight:800;font-family:'Inter',sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(2,132,199,.30);transition:filter .15s,transform .12s;" onmouseover="this.style.filter='brightness(1.07)'" onmouseout="this.style.filter=''" onmousedown="this.style.transform='scale(.97)'" onmouseup="this.style.transform=''">Confirmar devolución</button>
+      <button type="button" id="cCancel" style="flex:1;background:#fff;color:#475569;border:1.5px solid #e2e8f0;border-radius:999px;padding:13px 24px;font-size:15px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:background .15s,border-color .15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">Cancelar</button>
+    </div>
   </div>
 </dialog>
 
 <dialog id="notifyDlg" class="rv-modal rv-backdrop">
-  <div class="rv-card" style="text-align:center;">
-    <!-- Ícono animado arriba -->
-    <div id="nIcon" style="font-size:48px;margin-bottom:10px;line-height:1;">✅</div>
-    <header class="rv-head" style="margin-bottom:10px;">
-      <h2 class="rv-title" id="nTitle" style="font-size:26px;">¡Listo!</h2>
-    </header>
-    <section class="rv-body">
-      <div class="rv-msg" id="nMsg" style="text-align:center;font-size:16px;color:#475569;"></div>
-      <div class="rv-actions">
-        <button type="button" id="nOk" class="rv-btn primary">Aceptar</button>
-      </div>
-    </section>
+  <div class="rv-card" id="notifyCard" style="text-align:center;max-width:460px;padding:36px 36px 28px;">
+    <!-- Ícono grande con fondo de color según variante -->
+    <div id="nIconWrap" style="
+      width:72px;height:72px;
+      border-radius:22px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:36px;
+      margin:0 auto 20px;
+      background:linear-gradient(135deg,#dcfce7,#bbf7d0);
+      box-shadow:0 8px 24px rgba(22,163,74,.20);
+    ">
+      <span id="nIcon">✅</span>
+    </div>
+    <!-- Título -->
+    <h2 id="nTitle" style="
+      margin:0 0 10px;
+      font-size:22px;
+      font-weight:900;
+      color:#0c1523;
+      font-family:'Inter',sans-serif;
+      letter-spacing:-.3px;
+      line-height:1.15;
+    ">¡Listo!</h2>
+    <!-- Mensaje -->
+    <div id="nMsg" style="
+      font-size:14.5px;
+      color:#475569;
+      font-family:'Inter',sans-serif;
+      font-weight:500;
+      line-height:1.65;
+      white-space:pre-line;
+      margin-bottom:24px;
+    "></div>
+    <!-- Acciones -->
+    <div class="rv-actions" style="margin-top:0;">
+      <button type="button" id="nOk" style="
+        background:linear-gradient(135deg,#16a34a,#22c55e);
+        color:#fff;
+        border:none;
+        border-radius:999px;
+        padding:13px 40px;
+        font-size:15px;
+        font-weight:800;
+        font-family:'Inter',sans-serif;
+        cursor:pointer;
+        box-shadow:0 4px 14px rgba(22,163,74,.30);
+        transition:filter .15s,transform .12s;
+      "
+        onmouseover="this.style.filter='brightness(1.07)'"
+        onmouseout="this.style.filter=''"
+        onmousedown="this.style.transform='scale(.97)'"
+        onmouseup="this.style.transform=''"
+      >Aceptar</button>
+    </div>
   </div>
 </dialog>
 
 <style>
 #notifyDlg.no-ok .rv-actions{ display:none; }
+
+/* Animación de entrada para los modales de notificación */
+#notifyDlg .rv-card,
+#confirmDlg .rv-card{
+  animation: modalSlideUp .25s cubic-bezier(.34,1.4,.64,1) both;
+}
+@keyframes modalSlideUp{
+  from{ transform:translateY(20px) scale(.96); opacity:0; }
+  to{ transform:translateY(0) scale(1); opacity:1; }
+}
 
 /* === Estilo especial para mensaje de bienvenida (login) === */
 #notifyDlg.login-toast .rv-card{
