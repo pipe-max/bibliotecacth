@@ -200,72 +200,15 @@
   }
   .promo-banner-grid{
     display:grid;
-    grid-template-columns: minmax(240px,320px) minmax(0,1fr);
-    gap:28px;
-    align-items:center;
-  }
-  .promo-visual{
-    position:relative;
-    width:100%;
-    max-width:320px;
-    border-radius:24px;
-    overflow:hidden;
-    border:1px solid #d9e6f2;
-    background:
-      linear-gradient(180deg, rgba(15,23,42,.12), rgba(15,23,42,.04)),
-      linear-gradient(145deg, #2d1b12 0%, #5e3721 35%, #a9652b 100%);
-    box-shadow:0 18px 34px rgba(15,23,42,.12);
-  }
-  .promo-visual img{
-    width:100%;
-    height:100%;
-    display:block;
-    object-fit:cover;
-    aspect-ratio: 4 / 5;
-  }
-  .promo-visual-fallback{
-    position:absolute;
-    inset:0;
-    display:flex;
-    flex-direction:column;
-    justify-content:flex-end;
-    padding:22px;
-    background:
-      linear-gradient(180deg, rgba(15,23,42,.12), rgba(15,23,42,.68)),
-      radial-gradient(circle at top left, rgba(250,204,21,.22), transparent 25%);
-    color:#fff7ed;
-  }
-  .promo-visual-fallback.hidden{ display:none; }
-  .promo-visual-fallback .mini{
-    display:inline-flex;
-    align-self:flex-start;
-    padding:7px 11px;
-    border-radius:999px;
-    background:rgba(254,249,195,.92);
-    color:#713f12;
-    font-size:11px;
-    font-weight:900;
-    letter-spacing:.08em;
-    text-transform:uppercase;
-    margin-bottom:12px;
-  }
-  .promo-visual-fallback h3{
-    margin:0 0 10px;
-    font-size:30px;
-    line-height:1.02;
-    letter-spacing:-.7px;
-    color:#fff;
-  }
-  .promo-visual-fallback p{
-    margin:0;
-    color:rgba(255,247,237,.92);
-    font-size:14px;
-    line-height:1.58;
-    max-width:34ch;
+    grid-template-columns: minmax(0,1.2fr) minmax(320px,.8fr);
+    gap:18px;
+    align-items:stretch;
   }
   .promo-main{
     min-width:0;
-    max-width:720px;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
   }
   .promo-eyebrow{
     display:inline-flex;
@@ -283,18 +226,76 @@
   }
   .promo-main h2{
     margin:14px 0 10px;
-    font-size:30px;
-    line-height:1.06;
+    font-size:34px;
+    line-height:1.02;
     letter-spacing:-.9px;
     color:#0f172a;
-    max-width:14ch;
+    max-width:10ch;
   }
   .promo-main p{
     margin:0;
-    max-width:54ch;
+    max-width:62ch;
     color:#475569;
     font-size:15px;
     line-height:1.68;
+  }
+  .promo-poster{
+    position:relative;
+    width:min(100%, 360px);
+    margin:22px 0 0;
+    border-radius:22px;
+    overflow:hidden;
+    border:1px solid #d9e6f2;
+    box-shadow:0 18px 34px rgba(15,23,42,.12);
+    background:
+      linear-gradient(180deg, rgba(15,23,42,.12), rgba(15,23,42,.04)),
+      linear-gradient(145deg, #2d1b12 0%, #5e3721 35%, #a9652b 100%);
+  }
+  .promo-poster img{
+    width:100%;
+    display:block;
+    object-fit:cover;
+    aspect-ratio:4 / 5;
+  }
+  .promo-poster-fallback{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    padding:22px;
+    background:
+      linear-gradient(180deg, rgba(15,23,42,.12), rgba(15,23,42,.68)),
+      radial-gradient(circle at top left, rgba(250,204,21,.22), transparent 25%);
+    color:#fff7ed;
+  }
+  .promo-poster-fallback.hidden{ display:none; }
+  .promo-poster-fallback .mini{
+    display:inline-flex;
+    align-self:flex-start;
+    padding:7px 11px;
+    border-radius:999px;
+    background:rgba(254,249,195,.92);
+    color:#713f12;
+    font-size:11px;
+    font-weight:900;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    margin-bottom:12px;
+  }
+  .promo-poster-fallback h3{
+    margin:0 0 10px;
+    font-size:30px;
+    line-height:1.02;
+    letter-spacing:-.7px;
+    color:#fff;
+  }
+  .promo-poster-fallback p{
+    margin:0;
+    color:rgba(255,247,237,.92);
+    font-size:14px;
+    line-height:1.58;
+    max-width:34ch;
   }
   .promo-actions{
     display:flex;
@@ -323,6 +324,40 @@
     color:#0f172a;
     border:1px solid #dbe3ee;
     box-shadow:0 8px 18px rgba(15,23,42,.06);
+  }
+  .promo-side{
+    display:grid;
+    gap:12px;
+    align-content:start;
+  }
+  .promo-card{
+    background:rgba(255,255,255,.78);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border:1px solid #e2e8f0;
+    border-radius:22px;
+    padding:18px 18px 16px;
+  }
+  .promo-card .tag{
+    display:inline-block;
+    margin-bottom:10px;
+    color:#64748b;
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+  }
+  .promo-card h3{
+    margin:0 0 6px;
+    color:#0f172a;
+    font-size:20px;
+    letter-spacing:-.35px;
+  }
+  .promo-card p{
+    margin:0;
+    color:#64748b;
+    font-size:14px;
+    line-height:1.55;
   }
   .discover-bar{
     display:flex;
@@ -456,7 +491,6 @@
     .promo-banner{ padding:18px; border-radius:22px; }
     .promo-banner-grid{ grid-template-columns:1fr; }
     .promo-main h2{ font-size:28px; max-width:none; }
-    .promo-visual{ order:-1; }
   }
   /* Toolbar completa oculta — los filtros se manejan desde el hero */
   .toolbar{ display:none !important; }
@@ -1445,27 +1479,39 @@ html{ scroll-behavior: smooth; }
 <div class="wrap">
   <section class="promo-banner" aria-label="Destacados de biblioteca">
     <div class="promo-banner-grid">
-      <figure class="promo-visual">
-        <img
-          src="destacados/concurso GRUBE.jpeg"
-          alt="Afiche del concurso de cuento corto Una Aventura en la Biblioteca"
-          loading="lazy"
-          onload="this.nextElementSibling.classList.add('hidden')"
-          onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')">
-        <figcaption class="promo-visual-fallback">
-          <span class="mini">Concurso de cuento corto</span>
-          <h3>Una aventura en la biblioteca</h3>
-          <p>Dejamos este espacio listo para mostrar la pieza gráfica principal del concurso en cuanto la imagen esté dentro del proyecto.</p>
-        </figcaption>
-      </figure>
       <div class="promo-main">
         <span class="promo-eyebrow">Destacado de biblioteca</span>
-        <h2>Concurso de cuento corto: una aventura en la biblioteca</h2>
-        <p>La pieza gráfica ya contiene toda la información principal del concurso, así que aquí dejamos solo una introducción breve y dos accesos rápidos a lecturas relacionadas dentro del catálogo.</p>
+        <h2>Destacado del mes</h2>
+        <p>Usamos este espacio para resaltar la convocatoria principal de la biblioteca y acompañarla con accesos rápidos a lecturas relacionadas dentro del catálogo.</p>
+        <figure class="promo-poster">
+          <img
+            src="destacados/concurso GRUBE.jpeg"
+            alt="Afiche del concurso de cuento corto Una Aventura en la Biblioteca"
+            loading="lazy"
+            onload="this.nextElementSibling.classList.add('hidden')"
+            onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')">
+          <figcaption class="promo-poster-fallback">
+            <span class="mini">Concurso de cuento corto</span>
+            <h3>Una aventura en la biblioteca</h3>
+            <p>Dejamos este espacio listo para mostrar la pieza gráfica principal del concurso en cuanto la imagen esté dentro del proyecto.</p>
+          </figcaption>
+        </figure>
         <div class="promo-actions">
           <button class="promo-btn primary" type="button" data-promo-filter="aventura">Ver libros de aventura</button>
           <button class="promo-btn secondary" type="button" data-promo-filter="cuentos">Explorar cuentos</button>
         </div>
+      </div>
+      <div class="promo-side">
+        <article class="promo-card">
+          <span class="tag">Recomendación del mes</span>
+          <h3>Selecciona un tema central</h3>
+          <p>Ejemplo: amistad, ciencia, memoria, arte o lectura en familia. Luego guía al usuario con un botón o una palabra clave.</p>
+        </article>
+        <article class="promo-card">
+          <span class="tag">Libros nuevos</span>
+          <h3>Anuncia ingresos recientes</h3>
+          <p>Usa esta tarjeta para contar que llegaron títulos nuevos y motivar a explorar el catálogo desde el buscador.</p>
+        </article>
       </div>
     </div>
   </section>
