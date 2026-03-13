@@ -242,7 +242,7 @@
   .promo-poster{
     position:relative;
     width:min(100%, 360px);
-    margin:22px 0 0;
+    margin:18px 0 0;
     border-radius:22px;
     overflow:hidden;
     border:1px solid #d9e6f2;
@@ -296,34 +296,6 @@
     font-size:14px;
     line-height:1.58;
     max-width:34ch;
-  }
-  .promo-actions{
-    display:flex;
-    flex-wrap:wrap;
-    gap:12px;
-    margin-top:18px;
-  }
-  .promo-btn{
-    border:none;
-    border-radius:999px;
-    padding:12px 18px;
-    font-family:'Inter',sans-serif;
-    font-size:13px;
-    font-weight:800;
-    cursor:pointer;
-    transition:transform .12s ease, box-shadow .15s ease, filter .15s ease;
-  }
-  .promo-btn:hover{ transform:translateY(-1px); }
-  .promo-btn.primary{
-    background:linear-gradient(135deg,#0284c7,#0ea5e9);
-    color:#fff;
-    box-shadow:0 12px 26px rgba(2,132,199,.22);
-  }
-  .promo-btn.secondary{
-    background:#fff;
-    color:#0f172a;
-    border:1px solid #dbe3ee;
-    box-shadow:0 8px 18px rgba(15,23,42,.06);
   }
   .promo-side{
     display:grid;
@@ -1481,8 +1453,6 @@ html{ scroll-behavior: smooth; }
     <div class="promo-banner-grid">
       <div class="promo-main">
         <span class="promo-eyebrow">Destacado de biblioteca</span>
-        <h2>Destacado del mes</h2>
-        <p>Usamos este espacio para resaltar la convocatoria principal de la biblioteca y acompañarla con accesos rápidos a lecturas relacionadas dentro del catálogo.</p>
         <figure class="promo-poster">
           <img
             src="destacados/concurso GRUBE.jpeg"
@@ -1496,10 +1466,6 @@ html{ scroll-behavior: smooth; }
             <p>Dejamos este espacio listo para mostrar la pieza gráfica principal del concurso en cuanto la imagen esté dentro del proyecto.</p>
           </figcaption>
         </figure>
-        <div class="promo-actions">
-          <button class="promo-btn primary" type="button" data-promo-filter="aventura">Ver libros de aventura</button>
-          <button class="promo-btn secondary" type="button" data-promo-filter="cuentos">Explorar cuentos</button>
-        </div>
       </div>
       <div class="promo-side">
         <article class="promo-card">
