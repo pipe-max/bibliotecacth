@@ -4231,6 +4231,19 @@ async function updateVisibleCardsAvailability(){
   border: 2px solid #bae6fd !important;
   box-shadow: 0 30px 90px rgba(2,132,199,.20), 0 8px 20px rgba(2,8,23,.07) !important;
 }
+#notifyDlg.login-toast #nIconWrap{
+  width:auto !important;
+  height:auto !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  border-radius:0 !important;
+  margin:0 auto 18px !important;
+  padding:0 !important;
+}
+#notifyDlg.login-toast #nIcon{
+  font-size:54px;
+  line-height:1;
+}
 #notifyDlg.login-toast .rv-title{
   background: linear-gradient(135deg, #0284c7, #0ea5e9);
   -webkit-background-clip: text;
@@ -5090,9 +5103,10 @@ async function updateVisibleCardsAvailability(){
   background:#ffffff;
   border:1px solid #e5e7eb;
   border-radius:14px;
-  padding:10px;
+  padding:12px;
   box-shadow:0 8px 24px rgba(2,8,23,.06);
   position:relative;
+  margin-top:8px;
 }
 #logsDlg #logsControls input[type="search"],
 #logsDlg #logsControls select{
@@ -5115,15 +5129,15 @@ async function updateVisibleCardsAvailability(){
   position:absolute;
   top:-52px; /* lo posiciona visualmente dentro del header */
   right:0;
-  background:#111827;
-  color:#fff;
+  background:#f8fafc;
+  color:#334155;
   border-radius:999px;
   padding:6px 10px;
   font-size:12px;
   font-weight:800;
   letter-spacing:.2px;
-  box-shadow:0 10px 20px rgba(2,8,23,.18);
-  border:1px solid #0b0f1a;
+  box-shadow:0 8px 18px rgba(2,8,23,.10);
+  border:1px solid #dbe3ee;
   white-space:nowrap;
 }
 
@@ -5147,7 +5161,7 @@ async function updateVisibleCardsAvailability(){
   top:0;
   background:#f8fafc !important;
   border-bottom:1px solid #e5e7eb !important;
-  padding:12px 12px !important;
+  padding:10px 12px !important;
   color:#475569;
   font-weight:800;
   z-index:1;
@@ -5162,7 +5176,7 @@ async function updateVisibleCardsAvailability(){
   background:#eef6ff;
 }
 #logsDlg #logsTable tbody td{
-  padding:12px 12px !important;
+  padding:11px 12px !important;
   border-bottom:1px solid #eef2f7;
   color:#0f172a;
   vertical-align:top;
