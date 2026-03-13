@@ -187,6 +187,24 @@
   }
   .hero-search-wrap .clear-btn.show{ opacity:.7; pointer-events:auto; }
 
+  /* Frase del día bajo el buscador */
+  .hero-daily-quote{
+    margin-top: 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.92);
+    text-align: center;
+    letter-spacing: .2px;
+    line-height: 1.45;
+    text-shadow: 0 1px 4px rgba(0,0,0,.18);
+    padding: 0 12px;
+    animation: quoteFadeIn .7s ease both;
+  }
+  @keyframes quoteFadeIn{
+    from{ opacity:0; transform:translateY(6px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+
   /* Responsive hero */
   @media(max-width:640px){
     .site-header{ min-height:320px; }
@@ -1173,6 +1191,7 @@ html{ scroll-behavior: smooth; }
       <input id="q" class="hero-q" type="search" placeholder="Escribe el título, autor o categoría…" autocomplete="off">
       <button class="hero-search-btn" type="button" aria-label="Buscar">→</button>
     </div>
+    <p id="dailyQuote" class="hero-daily-quote"></p>
   </div>
 </header>
 <div class="wrap">
@@ -1211,9 +1230,6 @@ html{ scroll-behavior: smooth; }
     <div>Disponibles: <b id="dCount">0</b></div>
   </div>
 
-  <footer class="muted" style="text-align:center;">
-    📖 Cada libro es un mundo por descubrir — ¿cuál será el tuyo hoy?
-  </footer>
 </div>
 
 <div id="tooltip" class="tooltip"></div>
@@ -1264,6 +1280,50 @@ function isActiveLoan(it){
 
 const SHEET_ID = "13SOXwd_TSub0vivKLerD_81VoJiuHnNTXZ6f6DK9xtE";
 const SHEET_NAME = "Libros"; // solo esta pestaña
+
+// ── Frase del día ────────────────────────────────────────────────────────────
+(function(){
+  const FRASES = [
+    "📖 Cada libro es un mundo por descubrir — ¿cuál será el tuyo hoy?",
+    "✨ Leer es volar sin moverse del lugar.",
+    "🌟 Un libro abierto es un cerebro que habla; cerrado, un amigo que espera.",
+    "🚀 Los libros son la nave con la que exploramos el universo.",
+    "🌈 Hay una puerta mágica en cada libro. Ábrela.",
+    "🦋 Leer transforma, imaginar libera.",
+    "🌿 Los libros son espejos: en ellos nos reconocemos.",
+    "💡 Quien lee mucho y anda mucho, ve mucho y sabe mucho.",
+    "🎒 Lleva siempre un libro: es el mejor compañero de viaje.",
+    "🌙 Antes de dormir, un libro te lleva a otro mundo.",
+    "🔑 La lectura es la llave que abre todas las puertas.",
+    "🌺 Un libro prestado a tiempo puede cambiar una vida.",
+    "⭐ Los grandes lectores fueron grandes soñadores.",
+    "🎨 Cada página es una nueva aventura esperando comenzar.",
+    "🏆 El hábito de leer es el que más enriquece al ser humano.",
+    "🌊 Sumérgete en las páginas y descubre mundos sin límites.",
+    "🦁 Los libros dan valentía para vivir lo que aún no vivimos.",
+    "🌸 Regalar un libro es regalar un jardín.",
+    "🎵 Las palabras tienen ritmo; la lectura, melodía.",
+    "🦅 Leer eleva el pensamiento hasta donde el cielo no alcanza.",
+    "🍀 La biblioteca es el jardín más rico del colegio.",
+    "🔭 Los libros nos llevan a lugares que jamás visitaríamos.",
+    "🎯 Cada libro terminado es un logro que nadie puede quitarte.",
+    "🌻 Lee hoy y sé un poco más libre mañana.",
+    "🦋 Las historias que lees hoy te forman para siempre.",
+    "🌍 Un lector viaja por el mundo sin gastar un peso.",
+    "🎁 El mejor regalo que puedes darte es tiempo para leer.",
+    "🔮 Los libros son la memoria del mundo.",
+    "⚡ Una página al día mantiene la ignorancia a raya.",
+    "🌠 En cada libro hay una estrella esperando brillar para ti.",
+  ];
+  // Índice basado en el día del año → cambia cada día, igual en todos los dispositivos
+  const hoy = new Date();
+  const inicio = new Date(hoy.getFullYear(), 0, 0);
+  const diaDelAnio = Math.floor((hoy - inicio) / 86400000);
+  const frase = FRASES[diaDelAnio % FRASES.length];
+  const el = document.getElementById('dailyQuote');
+  if(el) el.textContent = frase;
+})();
+// ─────────────────────────────────────────────────────────────────────────────
 
 const state = {
   all: [], rows: [], page: 1, per: 12,
