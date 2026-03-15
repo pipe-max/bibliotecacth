@@ -558,9 +558,10 @@
   }
   .counters b{ color: var(--ink); font-weight: 800; font-size: 15px; }
 
-  .grid{display:grid;grid-template-columns:repeat(1,minmax(0,1fr));gap:18px;margin-top:14px}
-  @media(min-width:680px){.grid{grid-template-columns:repeat(3,1fr)}}
-  @media(min-width:980px){.grid{grid-template-columns:repeat(4,1fr)}}
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+  @media(min-width:540px){.grid{grid-template-columns:repeat(2,1fr);gap:14px}}
+  @media(min-width:680px){.grid{grid-template-columns:repeat(3,1fr);gap:16px}}
+  @media(min-width:980px){.grid{grid-template-columns:repeat(4,1fr);gap:18px}}
 
   /* ── Skeleton loader ── */
   @keyframes shimmer{
@@ -689,8 +690,26 @@
     text-overflow:ellipsis;
     white-space:nowrap;
   }
-  .badge.ok{background:#ecfdf5;color:#065f46;border-color:#a7f3d0}
-  .badge.bad{background:#fef2f2;color:#991b1b;border-color:#fecaca}
+  .badge.ok{background:#ecfdf5;color:#065f46;border-color:#a7f3d0; font-weight:700;}
+  .badge.bad{background:#fef2f2;color:#991b1b;border-color:#fecaca; font-weight:700;}
+
+  /* Badge de disponibilidad más prominente en la tarjeta */
+  .badge.status{
+    font-size:12px;
+    padding: 6px 13px;
+    letter-spacing: .01em;
+  }
+  /* Indicador visual en la esquina de la tarjeta */
+  .card .avail-dot{
+    position:absolute;
+    top:10px; right:10px;
+    width:10px; height:10px;
+    border-radius:50%;
+    border:2px solid #fff;
+    box-shadow:0 1px 4px rgba(0,0,0,.15);
+  }
+  .card .avail-dot.ok{ background:#22c55e; }
+  .card .avail-dot.bad{ background:#ef4444; }
 
   /* Botones */
   .btn{
@@ -1364,6 +1383,19 @@ html{ scroll-behavior: smooth; }
     min-width: 0;
     flex: 1 1 100%;
   }
+
+  /* Tarjetas más compactas en móvil (2 columnas) */
+  .card{ padding: 10px 8px 10px; gap: 6px; border-radius:14px; }
+  .card-cover{ width:80px; height:110px; flex: 0 0 110px; border-radius:8px; }
+  .title{ font-size:12px; }
+  .author{ font-size:10px; }
+  .badge{ font-size:10px; padding:4px 8px; }
+  .badges{ gap:4px; padding-top:5px; }
+  .avail-dot{ width:8px; height:8px; top:7px; right:7px; }
+
+  /* Banner en móvil: columna */
+  .promo-banner-grid{ grid-template-columns:1fr !important; }
+  .promo-side{ padding-top:0 !important; }
 }
 
 /* === Mobile fix: ficha (modal) de libro responsive y ordenada === */
@@ -1541,6 +1573,7 @@ html{ scroll-behavior: smooth; }
     </select>
     <button id="unlock" class="btn" title="Solo bibliotecología">🔒 Desbloquear</button>
     <button id="logsBtn" class="btn" title="Ver últimos préstamos y devoluciones">📒 Registros</button>
+    <button id="statsBtn" class="btn" title="Estadísticas de la biblioteca" style="display:none">📊 Estadísticas</button>
   </div>
 
   <div id="grid" class="grid">
@@ -2055,6 +2088,7 @@ function cardHTML(b){
     : `<div class="card-cover-placeholder">📖</div>`;
   return `
     <article class="card" data-title="${esc(b.titulo)||''}" ${tipAttr} role="button" aria-label="${esc(b.titulo||'')}">
+      <div class="avail-dot ${statusClass}" title="${statusText}"></div>
       <div class="card-cover">${coverHTML}</div>
       <div class="card-body">
         <h3 class="title">${esc(b.titulo)||"—"}</h3>
@@ -4479,6 +4513,24 @@ async function updateVisibleCardsAvailability(){
 
 
 <!-- === Registros recientes (modal) === -->
+<dialog id="statsDlg" style="border:none;padding:0;border-radius:22px;box-shadow:0 40px 100px rgba(2,8,23,.28);width:min(900px,96vw);max-height:92vh;background:transparent;overflow:hidden;">
+  <div style="background:#fff;border-radius:22px;display:flex;flex-direction:column;max-height:92vh;overflow:hidden;">
+    <div style="padding:22px 26px 0;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="width:44px;height:44px;background:linear-gradient(135deg,#7c3aed,#a78bfa);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 14px rgba(124,58,237,.30);">📊</div>
+        <div>
+          <h2 style="margin:0;font-size:20px;font-weight:900;color:#0c1523;letter-spacing:-.3px;">Estadísticas de la biblioteca</h2>
+          <p style="margin:0;font-size:13px;color:#64748b;">Resumen de préstamos y actividad</p>
+        </div>
+      </div>
+      <button onclick="document.getElementById('statsDlg').close()" style="width:38px;height:38px;border-radius:11px;border:1.5px solid #e2e8f0;background:#f8fafc;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;color:#64748b;transition:background .15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'">✕</button>
+    </div>
+    <div id="statsContent" style="padding:22px 26px 26px;overflow-y:auto;display:flex;flex-direction:column;gap:22px;">
+      <p style="color:#64748b;text-align:center;padding:40px 0;">Cargando estadísticas…</p>
+    </div>
+  </div>
+</dialog>
+
 <dialog id="logsDlg" style="border:none;padding:0;border-radius:22px;box-shadow:0 40px 100px rgba(2,8,23,.28);width:min(1300px,98vw);max-height:92vh;background:transparent;overflow:hidden;">
   <div style="background:#fff;border-radius:22px;display:flex;flex-direction:column;max-height:92vh;overflow:hidden;">
 
@@ -6191,5 +6243,173 @@ b2.addEventListener('click', function(){ cleanPrint('all', false); });
   }
 
   loadRecomendados();
+})();
+</script>
+
+<script>
+// === Dashboard de Estadísticas ===
+(function(){
+  const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbys0nC2pKbfkwhYvm67h6q3AQQdgBZaauYu4190VOykcsxBxRQ4MsRzGXUhKMHiX8sc/exec";
+  const SHEET_ID   = "13SOXwd_TSub0vivKLerD_81VoJiuHnNTXZ6f6DK9xtE";
+  const LOANS_GID  = "1311459646";
+
+  // Muestra el botón solo cuando el usuario está desbloqueado
+  const observer = new MutationObserver(()=>{
+    const unlocked = document.getElementById('unlock')?.textContent?.includes('🔓');
+    const btn = document.getElementById('statsBtn');
+    if(btn) btn.style.display = unlocked ? 'inline-flex' : 'none';
+  });
+  const unlockBtn = document.getElementById('unlock');
+  if(unlockBtn) observer.observe(unlockBtn, {childList:true, characterData:true, subtree:true});
+
+  function bar(pct, color){
+    return `<div style="height:10px;border-radius:999px;background:#f1f5f9;overflow:hidden;flex:1;">
+      <div style="height:100%;width:${Math.min(100,pct)}%;background:${color};border-radius:999px;transition:width .4s ease;"></div>
+    </div>`;
+  }
+
+  function renderStats(items){
+    const total   = items.length;
+    const activos = items.filter(x => /en\s*pr[eé]stamo/i.test(x.estado||'')).length;
+    const devueltos = items.filter(x => /devuelto/i.test(x.estado||'')).length;
+
+    // Top 5 libros más prestados
+    const byBook = {};
+    items.forEach(x=>{ const k=x.titulo||'?'; byBook[k]=(byBook[k]||0)+1; });
+    const topBooks = Object.entries(byBook).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    const maxBook  = topBooks[0]?.[1] || 1;
+
+    // Top 5 grados
+    const byGrade = {};
+    items.forEach(x=>{ const k=x.grado||'Sin grado'; byGrade[k]=(byGrade[k]||0)+1; });
+    const topGrades = Object.entries(byGrade).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    const maxGrade  = topGrades[0]?.[1] || 1;
+
+    // Préstamos por mes (últimos 6)
+    const byMonth = {};
+    items.forEach(x=>{
+      const raw = x.fechaPrestamo || x.fechaPrestamoRaw || '';
+      const m = String(raw).match(/(\d{1,2})[\/\-](\d{4})/);
+      if(m){ const key=`${m[2]}-${m[1].padStart(2,'0')}`; byMonth[key]=(byMonth[key]||0)+1; }
+    });
+    const months = Object.entries(byMonth).sort((a,b)=>a[0].localeCompare(b[0])).slice(-6);
+    const maxMonth = Math.max(...months.map(m=>m[1]), 1);
+
+    const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    const fmtMonth = k => { const [y,m]=k.split('-'); return `${meses[+m-1]} ${y}`; };
+
+    const colors = ['#6366f1','#8b5cf6','#a78bfa','#c4b5fd','#ddd6fe'];
+
+    document.getElementById('statsContent').innerHTML = `
+      <!-- KPIs -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+        <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:16px;padding:18px;text-align:center;">
+          <div style="font-size:32px;font-weight:900;color:#6d28d9;">${total}</div>
+          <div style="font-size:12px;color:#7c3aed;font-weight:600;margin-top:2px;">TOTAL PRÉSTAMOS</div>
+        </div>
+        <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:16px;padding:18px;text-align:center;">
+          <div style="font-size:32px;font-weight:900;color:#dc2626;">${activos}</div>
+          <div style="font-size:12px;color:#dc2626;font-weight:600;margin-top:2px;">EN PRÉSTAMO</div>
+        </div>
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:16px;padding:18px;text-align:center;">
+          <div style="font-size:32px;font-weight:900;color:#16a34a;">${devueltos}</div>
+          <div style="font-size:12px;color:#16a34a;font-weight:600;margin-top:2px;">DEVUELTOS</div>
+        </div>
+      </div>
+
+      <!-- Préstamos por mes -->
+      ${months.length ? `
+      <div style="background:#fafafa;border:1px solid #e2e8f0;border-radius:16px;padding:18px;">
+        <h3 style="margin:0 0 16px;font-size:14px;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:.05em;">📅 Préstamos por mes</h3>
+        <div style="display:flex;align-items:flex-end;gap:8px;height:80px;">
+          ${months.map(([k,v])=>`
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+              <div style="font-size:11px;font-weight:700;color:#6d28d9;">${v}</div>
+              <div style="width:100%;background:#6366f1;border-radius:6px 6px 0 0;height:${Math.round((v/maxMonth)*60)+8}px;"></div>
+              <div style="font-size:9px;color:#64748b;text-align:center;">${fmtMonth(k)}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>` : ''}
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <!-- Top libros -->
+        <div style="background:#fafafa;border:1px solid #e2e8f0;border-radius:16px;padding:18px;">
+          <h3 style="margin:0 0 14px;font-size:14px;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:.05em;">📚 Libros más prestados</h3>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            ${topBooks.map(([t,v],i)=>`
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+                  <span style="color:#0f172a;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:75%;">${t}</span>
+                  <span style="color:#6d28d9;font-weight:700;">${v}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  ${bar((v/maxBook)*100, colors[i])}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Top grados -->
+        <div style="background:#fafafa;border:1px solid #e2e8f0;border-radius:16px;padding:18px;">
+          <h3 style="margin:0 0 14px;font-size:14px;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:.05em;">🎓 Grados más activos</h3>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            ${topGrades.map(([g,v],i)=>`
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+                  <span style="color:#0f172a;font-weight:600;">${g}</span>
+                  <span style="color:#7c3aed;font-weight:700;">${v}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  ${bar((v/maxGrade)*100, colors[i])}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  async function openStats(){
+    const dlg = document.getElementById('statsDlg');
+    if(!dlg) return;
+    try{ dlg.showModal(); }catch(_){ dlg.setAttribute('open',''); }
+    document.getElementById('statsContent').innerHTML = '<p style="color:#64748b;text-align:center;padding:40px 0;">Cargando estadísticas…</p>';
+    try{
+      // Reutilizamos el endpoint recent-loans que ya trae todos los registros
+      const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${LOANS_GID}&t=${Date.now()}`;
+      const res = await fetch(url, {cache:'no-store'});
+      const txt = await res.text();
+      const s = txt.indexOf('{'); const e = txt.lastIndexOf('}');
+      const json = JSON.parse(txt.slice(s,e+1));
+      const cols = (json.table.cols||[]).map(c=>String(c.label||'').trim().toLowerCase());
+      const rows = (json.table.rows||[]).map(r=>(r.c||[]).map(c=>c?String(c.f??c.v??''):''));
+      function norm(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+      const iT = cols.findIndex(h=>norm(h).includes('titulo')||norm(h).includes('title'));
+      const iG = cols.findIndex(h=>norm(h).includes('grado')||norm(h).includes('curso'));
+      const iA = cols.findIndex(h=>norm(h).includes('acci')||norm(h).includes('estado'));
+      const iF = cols.findIndex(h=>norm(h).includes('fecha')&&!norm(h).includes('devol'));
+      const items = rows.filter(r=>r.some(v=>v.trim())).map(r=>({
+        titulo: iT>=0?r[iT]:'',
+        grado:  iG>=0?r[iG]:'',
+        estado: iA>=0?r[iA]:'',
+        fechaPrestamo: iF>=0?r[iF]:''
+      })).filter(x=>x.titulo);
+      renderStats(items);
+    }catch(err){
+      document.getElementById('statsContent').innerHTML = `<p style="color:#ef4444;text-align:center;padding:40px 0;">Error cargando datos: ${err.message}</p>`;
+    }
+  }
+
+  document.getElementById('statsBtn')?.addEventListener('click', openStats);
+
+  // También mostrar botón si ya estaba desbloqueado
+  setTimeout(()=>{
+    const unlocked = document.getElementById('unlock')?.textContent?.includes('🔓');
+    const btn = document.getElementById('statsBtn');
+    if(btn && unlocked) btn.style.display = 'inline-flex';
+  }, 1000);
 })();
 </script>
