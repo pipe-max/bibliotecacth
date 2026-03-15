@@ -6266,7 +6266,7 @@ b2.addEventListener('click', function(){ cleanPrint('all', false); });
 
     // Top 5 grados
     const byGrade = {};
-    items.forEach(x=>{ const k=x.grado||'Sin grado'; byGrade[k]=(byGrade[k]||0)+1; });
+    items.forEach(x=>{ const k = (x.grado||'').trim() || 'Docentes / Admin / Oficios Varios'; byGrade[k]=(byGrade[k]||0)+1; });
     const topGrades = Object.entries(byGrade).sort((a,b)=>b[1]-a[1]).slice(0,5);
     const maxGrade  = topGrades[0]?.[1] || 1;
 
