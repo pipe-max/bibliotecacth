@@ -2108,6 +2108,30 @@ function attachTooltips(){
 }
 
 function render(){
+  // Ocultar/mostrar banner según si hay búsqueda o filtros activos
+  const hasSearch = !!(
+    (document.getElementById('q')?.value||'').trim() ||
+    (document.getElementById('cat')?.value||'') ||
+    (document.getElementById('aut')?.value||'')
+  );
+  const banner = document.querySelector('.promo-banner');
+  if(banner){
+    banner.style.transition = 'opacity .2s ease, max-height .3s ease';
+    banner.style.overflow = 'hidden';
+    if(hasSearch){
+      banner.style.opacity = '0';
+      banner.style.maxHeight = '0';
+      banner.style.marginBottom = '0';
+      banner.style.marginTop = '0';
+      banner.style.padding = '0';
+    } else {
+      banner.style.opacity = '1';
+      banner.style.maxHeight = '1000px';
+      banner.style.marginBottom = '';
+      banner.style.marginTop = '';
+      banner.style.padding = '';
+    }
+  }
   applyFilters();
   computeCounters(state.rows);
   updateActiveFiltersUI();
