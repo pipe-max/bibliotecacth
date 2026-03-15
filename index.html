@@ -322,36 +322,59 @@
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border:1px solid #e2e8f0;
-    border-radius:24px;
-    padding:24px 26px;
-    min-height: 150px;
+    border-radius:20px;
+    padding:14px 16px;
+    min-height: 0;
     display:flex;
-    flex-direction:column;
-    justify-content:center;
+    flex-direction:row;
+    align-items:center;
+    gap:14px;
     box-shadow: 0 6px 18px rgba(15,23,42,.04);
+  }
+  .promo-card-cover{
+    flex-shrink:0;
+    width:58px;
+    height:80px;
+    border-radius:8px;
+    overflow:hidden;
+    border:1px solid #e2e8f0;
+    background:#f1f5f9;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+  }
+  .promo-card-cover img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .promo-card-text{
+    flex:1;
+    min-width:0;
   }
   .promo-card .tag{
     display:inline-block;
-    margin-bottom:12px;
+    margin-bottom:5px;
     color:#64748b;
-    font-size:12px;
+    font-size:10px;
     font-weight:800;
     letter-spacing:.08em;
     text-transform:uppercase;
   }
   .promo-card h3{
-    margin:0 0 10px;
+    margin:0 0 5px;
     color:#0f172a;
-    font-size:24px;
-    line-height:1.08;
-    letter-spacing:-.6px;
+    font-size:15px;
+    line-height:1.2;
+    letter-spacing:-.3px;
   }
   .promo-card p{
     margin:0;
     color:#64748b;
-    font-size:14px;
-    line-height:1.55;
-    max-width:34ch;
+    font-size:12px;
+    line-height:1.5;
   }
   .discover-bar{
     display:flex;
@@ -1488,16 +1511,26 @@ html{ scroll-behavior: smooth; }
           </figcaption>
         </figure>
       </div>
-      <div class="promo-side">
+      <div class="promo-side" id="promoSide">
         <article class="promo-card">
-          <span class="tag">Recomendación del mes</span>
-          <h3>Ética posmoderna — Zygmunt Bauman</h3>
-          <p>Plantea que la posmodernidad no es el fin de la moralidad, sino el momento en que las personas deben recuperar su propia responsabilidad moral, centrada en el compromiso con el otro, sin esperar recompensas ni seguir reglas estrictas.</p>
+          <div class="promo-card-cover">
+            <img src="http://www.librerialeon.com.mx/imagenes/9789682/978968232570.GIF" alt="Portada Ética posmoderna" onerror="this.parentElement.innerHTML='📘'">
+          </div>
+          <div class="promo-card-text">
+            <span class="tag">Recomendación del mes</span>
+            <h3>Ética posmoderna — Zygmunt Bauman</h3>
+            <p>La posmodernidad como el momento en que las personas recuperan su responsabilidad moral, centrada en el compromiso con el otro.</p>
+          </div>
         </article>
         <article class="promo-card">
-          <span class="tag">Libros nuevos</span>
-          <h3>Ramón Preocupón — Anthony Browne</h3>
-          <p>Un hermoso libro que ayuda a los niños a identificar, expresar y superar sus miedos y preocupaciones. Muestra cómo los muñecos quitapesares pueden facilitar soltar los miedos y recuperar la confianza en sí mismos.</p>
+          <div class="promo-card-cover">
+            <img src="https://images.cdn3.buscalibre.com/fit-in/360x360/7f/ce/7fce504b8278a322475e1613f8de68c6.jpg" alt="Portada Ramón Preocupón" onerror="this.parentElement.innerHTML='📗'">
+          </div>
+          <div class="promo-card-text">
+            <span class="tag">Libros nuevos</span>
+            <h3>Ramón Preocupón — Anthony Browne</h3>
+            <p>Ayuda a los niños a identificar y superar sus miedos. Los muñecos quitapesares como herramienta para recuperar la confianza.</p>
+          </div>
         </article>
       </div>
     </div>
@@ -6120,5 +6153,82 @@ b2.addEventListener('click', function(){ cleanPrint('all', false); });
     btn.parentNode.replaceChild(clone, btn);
     clone.addEventListener('click', openLogs);
   }
+})();
+</script>
+
+<script>
+// === Carga dinámica de tarjetas "Recomendado + Nuevos" desde Google Sheets ===
+(function(){
+  const SHEET_ID  = '13SOXwd_TSub0vivKLerD_81VoJiuHnNTXZ6f6DK9xtE';
+  const RECO_GID  = '1935965307';
+  const TAGS      = ['Recomendación del mes', 'Libros nuevos'];
+  const EMOJIS    = ['📘', '📗'];
+
+  const LABELS = {
+    urlPortada  : ['url portada','url imagen','portada','imagen','cover','url'],
+    titulo      : ['título','titulo','title','libro','nombre'],
+    descripcion : ['descripción','descripcion','description','desc','reseña','resena']
+  };
+
+  function norm(s){ return String(s||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+
+  function findCol(headers, keys){
+    for(const k of keys){
+      const i = headers.findIndex(h => norm(h) === norm(k));
+      if(i >= 0) return i;
+    }
+    for(const k of keys){
+      const i = headers.findIndex(h => norm(h).includes(norm(k)));
+      if(i >= 0) return i;
+    }
+    return -1;
+  }
+
+  function buildCard(data, tagIndex){
+    const emoji  = EMOJIS[tagIndex] || '📖';
+    const tag    = TAGS[tagIndex]   || 'Destacado';
+    const cover  = String(data.url    || '').trim();
+    const titulo = String(data.titulo || '').trim();
+    const desc   = String(data.desc   || '').trim();
+    const imgHTML = cover
+      ? `<img src="${cover}" alt="Portada ${titulo}" loading="lazy" onerror="this.parentElement.innerHTML='${emoji}'">`
+      : emoji;
+    return `<article class="promo-card">
+      <div class="promo-card-cover">${imgHTML}</div>
+      <div class="promo-card-text">
+        <span class="tag">${tag}</span>
+        <h3>${titulo}</h3>
+        <p>${desc}</p>
+      </div>
+    </article>`;
+  }
+
+  async function loadRecomendados(){
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${RECO_GID}&t=${Date.now()}`;
+    try{
+      const res  = await fetch(url, {cache:'no-store'});
+      const txt  = await res.text();
+      const s = txt.indexOf('{'); const e = txt.lastIndexOf('}');
+      if(s < 0 || e < 0) return;
+      const json = JSON.parse(txt.slice(s, e+1));
+      const cols = (json.table.cols||[]).map(c => String(c.label||'').trim());
+      const rows = (json.table.rows||[]).map(r => (r.c||[]).map(c => c ? String(c.v ?? c.f ?? '') : ''));
+      const iURL  = findCol(cols, LABELS.urlPortada);
+      const iTit  = findCol(cols, LABELS.titulo);
+      const iDesc = findCol(cols, LABELS.descripcion);
+      const items = rows
+        .filter(r => r.some(v => v.trim()))
+        .map(r => ({ url: iURL>=0?r[iURL]:'', titulo: iTit>=0?r[iTit]:'', desc: iDesc>=0?r[iDesc]:'' }))
+        .filter(d => d.titulo);
+      if(!items.length) return;
+      const side = document.getElementById('promoSide');
+      if(!side) return;
+      side.innerHTML = items.slice(0,2).map((d,i) => buildCard(d,i)).join('');
+    }catch(err){
+      console.warn('[recomendados] No se pudo cargar desde Sheets:', err);
+    }
+  }
+
+  loadRecomendados();
 })();
 </script>
