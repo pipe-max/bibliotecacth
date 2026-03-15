@@ -6158,32 +6158,11 @@ b2.addEventListener('click', function(){ cleanPrint('all', false); });
 </script>
 
 <script>
-// === Carga dinámica de tarjetas "Recomendado + Nuevos" desde Google Sheets ===
+// === Carga dinámica de tarjetas "Recomendado + Nuevos" desde AppScript ===
 (function(){
-  const SHEET_ID  = '13SOXwd_TSub0vivKLerD_81VoJiuHnNTXZ6f6DK9xtE';
-  const RECO_GID  = '1935965307';
-  const TAGS      = ['Recomendación del mes', 'Libros nuevos'];
-  const EMOJIS    = ['📘', '📗'];
-
-  const LABELS = {
-    urlPortada  : ['url portada','url imagen','portada','imagen','cover','url','url texto','link'],
-    titulo      : ['título','titulo','title','libro','nombre'],
-    descripcion : ['descripción','descripcion','description','desc','reseña','resena']
-  };
-
-  function norm(s){ return String(s||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
-
-  function findCol(headers, keys){
-    for(const k of keys){
-      const i = headers.findIndex(h => norm(h) === norm(k));
-      if(i >= 0) return i;
-    }
-    for(const k of keys){
-      const i = headers.findIndex(h => norm(h).includes(norm(k)));
-      if(i >= 0) return i;
-    }
-    return -1;
-  }
+  const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbys0nC2pKbfkwhYvm67h6q3AQQdgBZaauYu4190VOykcsxBxRQ4MsRzGXUhKMHiX8sc/exec";
+  const TAGS   = ['Recomendación del mes', 'Libros nuevos'];
+  const EMOJIS = ['📘', '📗'];
 
   function buildCard(data, tagIndex){
     const emoji  = EMOJIS[tagIndex] || '📖';
@@ -6205,33 +6184,15 @@ b2.addEventListener('click', function(){ cleanPrint('all', false); });
   }
 
   async function loadRecomendados(){
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${RECO_GID}&t=${Date.now()}`;
     try{
-      const res  = await fetch(url, {cache:'no-store'});
-      const txt  = await res.text();
-      const s = txt.indexOf('{'); const e = txt.lastIndexOf('}');
-      if(s < 0 || e < 0) return;
-      const json = JSON.parse(txt.slice(s, e+1));
-      const cols = (json.table.cols||[]).map(c => String(c.label||'').trim());
-      const rows = (json.table.rows||[]).map(r => (r.c||[]).map(c => {
-        if(!c) return '';
-        // GViz puede traer la URL como v (valor), f (formato) o dentro de p (properties)
-        const val = c.v ?? c.f ?? '';
-        return String(val);
-      }));
-      const iURL  = findCol(cols, LABELS.urlPortada);
-      const iTit  = findCol(cols, LABELS.titulo);
-      const iDesc = findCol(cols, LABELS.descripcion);
-      const items = rows
-        .filter(r => r.some(v => v.trim()))
-        .map(r => ({ url: iURL>=0?r[iURL]:'', titulo: iTit>=0?r[iTit]:'', desc: iDesc>=0?r[iDesc]:'' }))
-        .filter(d => d.titulo);
-      if(!items.length) return;
+      const res  = await fetch(`${WEBAPP_URL}?action=recomendados`, {cache:'no-store'});
+      const data = await res.json();
+      if(!data.ok || !data.items || !data.items.length) return;
       const side = document.getElementById('promoSide');
       if(!side) return;
-      side.innerHTML = items.slice(0,2).map((d,i) => buildCard(d,i)).join('');
+      side.innerHTML = data.items.slice(0,2).map((d,i) => buildCard(d,i)).join('');
     }catch(err){
-      console.warn('[recomendados] No se pudo cargar desde Sheets:', err);
+      console.warn('[recomendados] Error cargando desde AppScript:', err);
     }
   }
 
