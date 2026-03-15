@@ -2108,12 +2108,8 @@ function attachTooltips(){
 }
 
 function render(){
-  // Ocultar/mostrar banner según si hay búsqueda o filtros activos
-  const hasSearch = !!(
-    (document.getElementById('q')?.value||'').trim() ||
-    (document.getElementById('cat')?.value||'') ||
-    (document.getElementById('aut')?.value||'')
-  );
+  // Ocultar/mostrar banner solo cuando hay texto en la búsqueda
+  const hasSearch = !!(document.getElementById('q')?.value||'').trim();
   const banner = document.querySelector('.promo-banner');
   if(banner){
     banner.style.transition = 'opacity .2s ease, max-height .3s ease';
