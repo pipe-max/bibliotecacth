@@ -1479,10 +1479,9 @@ html{ scroll-behavior: smooth; }
           <img
             src="destacados/concurso-grube-horizontal.jpg"
             alt="Afiche del concurso de cuento corto Una Aventura en la Biblioteca"
-            loading="lazy"
-            onload="this.nextElementSibling.classList.add('hidden')"
-            onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')">
-          <figcaption class="promo-poster-fallback">
+            loading="eager"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+          <figcaption class="promo-poster-fallback" style="display:none">
             <span class="mini">Concurso de cuento corto</span>
             <h3>Una aventura en la biblioteca</h3>
             <p>Dejamos este espacio listo para mostrar la pieza gráfica principal del concurso en cuanto la imagen esté dentro del proyecto.</p>
