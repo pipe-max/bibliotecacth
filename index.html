@@ -699,17 +699,8 @@
     padding: 6px 13px;
     letter-spacing: .01em;
   }
-  /* Indicador visual en la esquina de la tarjeta */
-  .card .avail-dot{
-    position:absolute;
-    top:10px; right:10px;
-    width:10px; height:10px;
-    border-radius:50%;
-    border:2px solid #fff;
-    box-shadow:0 1px 4px rgba(0,0,0,.15);
-  }
-  .card .avail-dot.ok{ background:#22c55e; }
-  .card .avail-dot.bad{ background:#ef4444; }
+  /* Punto de disponibilidad en tarjeta - ELIMINADO */
+  .card .avail-dot{ display:none; }
 
   /* Botones */
   .btn{
@@ -2373,20 +2364,21 @@ function restoreLoginSession(){
 function updateLoginBtn(){
   const btn = document.getElementById('loginBtn');
   const logsBtn = document.getElementById('logsBtn');
+  const statsBtn = document.getElementById('statsBtn');
   if(!btn) return;
   if(isUnlocked){
     const name = currentUserEmail ? currentUserEmail.split('@')[0] : 'Sesión';
     btn.textContent = '✅ ' + name;
     btn.classList.add('logged-in');
     btn.title = 'Clic para cerrar sesión (' + (currentUserEmail||'') + ')';
-    // Mostrar botón Registros
-    if(logsBtn) logsBtn.style.display = 'inline-flex';
+    if(logsBtn)  logsBtn.style.display  = 'inline-flex';
+    if(statsBtn) statsBtn.style.display = 'inline-flex';
   } else {
     btn.innerHTML = '🔑 Login';
     btn.classList.remove('logged-in');
     btn.title = 'Ingresar con Google';
-    // Ocultar botón Registros
-    if(logsBtn) logsBtn.style.display = 'none';
+    if(logsBtn)  logsBtn.style.display  = 'none';
+    if(statsBtn) statsBtn.style.display = 'none';
   }
 }
 
@@ -6253,14 +6245,7 @@ b2.addEventListener('click', function(){ cleanPrint('all', false); });
   const SHEET_ID   = "13SOXwd_TSub0vivKLerD_81VoJiuHnNTXZ6f6DK9xtE";
   const LOANS_GID  = "1311459646";
 
-  // Muestra el botón solo cuando el usuario está desbloqueado
-  const observer = new MutationObserver(()=>{
-    const unlocked = document.getElementById('unlock')?.textContent?.includes('🔓');
-    const btn = document.getElementById('statsBtn');
-    if(btn) btn.style.display = unlocked ? 'inline-flex' : 'none';
-  });
-  const unlockBtn = document.getElementById('unlock');
-  if(unlockBtn) observer.observe(unlockBtn, {childList:true, characterData:true, subtree:true});
+  // El botón statsBtn lo maneja updateLoginBtn al hacer login
 
   function bar(pct, color){
     return `<div style="height:10px;border-radius:999px;background:#f1f5f9;overflow:hidden;flex:1;">
@@ -6404,12 +6389,5 @@ b2.addEventListener('click', function(){ cleanPrint('all', false); });
   }
 
   document.getElementById('statsBtn')?.addEventListener('click', openStats);
-
-  // También mostrar botón si ya estaba desbloqueado
-  setTimeout(()=>{
-    const unlocked = document.getElementById('unlock')?.textContent?.includes('🔓');
-    const btn = document.getElementById('statsBtn');
-    if(btn && unlocked) btn.style.display = 'inline-flex';
-  }, 1000);
 })();
 </script>
