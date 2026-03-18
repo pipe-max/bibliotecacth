@@ -1623,6 +1623,7 @@ html{ scroll-behavior: smooth; }
         <div class="kv stat"><b>Disponibilidad: </b><span class="value" id="fDisp"></span></div>
         <div class="kv stat"><b>En préstamo: </b><span class="value" id="fPrestamo"></span></div>
         <div class="kv full"><b>Observaciones: </b><span class="value" id="fObs"></span></div>
+        <div class="kv full" id="kvEnManosDeRow" style="display:none"><b>En manos de: </b><span class="value" id="fEnManosde">—</span></div>
       </div>
     </div>
   </div>
@@ -1852,6 +1853,7 @@ function validCover(url){
 function openModal(b){
   try{ document.getElementById('loanList')?.remove(); }catch(_){}
   try{ document.getElementById('kvPrestadores')?.remove(); }catch(_){}
+  try{ const r=document.getElementById('kvEnManosDeRow'); if(r) r.style.display='none'; }catch(_){}
   const src = validCover(b.portada) || "default_cover.png";
   document.getElementById("mCover").src = src;
 
@@ -1987,7 +1989,7 @@ function openModal(b){
 // Mostrar préstamos activos (rápido, con caché y carga inmediata)
   (function(){
     // PRIVACY: do not show active borrowers unless unlocked
-    if (typeof isUnlocked !== 'undefined' && !isUnlocked) { try{ document.getElementById('loanList')?.remove(); }catch(_){} return; }
+    if (typeof isUnlocked !== 'undefined' && !isUnlocked) { try{ document.getElementById('loanList')?.remove(); }catch(_){} try{ const r=document.getElementById('kvEnManosDeRow'); if(r) r.style.display='none'; }catch(_){} return; }
 
     try{
       const tituloX = b.titulo || document.getElementById('fTitulo')?.textContent?.trim() || '';
@@ -2016,25 +2018,20 @@ function openModal(b){
         // "En manos de" para admins — se actualiza con cada render
         try{
           document.getElementById('kvPrestadores')?.remove();
-          if(_isAdmin && items && items.length > 0){
-            const pBox = document.createElement('div');
-            pBox.id = 'kvPrestadores';
-            pBox.className = 'kv full';
-            pBox.style.cssText = 'background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:10px 12px;';
-            const titulo_label = document.createElement('b');
-            titulo_label.style.cssText = 'color:#15803d;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px;';
-            titulo_label.textContent = 'En manos de:';
-            pBox.appendChild(titulo_label);
-            items.forEach(it => {
-              const row = document.createElement('div');
-              row.style.cssText = 'padding:4px 0;border-bottom:1px solid #dcfce7;font-size:.9em';
-              const nombre = it.borrower || it.usuario || '—';
-              const rol    = it.rol   ? ` (${it.rol})` : '';
-              const grado  = it.grado ? ` · ${it.grado}` : '';
-              row.textContent = `👤 ${nombre}${rol}${grado}`;
-              pBox.appendChild(row);
-            });
-            cont.appendChild(pBox);
+          const enManosRow = document.getElementById('kvEnManosDeRow');
+          const enManosEl  = document.getElementById('fEnManosde');
+          if(enManosRow && enManosEl){
+            if(_isAdmin && items && items.length > 0){
+              enManosEl.textContent = items.map(it => {
+                const nombre = it.borrower || it.usuario || '—';
+                const rol    = it.rol   ? ` (${it.rol})` : '';
+                const grado  = it.grado ? ` · ${it.grado}` : '';
+                return nombre + rol + grado;
+              }).join(' · ');
+              enManosRow.style.display = '';
+            } else {
+              enManosRow.style.display = 'none';
+            }
           }
         }catch(_){}
 
