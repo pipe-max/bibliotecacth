@@ -1886,12 +1886,17 @@ function openModal(b){
             const _emData = await _emRes.json();
             const _emItems = (Array.isArray(_emData.items) ? _emData.items : []);
             if(_emItems.length > 0){
-              _emEl.textContent = _emItems.map(it => {
+              const _emGrouped = new Map();
+              _emItems.forEach(it => {
                 const n = it.borrower || it.usuario || '?';
                 const r = it.rol   ? ` (${it.rol})`   : '';
                 const g = it.grado ? ` · ${it.grado}` : '';
-                return n + r + g;
-              }).join(' · ');
+                const key = n + r + g;
+                _emGrouped.set(key, (_emGrouped.get(key) || 0) + 1);
+              });
+              _emEl.textContent = Array.from(_emGrouped.entries()).map(([label, cnt]) =>
+                cnt > 1 ? `${label} ×${cnt}` : label
+              ).join(' · ');
             } else {
               _emEl.textContent = '—';
               _emRow.style.display = 'none';
@@ -3876,6 +3881,15 @@ function __toggleClearBtn(){ try{ var el=document.getElementById('clearQ'); var 
           <span class="rv-label">Fecha de devolución</span>
           <input id="rvDate" class="rv-input" type="date"/>
         </label>
+        <label class="rv-field is-required">
+          <span class="rv-label">Cantidad de ejemplares</span>
+          <input id="rvQty" class="rv-input" type="number" min="1" value="1"/>
+          <span class="rv-note" id="rvQtyNote">Disponibles: —</span>
+        </label>
+        <label class="rv-field">
+          <span class="rv-label">Observaciones</span>
+          <input id="rvObs" class="rv-input" placeholder="Opcional" autocomplete="off"/>
+        </label>
       </div>
 
       <div class="rv-actions">
@@ -3913,19 +3927,25 @@ function __toggleClearBtn(){ try{ var el=document.getElementById('clearQ'); var 
     }
   }
 
-  function openReserveDialogUnified(){
+  function openReserveDialogUnified(maxQty){
     return new Promise((resolve, reject)=>{
-      const dlg   = document.getElementById('reserveDlg');
-      const name  = document.getElementById('rvName');
-      const role  = document.getElementById('rvRole');
-      const grade = document.getElementById('rvGrade');
+      const dlg      = document.getElementById('reserveDlg');
+      const name     = document.getElementById('rvName');
+      const role     = document.getElementById('rvRole');
+      const grade    = document.getElementById('rvGrade');
       const gradeField = document.getElementById('rvGradeField');
-      const date  = document.getElementById('rvDate');
-      const ok    = document.getElementById('rvOk');
-      const cancel= document.getElementById('rvCancel');
+      const date     = document.getElementById('rvDate');
+      const qty      = document.getElementById('rvQty');
+      const qtyNote  = document.getElementById('rvQtyNote');
+      const obs      = document.getElementById('rvObs');
+      const ok       = document.getElementById('rvOk');
+      const cancel   = document.getElementById('rvCancel');
 
       // Reset
       name.value=''; role.value=''; grade.value=''; grade.disabled=true; grade.classList.add('rv-disabled'); gradeField?.classList.add('is-disabled');
+      qty.value='1'; qty.min='1'; qty.max= maxQty || 99;
+      if(qtyNote) qtyNote.textContent = maxQty ? `Disponibles: ${maxQty}` : 'Disponibles: —';
+      obs.value='';
       ok.disabled = true;
       // Fecha por defecto: hoy + 14 días
       try{
@@ -3953,7 +3973,9 @@ function __toggleClearBtn(){ try{ var el=document.getElementById('clearQ'); var 
         const hasDate = !!(date.value||'').trim();
         const isStudent = /^alumno$/i.test(role.value||'') || /^estudiante$/i.test(role.value||'');
         const hasGrade = !isStudent || !!(grade.value||'').trim();
-        ok.disabled = !(hasName && hasRole && hasDate && hasGrade);
+        const qtyVal = parseInt(qty.value||'1', 10);
+        const hasQty = qtyVal >= 1 && qtyVal <= (maxQty || 99);
+        ok.disabled = !(hasName && hasRole && hasDate && hasGrade && hasQty);
       }
       role.addEventListener('change', onRoleChange);
       name.addEventListener('input', validateForm);
@@ -3961,6 +3983,7 @@ function __toggleClearBtn(){ try{ var el=document.getElementById('clearQ'); var 
       grade.addEventListener('input', validateForm);
       date.addEventListener('change', validateForm);
       date.addEventListener('input', validateForm);
+      qty.addEventListener('input', validateForm);
 
       function cleanup(){
         ok.removeEventListener('click', onOk);
@@ -3971,6 +3994,7 @@ function __toggleClearBtn(){ try{ var el=document.getElementById('clearQ'); var 
         grade.removeEventListener('input', validateForm);
         date.removeEventListener('change', validateForm);
         date.removeEventListener('input', validateForm);
+        qty.removeEventListener('input', validateForm);
       }
       function onCancel(){ cleanup(); dlg.close(); reject(new Error('cancel')); }
       function onOk(){
@@ -3982,8 +4006,10 @@ function __toggleClearBtn(){ try{ var el=document.getElementById('clearQ'); var 
         const rol = /^alumno$/i.test(rolSel) ? 'Estudiante' : rolSel;
         const grado = grade.disabled ? '' : (grade.value||'').trim();
         const fechaEntrega = (function(){ const [y,m,d]=(date.value||'').split('-'); return `${d}/${m}/${y}`; })();
+        const cantidad = Math.max(1, parseInt(qty.value||'1', 10));
+        const observaciones = (obs.value||'').trim();
         cleanup(); dlg.close();
-        resolve({ estudiante, grado, rol, fechaEntrega });
+        resolve({ estudiante, grado, rol, fechaEntrega, cantidad, observaciones });
       }
       ok.addEventListener('click', onOk);
       cancel.addEventListener('click', onCancel);
@@ -3998,25 +4024,39 @@ function __toggleClearBtn(){ try{ var el=document.getElementById('clearQ'); var 
     if(typeof isUnlocked !== 'undefined' && !isUnlocked){ uiAlert('Necesita PIN', 'Primero desbloquea con el PIN.'); return; }
     if(typeof currentBook === 'undefined' || !currentBook){ return; }
     try{
-      const { estudiante, grado, rol, fechaEntrega } = await openReserveDialogUnified();
-      // Fecha de préstamo = hoy (servidor). La fecha de devolución se define en el mismo formulario.
+      const _titulo = currentBook.titulo || currentBook.Titulo || document.getElementById('fTitulo')?.textContent?.trim() || '';
+      const _totalEj = Number(currentBook.ejemplares || 0);
+      const _liveLoans = (typeof loansCache !== 'undefined' && loansCache.has(_titulo))
+        ? loansCache.get(_titulo).filter(it => { const e=String(it.estado||it.Estado||''); const d=String(it.fecha_devolucion||it.fechaDevolucion||''); return !(e.toLowerCase()==='devuelto'||d); }).length
+        : Number(currentBook.prestamo || 0);
+      const _available = Math.max(0, _totalEj - _liveLoans);
+
+      const { estudiante, grado, rol, fechaEntrega, cantidad, observaciones } = await openReserveDialogUnified(_available);
+      const titulo = _titulo;
 
       const payload = {
         action: 'reserve',
         token: typeof TOKEN_CACHE !== 'undefined' ? TOKEN_CACHE : '',
-        titulo: currentBook.titulo || currentBook.Titulo || document.getElementById('fTitulo')?.textContent?.trim() || '',
-        estudiante, grado, rol, fechaEntrega
+        titulo,
+        estudiante, grado, rol, fechaEntrega,
+        obs: observaciones
       };
 
       __CTH_SHOW__ && __CTH_SHOW__('Registrando préstamo…','Por favor no cierres esta ventana');
       __showModalSpinner__ && __showModalSpinner__('Registrando préstamo…','No cierres esta ventana');
       try{
-        const data = await postToWebApp(payload);
+        let _ok = true;
+        for(let _i = 0; _i < cantidad; _i++){
+          const data = await postToWebApp(payload);
+          if(!data || !data.ok){ _ok = false; break; }
+        }
+        const data = { ok: _ok };
         if(data && data.ok){
           __CTH_HIDE__ && __CTH_HIDE__(); __hideModalSpinner__ && __hideModalSpinner__(); const __roleText = (/^Estudiante$/i.test(rol) && (grado||'').trim()) ? `Estudiante (Grado: ${(grado||'').trim()})` : (rol||'');
 await uiAlert('Reserva registrada', `Título: ${payload.titulo}
+Ejemplares: ${cantidad}
 Reservado por: ${estudiante}
-Rol: ${__roleText}`);
+Rol: ${__roleText}${observaciones ? '\nObs: ' + observaciones : ''}`);
 try{ if(typeof loansCache!=='undefined' && currentBook?.titulo){ loansCache.delete(currentBook.titulo); } }catch(_){}
           await boot();
 
