@@ -1622,8 +1622,8 @@ html{ scroll-behavior: smooth; }
         <div class="kv"><b>Categoría: </b><span class="value" id="fCat"></span></div>
         <div class="kv stat"><b>Disponibilidad: </b><span class="value" id="fDisp"></span></div>
         <div class="kv stat"><b>En préstamo: </b><span class="value" id="fPrestamo"></span></div>
-        <div class="kv full"><b>Observaciones: </b><span class="value" id="fObs"></span></div>
         <div class="kv full" id="kvEnManosDeRow" style="display:none"><b>En manos de: </b><span class="value" id="fEnManosde">—</span></div>
+        <div class="kv full"><b>Observaciones: </b><span class="value" id="fObs"></span></div>
       </div>
     </div>
   </div>
@@ -1884,7 +1884,6 @@ function openModal(b){
           try{
             const _emRes  = await fetch(`${LOOKUP_URL}?action=loans-by-title&title=${encodeURIComponent(_emTitulo)}`, {cache:'no-store'});
             const _emData = await _emRes.json();
-            console.log('[EnManosde] titulo buscado:', _emTitulo, '| items recibidos:', _emItems.length, '| ok:', _emData.ok, '| error:', _emData.error);
             const _emItems = (Array.isArray(_emData.items) ? _emData.items : []);
             if(_emItems.length > 0){
               _emEl.textContent = _emItems.map(it => {
