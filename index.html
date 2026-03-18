@@ -3848,9 +3848,13 @@ function __toggleClearBtn(){ try{ var el=document.getElementById('clearQ'); var 
 
 <dialog id="reserveDlg" class="rv-modal rv-backdrop">
   <div class="rv-card">
-    <header class="rv-head">
-      <h2 class="rv-title">Datos de quien toma prestado</h2>
-      <div class="rv-sub">Ingresa la información para registrar el préstamo</div>
+    <header class="rv-head" style="display:flex;gap:14px;align-items:flex-start;">
+      <img id="rvCover" src="" alt="portada" style="width:54px;height:78px;object-fit:cover;border-radius:6px;border:1px solid #e2e8f0;flex-shrink:0;display:none;"/>
+      <div>
+        <div style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">Registrar préstamo</div>
+        <h2 class="rv-title" id="rvBookTitle" style="font-size:1.3em;margin:0 0 2px;">Datos de quien toma prestado</h2>
+        <div class="rv-sub" id="rvBookAuthor">Ingresa la información para registrar el préstamo</div>
+      </div>
     </header>
 
     <section class="rv-body">
@@ -3940,6 +3944,20 @@ function __toggleClearBtn(){ try{ var el=document.getElementById('clearQ'); var 
       const obs      = document.getElementById('rvObs');
       const ok       = document.getElementById('rvOk');
       const cancel   = document.getElementById('rvCancel');
+
+      // Rellena header con datos del libro actual
+      try{
+        const _cb = typeof currentBook !== 'undefined' ? currentBook : null;
+        const _titleEl  = document.getElementById('rvBookTitle');
+        const _authorEl = document.getElementById('rvBookAuthor');
+        const _coverEl  = document.getElementById('rvCover');
+        if(_titleEl)  _titleEl.textContent  = (_cb && _cb.titulo)    || 'Registrar préstamo';
+        if(_authorEl) _authorEl.textContent = (_cb && _cb.autor)     || 'Ingresa la información para registrar el préstamo';
+        if(_coverEl && _cb && _cb.portada){
+          _coverEl.src = _cb.portada;
+          _coverEl.style.display = '';
+        } else if(_coverEl){ _coverEl.style.display = 'none'; }
+      }catch(_){}
 
       // Reset
       name.value=''; role.value=''; grade.value=''; grade.disabled=true; grade.classList.add('rv-disabled'); gradeField?.classList.add('is-disabled');
