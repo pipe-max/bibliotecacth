@@ -2008,8 +2008,36 @@ function openModal(b){
       cont.appendChild(box);
       const btns = document.getElementById('loanBtns');
 
+      const _adminEmails = ['bibliotecacth@theodoro.edu.co','pipe@theodoro.edu.co'];
+      const _isAdmin = _adminEmails.includes(typeof currentUserEmail !== 'undefined' ? currentUserEmail : '');
+
       function renderLoans(items){
         btns.innerHTML = '';
+        // "En manos de" para admins — se actualiza con cada render
+        try{
+          document.getElementById('kvPrestadores')?.remove();
+          if(_isAdmin && items && items.length > 0){
+            const pBox = document.createElement('div');
+            pBox.id = 'kvPrestadores';
+            pBox.className = 'kv full';
+            pBox.style.cssText = 'background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:10px 12px;';
+            const titulo_label = document.createElement('b');
+            titulo_label.style.cssText = 'color:#15803d;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px;';
+            titulo_label.textContent = 'En manos de:';
+            pBox.appendChild(titulo_label);
+            items.forEach(it => {
+              const row = document.createElement('div');
+              row.style.cssText = 'padding:4px 0;border-bottom:1px solid #dcfce7;font-size:.9em';
+              const nombre = it.borrower || it.usuario || '—';
+              const rol    = it.rol   ? ` (${it.rol})` : '';
+              const grado  = it.grado ? ` · ${it.grado}` : '';
+              row.textContent = `👤 ${nombre}${rol}${grado}`;
+              pBox.appendChild(row);
+            });
+            cont.appendChild(pBox);
+          }
+        }catch(_){}
+
         if(!items || !items.length){
           box.remove();
           return;
@@ -2514,29 +2542,6 @@ openModal = function(b){
       if(dBtn) dBtn.disabled = !isUnlocked || activos === 0;
       if(rBtn) rBtn.disabled = !isUnlocked || (ejemplares - activos) <= 0;
 
-      // Sección "En manos de" — solo para admins
-      try{
-        document.getElementById('kvPrestadores')?.remove();
-        const adminEmails = ['bibliotecacth@theodoro.edu.co','pipe@theodoro.edu.co'];
-        const activos2 = items.filter(isActiveLoan);
-        if(isUnlocked && adminEmails.includes(currentUserEmail) && activos2.length > 0){
-          const cont = document.querySelector('#dlg .fields');
-          if(cont){
-            const box = document.createElement('div');
-            box.id = 'kvPrestadores';
-            box.className = 'kv full';
-            box.style.cssText = 'background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:10px 12px;';
-            box.innerHTML = '<b style="color:#15803d;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px;">En manos de:</b>'
-              + activos2.map(it => {
-                  const nombre = esc(it.borrower || it.usuario || '—');
-                  const rol    = it.rol   ? ` <span style="opacity:.6;font-size:.85em">(${esc(it.rol)})</span>` : '';
-                  const grado  = it.grado ? ` · <span style="opacity:.6;font-size:.85em">${esc(it.grado)}</span>` : '';
-                  return `<div style="padding:4px 0;border-bottom:1px solid #dcfce7;font-size:.9em">👤 ${nombre}${rol}${grado}</div>`;
-                }).join('');
-            cont.appendChild(box);
-          }
-        }
-      }catch(err){ console.error('[En manos de]', err); }
     }catch(err){ console.error('[openModal async]', err); }
   })();
 };
