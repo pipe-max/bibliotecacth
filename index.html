@@ -2729,23 +2729,21 @@ async function registrarDevolucion(){
       return;
     }
 
-    const devolverConNombre = async (nombre) => {
+    const devolverConNombre = async (nombre, silent = false) => {
       const payload = {
         action: 'return',
         token: TOKEN_CACHE,
         titulo,
         estudiante: nombre
       };
-      __showModalSpinner__('Registrando devolución…','No cierres esta ventana');
-__CTH_SHOW__('Registrando devolución…','Por favor no cierres esta ventana');
+      if(!silent){ __showModalSpinner__('Registrando devolución…','No cierres esta ventana'); __CTH_SHOW__('Registrando devolución…','Por favor no cierres esta ventana'); }
 let r;
 try {
         r = await postToWebApp(payload);
 } finally {
-        __CTH_HIDE__();
-        __hideModalSpinner__();
+        if(!silent){ __CTH_HIDE__(); __hideModalSpinner__(); }
 }
-if(r.ok){
+if(r && r.ok && !silent){
         const __loan = (data && Array.isArray(data.items) ? data.items : []).find(it => (
   (it.estudiante||it.nombre||'').toString().trim().toLowerCase() === (nombre||'').toString().trim().toLowerCase()
 )) || {};
@@ -2827,9 +2825,10 @@ function __toggleClearBtn(){ try{ var el=document.getElementById('clearQ'); var 
 })(); 
 
         document.getElementById('dlg')?.close();
-      }else{
-        uiAlert('No se pudo registrar la devolución', 'No se pudo registrar la devolución: ' + (r.error || r.message || ''));
+      }else if(!silent){
+        uiAlert('No se pudo registrar la devolución', 'No se pudo registrar la devolución: ' + ((r&&r.error) || (r&&r.message) || ''));
       }
+      return r;
     };
 
     // Agrupar por nombre único con su cantidad
@@ -2840,6 +2839,26 @@ function __toggleClearBtn(){ try{ var el=document.getElementById('clearQ'); var 
     });
     const _devEntries = Array.from(_devGroup.entries()); // [[nombre, count], ...]
 
+    // Función auxiliar: devolver N copias del mismo usuario con una sola UI
+    const devolverBatch = async (n, cnt) => {
+      if(cnt === 1){ await devolverConNombre(n); return; }
+      __showModalSpinner__('Registrando devolución…','No cierres esta ventana');
+      __CTH_SHOW__('Registrando devolución…','Por favor no cierres esta ventana');
+      let _allOk = true;
+      try{
+        for(let _i = 0; _i < cnt; _i++){
+          const _r = await devolverConNombre(n, true);
+          if(!_r || !_r.ok){ _allOk = false; break; }
+        }
+      } finally { __CTH_HIDE__(); __hideModalSpinner__(); }
+      if(_allOk){
+        try{ loansCache.delete(titulo); }catch(_){}
+        try{ setBookLoansInState(titulo, Math.max(0, Number(currentBook.prestamo||0)-cnt)); updateCardStatus(titulo); }catch(_){}
+        await uiAlert('Devolución registrada', `Título: ${titulo}\nDevuelto por: ${n} (${cnt} ejemplares)`, null, { hideOk:true, autoCloseMs:3000, onClose:function(){ try{ document.getElementById('dlg').close(); }catch(_){} } });
+        boot();
+      } else { uiAlert('Error', 'No se pudo registrar alguna devolución.'); }
+    };
+
     // Si solo hay un usuario único (aunque tenga varias copias), confirmar y devolver todo
     if(_devEntries.length === 1){
       const [n, cnt] = _devEntries[0];
@@ -2847,7 +2866,7 @@ function __toggleClearBtn(){ try{ var el=document.getElementById('clearQ'); var 
         ? `Título: ${titulo}\nLo tiene: ${n} (${cnt} ejemplares)`
         : `Título: ${titulo}\nLo tiene: ${n}`;
       if(await uiConfirm('¿Confirmar devolución?', msg, '', 'Confirmar devolución')){
-        for(let _i = 0; _i < cnt; _i++) await devolverConNombre(n);
+        await devolverBatch(n, cnt);
       }
       return;
     }
@@ -2856,10 +2875,9 @@ function __toggleClearBtn(){ try{ var el=document.getElementById('clearQ'); var 
     const _labels = _devEntries.map(([n, cnt]) => cnt > 1 ? `${n} (×${cnt})` : n);
     const choice = await window.uiPickBorrower('Selecciona un nombre', 'Haz clic en la persona que devuelve:', _labels);
     if(choice){
-      // Recuperar el nombre original quitando el " (×N)" si se añadió
       const _chosenName = choice.replace(/\s*\(×\d+\)$/, '');
       const _chosenCount = _devGroup.get(_chosenName) || 1;
-      for(let _i = 0; _i < _chosenCount; _i++) await devolverConNombre(_chosenName);
+      await devolverBatch(_chosenName, _chosenCount);
     }
   }catch(err){
     uiAlert('Error', 'Error consultando préstamos: ' + err.message);
