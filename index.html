@@ -1623,6 +1623,10 @@ html{ scroll-behavior: smooth; }
         <div class="kv stat"><b>Disponibilidad: </b><span class="value" id="fDisp"></span></div>
         <div class="kv stat"><b>En préstamo: </b><span class="value" id="fPrestamo"></span></div>
         <div class="kv full"><b>Observaciones: </b><span class="value" id="fObs"></span></div>
+        <div class="kv full" id="kvPrestadores" style="display:none">
+          <b>En manos de: </b>
+          <div id="fPrestadores" style="margin-top:6px;display:flex;flex-direction:column;gap:4px;"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -2512,6 +2516,29 @@ openModal = function(b){
       // Habilita/inhabilita correctamente según lo que exista realmente en la hoja
       if(dBtn) dBtn.disabled = !isUnlocked || activos === 0;
       if(rBtn) rBtn.disabled = !isUnlocked || (ejemplares - activos) <= 0;
+
+      // Sección "En manos de" — solo para admins
+      const kvP = document.getElementById('kvPrestadores');
+      const fP  = document.getElementById('fPrestadores');
+      if(kvP && fP){
+        const adminEmails = ['bibliotecacth@theodoro.edu.co','pipe@theodoro.edu.co'];
+        if(isUnlocked && adminEmails.includes(currentUserEmail)){
+          const activos2 = items.filter(isActiveLoan);
+          if(activos2.length > 0){
+            fP.innerHTML = activos2.map(it => {
+              const nombre = it.borrower || it.usuario || '—';
+              const rol    = it.rol   ? ` <span style="opacity:.6;font-size:.85em">(${it.rol})</span>` : '';
+              const grado  = it.grado ? ` · <span style="opacity:.6;font-size:.85em">${it.grado}</span>` : '';
+              return `<div style="padding:4px 0;border-bottom:1px solid #f1f5f9;font-size:.95em">👤 ${nombre}${rol}${grado}</div>`;
+            }).join('');
+            kvP.style.display = '';
+          } else {
+            kvP.style.display = 'none';
+          }
+        } else {
+          kvP.style.display = 'none';
+        }
+      }
     }catch(_){ /* silencioso */ }
   })();
 };
