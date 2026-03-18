@@ -1869,8 +1869,43 @@ function openModal(b){
   document.getElementById("fDisp").textContent = b.disponible || "—";
   document.getElementById("fPrestamo").textContent = b.prestamo;
   document.getElementById("fObs").textContent = b.obs || "—";
-  
-  
+
+  // "En manos de" — sólo para admins: mostrar inmediatamente con "cargando..." y actualizar con fetch
+  try{
+    const _emRow = document.getElementById('kvEnManosDeRow');
+    const _emEl  = document.getElementById('fEnManosde');
+    const _emAdmins = ['bibliotecacth@theodoro.edu.co','pipe@theodoro.edu.co'];
+    if(_emRow && _emEl && typeof currentUserEmail !== 'undefined' && _emAdmins.includes(currentUserEmail)){
+      _emEl.textContent = 'cargando…';
+      _emRow.style.display = '';
+      const _emTitulo = b.titulo || '';
+      if(_emTitulo && typeof LOOKUP_URL !== 'undefined'){
+        (async()=>{
+          try{
+            const _emRes  = await fetch(`${LOOKUP_URL}?action=loans-by-title&title=${encodeURIComponent(_emTitulo)}`, {cache:'no-store'});
+            const _emData = await _emRes.json();
+            console.log('[EnManosde] respuesta Apps Script:', _emData);
+            const _emItems = (Array.isArray(_emData.items) ? _emData.items : []);
+            if(_emItems.length > 0){
+              _emEl.textContent = _emItems.map(it => {
+                const n = it.borrower || it.usuario || '?';
+                const r = it.rol   ? ` (${it.rol})`   : '';
+                const g = it.grado ? ` · ${it.grado}` : '';
+                return n + r + g;
+              }).join(' · ');
+            } else {
+              _emEl.textContent = '—';
+              _emRow.style.display = 'none';
+            }
+          }catch(err){
+            console.error('[EnManosde] error fetch:', err);
+            _emEl.textContent = 'error';
+          }
+        })();
+      }
+    }
+  }catch(_){}
+
   // Colorear las píldoras según estado
   try{
     const elE = document.getElementById("fEjem")?.closest(".kv");
