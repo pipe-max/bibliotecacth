@@ -1623,10 +1623,6 @@ html{ scroll-behavior: smooth; }
         <div class="kv stat"><b>Disponibilidad: </b><span class="value" id="fDisp"></span></div>
         <div class="kv stat"><b>En préstamo: </b><span class="value" id="fPrestamo"></span></div>
         <div class="kv full"><b>Observaciones: </b><span class="value" id="fObs"></span></div>
-        <div class="kv full" id="kvPrestadores" style="display:none">
-          <b>En manos de: </b>
-          <div id="fPrestadores" style="margin-top:6px;display:flex;flex-direction:column;gap:4px;"></div>
-        </div>
       </div>
     </div>
   </div>
@@ -1855,6 +1851,7 @@ function validCover(url){
 
 function openModal(b){
   try{ document.getElementById('loanList')?.remove(); }catch(_){}
+  try{ document.getElementById('kvPrestadores')?.remove(); }catch(_){}
   const src = validCover(b.portada) || "default_cover.png";
   document.getElementById("mCover").src = src;
 
@@ -2518,28 +2515,29 @@ openModal = function(b){
       if(rBtn) rBtn.disabled = !isUnlocked || (ejemplares - activos) <= 0;
 
       // Sección "En manos de" — solo para admins
-      const kvP = document.getElementById('kvPrestadores');
-      const fP  = document.getElementById('fPrestadores');
-      if(kvP && fP){
+      try{
+        document.getElementById('kvPrestadores')?.remove();
         const adminEmails = ['bibliotecacth@theodoro.edu.co','pipe@theodoro.edu.co'];
-        if(isUnlocked && adminEmails.includes(currentUserEmail)){
-          const activos2 = items.filter(isActiveLoan);
-          if(activos2.length > 0){
-            fP.innerHTML = activos2.map(it => {
-              const nombre = it.borrower || it.usuario || '—';
-              const rol    = it.rol   ? ` <span style="opacity:.6;font-size:.85em">(${it.rol})</span>` : '';
-              const grado  = it.grado ? ` · <span style="opacity:.6;font-size:.85em">${it.grado}</span>` : '';
-              return `<div style="padding:4px 0;border-bottom:1px solid #f1f5f9;font-size:.95em">👤 ${nombre}${rol}${grado}</div>`;
-            }).join('');
-            kvP.style.display = '';
-          } else {
-            kvP.style.display = 'none';
+        const activos2 = items.filter(isActiveLoan);
+        if(isUnlocked && adminEmails.includes(currentUserEmail) && activos2.length > 0){
+          const cont = document.querySelector('#dlg .fields');
+          if(cont){
+            const box = document.createElement('div');
+            box.id = 'kvPrestadores';
+            box.className = 'kv full';
+            box.style.cssText = 'background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:10px 12px;';
+            box.innerHTML = '<b style="color:#15803d;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px;">En manos de:</b>'
+              + activos2.map(it => {
+                  const nombre = esc(it.borrower || it.usuario || '—');
+                  const rol    = it.rol   ? ` <span style="opacity:.6;font-size:.85em">(${esc(it.rol)})</span>` : '';
+                  const grado  = it.grado ? ` · <span style="opacity:.6;font-size:.85em">${esc(it.grado)}</span>` : '';
+                  return `<div style="padding:4px 0;border-bottom:1px solid #dcfce7;font-size:.9em">👤 ${nombre}${rol}${grado}</div>`;
+                }).join('');
+            cont.appendChild(box);
           }
-        } else {
-          kvP.style.display = 'none';
         }
-      }
-    }catch(_){ /* silencioso */ }
+      }catch(err){ console.error('[En manos de]', err); }
+    }catch(err){ console.error('[openModal async]', err); }
   })();
 };
 
