@@ -2061,12 +2061,17 @@ function openModal(b){
           const enManosEl  = document.getElementById('fEnManosde');
           if(enManosRow && enManosEl){
             if(_isAdmin && items && items.length > 0){
-              enManosEl.textContent = items.map(it => {
-                const nombre = it.borrower || it.usuario || '—';
-                const rol    = it.rol   ? ` (${it.rol})` : '';
-                const grado  = it.grado ? ` · ${it.grado}` : '';
-                return nombre + rol + grado;
-              }).join(' · ');
+              const _rlGrouped = new Map();
+              items.forEach(it => {
+                const n = it.borrower || it.usuario || '—';
+                const r = it.rol   ? ` (${it.rol})`   : '';
+                const g = it.grado ? ` · ${it.grado}` : '';
+                const k = n + r + g;
+                _rlGrouped.set(k, (_rlGrouped.get(k) || 0) + 1);
+              });
+              enManosEl.textContent = Array.from(_rlGrouped.entries())
+                .map(([label, cnt]) => cnt > 1 ? `${label} ×${cnt}` : label)
+                .join(' · ');
               enManosRow.style.display = '';
             } else {
               enManosRow.style.display = 'none';
@@ -2827,38 +2832,35 @@ function __toggleClearBtn(){ try{ var el=document.getElementById('clearQ'); var 
       }
     };
 
-    // Caso único
-    if(data.items.length === 1){
-      const n = data.items[0].borrower || '(sin nombre)';
-      if(await uiConfirm('¿Confirmar devolución?', `Título: ${titulo}\nLo tiene: ${n}`, '', 'Confirmar devolución')){
-        await devolverConNombre(n);
+    // Agrupar por nombre único con su cantidad
+    const _devGroup = new Map();
+    data.items.forEach(it => {
+      const n = it.borrower || '(sin nombre)';
+      _devGroup.set(n, (_devGroup.get(n) || 0) + 1);
+    });
+    const _devEntries = Array.from(_devGroup.entries()); // [[nombre, count], ...]
+
+    // Si solo hay un usuario único (aunque tenga varias copias), confirmar y devolver todo
+    if(_devEntries.length === 1){
+      const [n, cnt] = _devEntries[0];
+      const msg = cnt > 1
+        ? `Título: ${titulo}\nLo tiene: ${n} (${cnt} ejemplares)`
+        : `Título: ${titulo}\nLo tiene: ${n}`;
+      if(await uiConfirm('¿Confirmar devolución?', msg, '', 'Confirmar devolución')){
+        for(let _i = 0; _i < cnt; _i++) await devolverConNombre(n);
       }
       return;
     }
 
-    // Varios: pinta lista clicable en el modal, sin romper estructura
-    const cont = document.querySelector('.fields');
-    const old = document.getElementById('loanList');
-    if(old) old.remove();
-
-    const box = document.createElement('div');
-    box.id = 'loanList';
-    box.className = 'kv full';
-    box.innerHTML = `<b>Préstamos activos:</b> <div id="loanBtns" style="margin-top:8px; display:flex; flex-wrap:wrap; gap:8px;"></div>`;
-    cont.appendChild(box);
-
-    const btns = document.getElementById('loanBtns');
-    data.items.forEach(it=>{
-      const btn = document.createElement('button');
-      btn.className = 'btn';
-      btn.textContent = it.borrower || '(sin nombre)';
-      btn.style.padding = '6px 10px';
-      btn.onclick = () => devolverConNombre(it.borrower||'');
-      btns.appendChild(btn);
-    });
-
-    const choice = await window.uiPickBorrower('Selecciona un nombre', 'Haz clic en la persona que devuelve:', (data.items||[]).map(it => it.borrower || '(sin nombre)'));
-      if(choice){ await devolverConNombre(choice); }
+    // Varios usuarios distintos: mostrar un botón por usuario (con su cantidad)
+    const _labels = _devEntries.map(([n, cnt]) => cnt > 1 ? `${n} (×${cnt})` : n);
+    const choice = await window.uiPickBorrower('Selecciona un nombre', 'Haz clic en la persona que devuelve:', _labels);
+    if(choice){
+      // Recuperar el nombre original quitando el " (×N)" si se añadió
+      const _chosenName = choice.replace(/\s*\(×\d+\)$/, '');
+      const _chosenCount = _devGroup.get(_chosenName) || 1;
+      for(let _i = 0; _i < _chosenCount; _i++) await devolverConNombre(_chosenName);
+    }
   }catch(err){
     uiAlert('Error', 'Error consultando préstamos: ' + err.message);
   }
@@ -3848,8 +3850,8 @@ function __toggleClearBtn(){ try{ var el=document.getElementById('clearQ'); var 
 
 <dialog id="reserveDlg" class="rv-modal rv-backdrop">
   <div class="rv-card">
-    <header class="rv-head" style="display:flex;gap:14px;align-items:flex-start;">
-      <img id="rvCover" src="" alt="portada" style="width:54px;height:78px;object-fit:cover;border-radius:6px;border:1px solid #e2e8f0;flex-shrink:0;display:none;"/>
+    <header class="rv-head" style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;">
+      <img id="rvCover" src="" alt="portada" style="width:60px;height:86px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0;display:none;box-shadow:0 4px 12px rgba(0,0,0,.12);"/>
       <div>
         <div style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">Registrar préstamo</div>
         <h2 class="rv-title" id="rvBookTitle" style="font-size:1.3em;margin:0 0 2px;">Datos de quien toma prestado</h2>
@@ -4076,7 +4078,8 @@ Ejemplares: ${cantidad}
 Reservado por: ${estudiante}
 Rol: ${__roleText}${observaciones ? '\nObs: ' + observaciones : ''}`);
 try{ if(typeof loansCache!=='undefined' && currentBook?.titulo){ loansCache.delete(currentBook.titulo); } }catch(_){}
-          await boot();
+          try{ const _na=Number(currentBook.prestamo||0)+cantidad; setBookLoansInState(currentBook.titulo,_na); updateCardStatus(currentBook.titulo); }catch(_){}
+          boot();
 
 // === Clear rápido para filtro Autor ===
 (function(){
