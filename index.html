@@ -1884,7 +1884,7 @@ function openModal(b){
           try{
             const _emRes  = await fetch(`${LOOKUP_URL}?action=loans-by-title&title=${encodeURIComponent(_emTitulo)}`, {cache:'no-store'});
             const _emData = await _emRes.json();
-            console.log('[EnManosde] respuesta Apps Script:', _emData);
+            console.log('[EnManosde] titulo buscado:', _emTitulo, '| items recibidos:', _emItems.length, '| ok:', _emData.ok, '| error:', _emData.error);
             const _emItems = (Array.isArray(_emData.items) ? _emData.items : []);
             if(_emItems.length > 0){
               _emEl.textContent = _emItems.map(it => {
