@@ -1610,7 +1610,7 @@ html{ scroll-behavior: smooth; }
 
     <div class="detail">
       <div class="cover-wrap">
-        <img id="mCover" class="cover" src="default_cover.png" alt="Portada">
+        <img id="mCover" class="cover" src="default_cover.png" alt="Portada" referrerpolicy="no-referrer">
       </div>
       <div class="fields">
         <div class="kv"><b>Título: </b><span class="value" id="fTitulo"></span></div>
@@ -2145,7 +2145,7 @@ function cardHTML(b){
   const statusClass = avail ? 'ok' : 'bad';
   const coverSrc = validCover(b.portada);
   const coverHTML = coverSrc
-    ? `<img src="${esc(coverSrc)}" alt="" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'card-cover-placeholder\\'>📖</div>'">`
+    ? `<img src="${esc(coverSrc)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.innerHTML='<div class=\\'card-cover-placeholder\\'>📖</div>'">`
     : `<div class="card-cover-placeholder">📖</div>`;
   return `
     <article class="card" data-title="${esc(b.titulo)||''}" ${tipAttr} role="button" aria-label="${esc(b.titulo||'')}">
@@ -6369,7 +6369,7 @@ b2.addEventListener('click', function(){ cleanPrint('all', false); });
     const titulo = String(data.titulo || '').trim();
     const desc   = String(data.desc   || '').trim();
     const imgHTML = cover
-      ? `<img src="${cover}" alt="Portada ${titulo}" loading="lazy" onerror="this.parentElement.innerHTML='${emoji}'">`
+      ? `<img src="${cover}" alt="Portada ${titulo}" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.innerHTML='${emoji}'">`
       : emoji;
     return `<article class="promo-card">
       <div class="promo-card-cover">${imgHTML}</div>
