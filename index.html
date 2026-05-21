@@ -1848,9 +1848,9 @@ function validCover(url){
     if(m && m[1]){ return `https://drive.google.com/uc?export=view&id=${m[1]}`; }
     return url;
   }
-  // Proxy para todas las URLs externas (evita hotlink protection y acortadores)
+  // Proxy propio (Cloudflare Worker) para todas las URLs externas
   if(/^https?:\/\//.test(url)){
-    return `https://wsrv.nl/?url=${encodeURIComponent(url)}&n=-1&we`;
+    return `/img-proxy?url=${encodeURIComponent(url)}`;
   }
   return url;
 }
