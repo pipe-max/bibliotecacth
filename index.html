@@ -1848,6 +1848,10 @@ function validCover(url){
     if(m && m[1]){ return `https://drive.google.com/uc?export=view&id=${m[1]}`; }
     return url;
   }
+  // Para acortadores y URLs externas que bloquean hotlinking, usar proxy de imágenes
+  if(/goo\.su\/|bit\.ly\/|tinyurl\.com\//.test(url)){
+    return `https://images.weserv.nl/?url=${encodeURIComponent(url)}&n=-1`;
+  }
   return url;
 }
 
